@@ -1,0 +1,477 @@
+﻿@using BTL_2.Models.ViewModels
+@model EmployerRegisterViewModel
+
+@{
+    ViewData["Title"] = "Tạo tài khoản nhà tuyển dụng";
+    Layout = "~/Views/Shared/_Layout_Admin.cshtml";
+    var companies = ViewBag.Companies as List<BTL_2.Models.Company> ?? new List<BTL_2.Models.Company>();
+    var selectedCompanyIds = ViewBag.SelectedCompanyIds as HashSet<int> ?? new HashSet<int>();
+}
+
+<style>
+    /* ==================== MODERN DESIGN SYSTEM ==================== */
+    :root {
+        --primary: #6366f1;
+        --primary-dark: #4f46e5;
+        --success: #22c55e;
+        --danger: #ef4444;
+        --warning: #f59e0b;
+        --gray-400: #94a3b8;
+        --gray-500: #64748b;
+        --gray-600: #475569;
+        --gray-700: #334155;
+        --gray-800: #1e293b;
+        --radius-sm: 0.5rem;
+        --radius-md: 0.75rem;
+        --radius-lg: 1rem;
+        --radius-xl: 1.5rem;
+        --transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
+    body {
+        background: linear-gradient(145deg, #1e293b 0%, #0f172a 100%);
+        min-height: 100vh;
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+    }
+
+    .page-wrapper {
+        max-width: 700px;
+        margin: 0 auto;
+        padding: 2rem;
+    }
+
+    /* Card */
+    .form-card {
+        background: rgba(255, 255, 255, 0.03);
+        backdrop-filter: blur(20px);
+        border-radius: var(--radius-xl);
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        overflow: hidden;
+        animation: fadeInUp 0.5s ease;
+    }
+
+    @@keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    /* Header */
+    .form-header {
+        background: rgba(99, 102, 241, 0.1);
+        padding: 2rem;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        text-align: center;
+    }
+
+    .form-header i {
+        font-size: 3rem;
+        color: #818cf8;
+        margin-bottom: 1rem;
+    }
+
+    .form-header h4 {
+        font-size: 1.75rem;
+        font-weight: 700;
+        background: linear-gradient(135deg, #a855f7, #6366f1);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin-bottom: 0.5rem;
+    }
+
+    .form-header p {
+        color: var(--gray-400);
+        font-size: 0.875rem;
+        margin: 0;
+    }
+
+    /* Body */
+    .form-body {
+        padding: 2rem;
+    }
+
+    /* Form Groups */
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+
+    .form-label {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-weight: 600;
+        color: #e2e8f0 !important;
+        margin-bottom: 0.5rem;
+        font-size: 0.875rem;
+    }
+
+    .form-label i {
+        color: #818cf8;
+        width: 20px;
+    }
+
+    .form-label .text-danger {
+        color: #f87171 !important;
+        margin-left: 0.25rem;
+    }
+
+    .form-control {
+        width: 100%;
+        padding: 0.75rem 1rem;
+        background: rgba(0, 0, 0, 0.4) !important;
+        border: 1px solid rgba(255, 255, 255, 0.2) !important;
+        border-radius: var(--radius-md);
+        font-size: 0.875rem;
+        color: white !important;
+        transition: var(--transition);
+    }
+
+    .form-control:focus {
+        outline: none;
+        border-color: #6366f1 !important;
+        background: rgba(0, 0, 0, 0.6) !important;
+        box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+    }
+
+    .form-control::placeholder {
+        color: #94a3b8 !important;
+    }
+
+    .form-text {
+        color: #94a3b8 !important;
+        font-size: 0.7rem;
+        margin-top: 0.25rem;
+        display: block;
+    }
+
+    .text-danger {
+        color: #f87171 !important;
+        font-size: 0.75rem;
+        margin-top: 0.25rem;
+        display: block;
+    }
+
+    /* Alerts */
+    .alert-modern {
+        padding: 1rem 1.25rem;
+        border-radius: var(--radius-lg);
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        backdrop-filter: blur(10px);
+        animation: fadeInUp 0.3s ease;
+    }
+
+    .alert-modern i {
+        font-size: 1.25rem;
+    }
+
+    .alert-success-modern {
+        background: rgba(34, 197, 94, 0.15);
+        border-left: 4px solid var(--success);
+        color: #bef264 !important;
+    }
+
+    .alert-danger-modern {
+        background: rgba(239, 68, 68, 0.15);
+        border-left: 4px solid var(--danger);
+        color: #fecaca !important;
+    }
+
+    .alert ul {
+        margin: 0;
+        padding-left: 1.5rem;
+    }
+
+    .alert li {
+        margin: 0.25rem 0;
+        color: #fecaca;
+    }
+
+    /* Info Box */
+    .info-box {
+        background: rgba(99, 102, 241, 0.1);
+        border-left: 4px solid var(--primary);
+        padding: 1rem;
+        border-radius: var(--radius-md);
+        margin-bottom: 1.5rem;
+        font-size: 0.875rem;
+        color: #e2e8f0 !important;
+    }
+
+    .info-box i {
+        color: #818cf8;
+    }
+
+    /* Buttons */
+    .form-actions {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+        margin-top: 2rem;
+    }
+
+    .btn-submit, .btn-cancel {
+        width: 100%;
+        padding: 0.75rem 1.5rem;
+        border-radius: var(--radius-md);
+        font-weight: 600;
+        font-size: 0.875rem;
+        transition: var(--transition);
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        border: none;
+        text-decoration: none;
+    }
+
+    .btn-submit {
+        background: linear-gradient(135deg, #6366f1, #4f46e5);
+        color: white !important;
+        box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+    }
+
+    .btn-submit:hover:not(:disabled) {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(99, 102, 241, 0.4);
+    }
+
+    .btn-cancel {
+        background: rgba(255, 255, 255, 0.05);
+        color: #cbd5e1 !important;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .btn-cancel:hover {
+        background: rgba(255, 255, 255, 0.1);
+        border-color: rgba(255, 255, 255, 0.2);
+        color: white !important;
+        transform: translateY(-2px);
+    }
+
+    .btn-submit:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+        transform: none;
+    }
+
+    /* Spinner */
+    .spinner-border {
+        display: inline-block;
+        width: 1rem;
+        height: 1rem;
+        border: 0.15em solid currentColor;
+        border-right-color: transparent;
+        border-radius: 50%;
+        animation: spinner-border .75s linear infinite;
+    }
+
+    @@keyframes spinner-border {
+        to {
+            transform: rotate(360deg);
+        }
+    }
+
+    /* Responsive */
+    @@media (max-width: 768px) {
+        .page-wrapper {
+            padding: 1rem;
+        }
+        
+        .form-body {
+            padding: 1.5rem;
+        }
+        
+        .form-header {
+            padding: 1.5rem;
+        }
+        
+        .form-header h4 {
+            font-size: 1.5rem;
+        }
+        
+        .form-header i {
+            font-size: 2.5rem;
+        }
+    }
+</style>
+
+<div class="page-wrapper">
+    <div class="form-card">
+        <div class="form-header">
+            <i class="fas fa-building"></i>
+            <h4>Đăng ký tài khoản nhà tuyển dụng</h4>
+            <p>Tạo tài khoản để đăng tin tuyển dụng</p>
+        </div>
+
+        <div class="form-body">
+            <!-- HIỂN THỊ THÔNG BÁO THÀNH CÔNG -->
+            @if (TempData["SuccessMessage"] != null)
+            {
+                <div class="alert-modern alert-success-modern">
+                    <i class="fas fa-check-circle"></i>
+                    <span>@TempData["SuccessMessage"]</span>
+                </div>
+            }
+
+            <!-- HIỂN THỊ THÔNG BÁO LỖI -->
+            @if (TempData["ErrorMessage"] != null)
+            {
+                <div class="alert-modern alert-danger-modern">
+                    <i class="fas fa-exclamation-circle"></i>
+                    <span>@TempData["ErrorMessage"]</span>
+                </div>
+            }
+
+            <!-- HIỂN THỊ LỖI VALIDATION -->
+            @if (!ViewData.ModelState.IsValid)
+            {
+                <div class="alert-modern alert-danger-modern">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <span>Vui lòng kiểm tra lại thông tin:</span>
+                    <ul class="mb-0 mt-2">
+                        @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+                        {
+                            <li>@error.ErrorMessage</li>
+                        }
+                    </ul>
+                </div>
+            }
+
+            <div class="info-box">
+                <i class="fas fa-info-circle me-2"></i>
+                Các trường có dấu <span class="text-danger">*</span> là bắt buộc.<br />
+                <i class="fas fa-key me-2 mt-1"></i>
+                Mật khẩu tạm thời sẽ được tạo ngẫu nhiên và gửi về email. Nhà tuyển dụng bắt buộc đổi mật khẩu sau lần đăng nhập đầu tiên.
+            </div>
+
+            <form asp-action="CreateEmployer" method="post" id="registerForm">
+                @Html.AntiForgeryToken()
+
+                <!-- Họ tên -->
+                <div class="form-group">
+                    <label asp-for="FullName" class="form-label">
+                        <i class="fas fa-user"></i> Họ tên <span class="text-danger">*</span>
+                    </label>
+                    <input asp-for="FullName" class="form-control" placeholder="Nhập họ tên đầy đủ" />
+                    <span asp-validation-for="FullName" class="text-danger"></span>
+                </div>
+
+                <!-- Email -->
+                <div class="form-group">
+                    <label asp-for="Email" class="form-label">
+                        <i class="fas fa-envelope"></i> Email <span class="text-danger">*</span>
+                    </label>
+                    <input asp-for="Email" class="form-control" type="email" placeholder="example@email.com" />
+                    <span asp-validation-for="Email" class="text-danger"></span>
+                    <span class="form-text">Email sẽ được dùng để đăng nhập và nhận thông báo</span>
+                </div>
+
+                <!-- Số điện thoại -->
+                <div class="form-group">
+                    <label asp-for="Phone" class="form-label">
+                        <i class="fas fa-phone"></i> Số điện thoại
+                    </label>
+                    <input asp-for="Phone" class="form-control" placeholder="Nhập số điện thoại liên hệ" />
+                    <span asp-validation-for="Phone" class="text-danger"></span>
+                </div>
+
+                <!-- Địa chỉ -->
+                <div class="form-group">
+                    <label asp-for="Address" class="form-label">
+                        <i class="fas fa-map-marker-alt"></i> Địa chỉ
+                    </label>
+                    <input asp-for="Address" class="form-control" placeholder="Nhập địa chỉ công ty" />
+                    <span asp-validation-for="Address" class="text-danger"></span>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">
+                        <i class="fas fa-building"></i> Công ty được phép tuyển dụng
+                    </label>
+                    <span class="form-text">Tài khoản này chỉ được duyệt hồ sơ, xem CV và tải CV của các công ty được chọn.</span>
+                    @if (companies.Any())
+                    {
+                        <div class="row mt-3">
+                            @foreach (var company in companies)
+                            {
+                                <div class="col-md-6 mb-2">
+                                    <label class="form-check p-2" style="border: 1px solid rgba(255,255,255,.12); border-radius: 8px;">
+                                        <input class="form-check-input me-2" type="checkbox" name="selectedCompanyIds" value="@company.CompanyId" @(selectedCompanyIds.Contains(company.CompanyId) ? "checked" : "") />
+                                        <span>@company.CompanyName</span>
+                                    </label>
+                                </div>
+                            }
+                        </div>
+                    }
+                    else
+                    {
+                        <span class="form-text">Chưa có công ty nào để gán.</span>
+                    }
+                </div>
+
+                <!-- Nút submit -->
+                <div class="form-actions">
+                    <button type="submit" class="btn-submit" id="submitBtn">
+                        <i class="fas fa-save"></i> Đăng ký tài khoản
+                    </button>
+                    <a asp-action="ManageUsers" asp-controller="Admin" class="btn-cancel">
+                        <i class="fas fa-arrow-left"></i> Quay lại danh sách
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    
+    <script>
+        // XỬ LÝ SUBMIT
+        document.addEventListener('DOMContentLoaded', function() {
+            var form = document.getElementById('registerForm');
+            var submitBtn = document.getElementById('submitBtn');
+            var originalText = submitBtn ? submitBtn.innerHTML : '';
+
+            if (form && submitBtn) {
+                form.addEventListener('submit', function(e) {
+                    // Kiểm tra form có hợp lệ không
+                    if (form.checkValidity()) {
+                        // Disable nút submit
+                        submitBtn.disabled = true;
+                        submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span> Đang xử lý...';
+                        return true;
+                    } else {
+                        e.preventDefault();
+                        alert('⚠️ Vui lòng điền đầy đủ thông tin bắt buộc!');
+                        return false;
+                    }
+                });
+            }
+
+            // Khôi phục nút nếu có lỗi từ server
+            if (document.querySelector('.alert-danger-modern') || document.querySelector('.text-danger')) {
+                if (submitBtn) {
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = originalText;
+                }
+            }
+        });
+    </script>
+}

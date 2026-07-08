@@ -1,0 +1,74 @@
+﻿@model List<BTL_2.Models.Company>
+
+@{
+    ViewData["Title"] = "Nhà tuyển dụng hàng đầu";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container mt-4">
+    <div class="text-center mb-5">
+        <h1 class="display-4 fw-bold text-primary">Nhà tuyển dụng hàng đầu</h1>
+        <p class="lead text-muted">Các công ty uy tín đang tuyển dụng</p>
+    </div>
+
+    <div class="row">
+        @foreach (var company in Model)
+        {
+            <div class="col-md-4 mb-4">
+                <div class="card h-100 shadow-sm hover-shadow">
+                    <div class="card-body text-center">
+                        <!-- Logo công ty -->
+                        <div class="mb-3">
+                            @if (!string.IsNullOrEmpty(company.Logo))
+                            {
+                                <img src="@company.Logo" alt="@company.CompanyName" 
+                                     style="width: 120px; height: 120px; object-fit: contain;"
+                                     class="rounded-circle border p-2">
+                            }
+                            else
+                            {
+                                <div class="mx-auto bg-light rounded-circle d-flex align-items-center justify-content-center"
+                                     style="width: 120px; height: 120px;">
+                                    <i class="fas fa-building fa-4x text-secondary"></i>
+                                </div>
+                            }
+                        </div>
+
+                        <!-- Tên công ty -->
+                        <h4 class="fw-bold mb-2">@company.CompanyName</h4>
+
+                        <!-- Địa chỉ -->
+                        @if (!string.IsNullOrEmpty(company.Address))
+                        {
+                            <p class="text-muted mb-2">
+                                <i class="fas fa-map-marker-alt me-1 text-primary"></i>
+                                @company.Address
+                            </p>
+                        }
+
+                        <!-- Mô tả ngắn -->
+                        <p class="text-muted small mb-3">
+                            @(company.Description?.Length > 100 ? company.Description.Substring(0, 100) + "..." : company.Description)
+                        </p>
+
+                        <!-- Nút xem công ty -->
+                        <a asp-action="Details" asp-route-id="@company.CompanyId" 
+                           class="btn btn-outline-primary w-100">
+                            <i class="fas fa-building me-2"></i>Xem công ty
+                        </a>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+<style>
+    .hover-shadow {
+        transition: all 0.3s ease;
+    }
+    .hover-shadow:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(0,0,0,0.1) !important;
+    }
+</style>

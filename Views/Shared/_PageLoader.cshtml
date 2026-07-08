@@ -1,0 +1,381 @@
+<style>
+    .page-loader {
+        position: fixed;
+        inset: 0;
+        z-index: 2147483000;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: radial-gradient(circle at center, #eef7ff 0, #f8fbff 48%, #edf4ff 100%);
+        opacity: 1;
+        visibility: visible;
+        transition: opacity .28s ease, visibility .28s ease;
+    }
+
+    .page-loader.is-hidden {
+        opacity: 0;
+        visibility: hidden;
+        pointer-events: none;
+    }
+
+    .page-loader-card {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 18px;
+        width: min(320px, calc(100vw - 48px));
+    }
+
+    .page-loader-logo {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        color: #2563eb;
+        font-size: 1.55rem;
+        font-weight: 900;
+        letter-spacing: 0;
+    }
+
+    .page-loader-logo-icon {
+        width: 58px;
+        height: 58px;
+        border-radius: 18px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #fff;
+        background: linear-gradient(135deg, #60a5fa, #2563eb, #7c3aed);
+        box-shadow: 0 16px 38px rgba(37, 99, 235, .28);
+        animation: loaderPulse 1.6s ease-in-out infinite;
+    }
+
+    .page-loader-logo-icon svg {
+        width: 30px;
+        height: 30px;
+    }
+
+    .page-loader-progress-track {
+        width: 100%;
+        height: 6px;
+        border-radius: 999px;
+        overflow: hidden;
+        background: #dbeafe;
+        box-shadow: inset 0 1px 2px rgba(37, 99, 235, .10);
+        position: relative;
+    }
+
+    .page-loader-progress-fill {
+        display: block;
+        width: 0%;
+        height: 100%;
+        border-radius: inherit;
+        background: linear-gradient(90deg, #38bdf8, #2563eb, #7c3aed);
+        transition: width .22s ease;
+    }
+
+    .page-loader-progress-shimmer {
+        display: block;
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 42%;
+        height: 100%;
+        border-radius: inherit;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, .62), transparent);
+        animation: pageLoaderShimmer 1s ease-in-out infinite;
+    }
+
+    .page-loader-status {
+        color: #64748b;
+        font-size: .84rem;
+        font-weight: 650;
+        letter-spacing: 0;
+    }
+
+    .page-loader-percent {
+        color: #2563eb;
+        font-size: .88rem;
+        font-weight: 800;
+        font-variant-numeric: tabular-nums;
+    }
+
+    html.is-navigating,
+    html.is-navigating * {
+        cursor: progress !important;
+    }
+
+    a.smooth-click-busy,
+    button.smooth-click-busy,
+    .btn.smooth-click-busy,
+    input[type="submit"].smooth-click-busy {
+        transform: translateY(1px) scale(.99);
+        filter: saturate(.92);
+        transition: transform .12s ease, filter .12s ease, opacity .12s ease;
+    }
+
+    button.smooth-submit-busy,
+    input[type="submit"].smooth-submit-busy {
+        opacity: .76;
+        pointer-events: none;
+    }
+
+    .smooth-inline-spinner {
+        display: inline-block;
+        width: .9em;
+        height: .9em;
+        margin-right: .45rem;
+        border: 2px solid currentColor;
+        border-right-color: transparent;
+        border-radius: 50%;
+        vertical-align: -0.12em;
+        animation: smoothInlineSpin .75s linear infinite;
+    }
+
+    body.dark-mode .page-loader,
+    html.dark-mode-preload .page-loader,
+    html.security-dark-page .page-loader {
+        background: radial-gradient(circle at center, #172554 0, #0f172a 52%, #020617 100%);
+    }
+
+    body.dark-mode .page-loader-progress-track,
+    html.dark-mode-preload .page-loader-progress-track,
+    html.security-dark-page .page-loader-progress-track {
+        background: #1e3a8a;
+    }
+
+    body.dark-mode .page-loader-status,
+    html.dark-mode-preload .page-loader-status,
+    html.security-dark-page .page-loader-status {
+        color: #94a3b8;
+    }
+
+    @@keyframes loaderPulse {
+        0%, 100% {
+            transform: scale(1);
+            box-shadow: 0 16px 38px rgba(37, 99, 235, .28);
+        }
+        50% {
+            transform: scale(1.06);
+            box-shadow: 0 20px 48px rgba(37, 99, 235, .38);
+        }
+    }
+
+    @@keyframes pageLoaderShimmer {
+        0% {
+            transform: translateX(-120%);
+        }
+        100% {
+            transform: translateX(250%);
+        }
+    }
+
+    @@keyframes smoothInlineSpin {
+        to {
+            transform: rotate(360deg);
+        }
+    }
+
+    @@media (prefers-reduced-motion: reduce) {
+        .page-loader,
+        .page-loader-progress-shimmer,
+        .page-loader-logo-icon,
+        .smooth-inline-spinner {
+            transition: none;
+            animation: none;
+        }
+
+        .page-loader-progress-shimmer {
+            width: 100%;
+        }
+    }
+</style>
+
+<div id="pageLoader" class="page-loader" role="status" aria-label="Dang tai JobPortal">
+    <div class="page-loader-card">
+        <div class="page-loader-logo">
+            <span class="page-loader-logo-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M10 6V5a2 2 0 0 1 2-2h0a2 2 0 0 1 2 2v1" />
+                    <path d="M3 8a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2Z" />
+                    <path d="M3 13h18" />
+                    <path d="M9 13v2h6v-2" />
+                </svg>
+            </span>
+            <span>JobPortal</span>
+        </div>
+        <div class="page-loader-progress-track" aria-hidden="true">
+            <span class="page-loader-progress-fill" id="loaderProgressFill"></span>
+            <span class="page-loader-progress-shimmer"></span>
+        </div>
+        <div class="d-flex align-items-center justify-content-between w-100">
+            <span class="page-loader-status" id="loaderStatus">Dang tai trang...</span>
+            <span class="page-loader-percent" id="loaderPercent">0%</span>
+        </div>
+    </div>
+</div>
+
+<script>
+    (function () {
+        var loader = document.getElementById('pageLoader');
+        var fill = document.getElementById('loaderProgressFill');
+        var status = document.getElementById('loaderStatus');
+        var percent = document.getElementById('loaderPercent');
+        if (!loader) return;
+
+        var progress = 0;
+        var simInterval = null;
+        var hideTimer = null;
+        var statusTexts = [
+            { at: 0, text: 'Dang tai trang...' },
+            { at: 25, text: 'Dang tai giao dien...' },
+            { at: 50, text: 'Dang xu ly du lieu...' },
+            { at: 75, text: 'Sap hoan tat...' },
+            { at: 95, text: 'Hoan thanh!' }
+        ];
+
+        function updateProgress(val) {
+            progress = Math.min(Math.max(val, 0), 100);
+            if (fill) fill.style.width = progress + '%';
+            if (percent) percent.textContent = Math.round(progress) + '%';
+
+            for (var i = statusTexts.length - 1; i >= 0; i--) {
+                if (progress >= statusTexts[i].at) {
+                    if (status) status.textContent = statusTexts[i].text;
+                    break;
+                }
+            }
+        }
+
+        function stopSimulation() {
+            if (simInterval) {
+                clearInterval(simInterval);
+                simInterval = null;
+            }
+        }
+
+        function startSimulation(startAt) {
+            stopSimulation();
+            updateProgress(typeof startAt === 'number' ? startAt : 8);
+            simInterval = setInterval(function () {
+                if (progress < 68) {
+                    updateProgress(progress + 8 + Math.random() * 8);
+                } else if (progress < 91) {
+                    updateProgress(progress + 1.5 + Math.random() * 2.5);
+                }
+            }, 180);
+        }
+
+        function showLoader(message, startAt) {
+            window.clearTimeout(hideTimer);
+            if (message && status) status.textContent = message;
+            document.documentElement.classList.add('is-navigating');
+            loader.classList.remove('is-hidden');
+            startSimulation(startAt);
+        }
+
+        function hideLoader() {
+            stopSimulation();
+            updateProgress(100);
+            document.documentElement.classList.remove('is-navigating');
+            hideTimer = window.setTimeout(function () {
+                loader.classList.add('is-hidden');
+            }, 220);
+        }
+
+        function isModifiedClick(event) {
+            return event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey;
+        }
+
+        function shouldSkipLink(link) {
+            if (!link) return true;
+            if (link.target && link.target !== '_self') return true;
+            if (link.hasAttribute('download')) return true;
+            if (link.getAttribute('data-bs-toggle') || link.closest('[data-bs-toggle], .dropdown-menu, .modal-modern')) return true;
+            if (link.classList.contains('dropdown-toggle') || link.classList.contains('no-smooth-loader')) return true;
+
+            var href = link.getAttribute('href');
+            if (!href || href === '#') return true;
+            var lowered = href.toLowerCase();
+            if (lowered.indexOf('javascript:') === 0 || lowered.indexOf('mailto:') === 0 || lowered.indexOf('tel:') === 0) return true;
+
+            var url;
+            try {
+                url = new URL(href, window.location.href);
+            } catch (e) {
+                return true;
+            }
+
+            if (url.origin !== window.location.origin) return true;
+            if (url.pathname === window.location.pathname && url.search === window.location.search && url.hash) return true;
+            return false;
+        }
+
+        document.addEventListener('click', function (event) {
+            if (isModifiedClick(event)) return;
+
+            var interactive = event.target.closest('a, button, input[type="submit"], input[type="button"]');
+            if (interactive) {
+                interactive.classList.add('smooth-click-busy');
+                window.setTimeout(function () {
+                    interactive.classList.remove('smooth-click-busy');
+                }, 180);
+            }
+
+            var link = event.target.closest('a');
+            if (shouldSkipLink(link)) return;
+
+            window.setTimeout(function () {
+                if (!event.defaultPrevented) {
+                    showLoader('Dang chuyen trang...', 12);
+                }
+            }, 40);
+        }, true);
+
+        document.addEventListener('submit', function (event) {
+            var form = event.target;
+            if (!form || form.classList.contains('no-smooth-loader')) return;
+            if (form.target && form.target !== '_self') return;
+            if (typeof form.checkValidity === 'function' && !form.checkValidity()) return;
+
+            var submitter = event.submitter || form.querySelector('button[type="submit"], input[type="submit"]');
+            if (submitter && !submitter.disabled) {
+                submitter.classList.add('smooth-submit-busy');
+                submitter.setAttribute('aria-busy', 'true');
+                if (submitter.tagName === 'BUTTON' && !submitter.querySelector('.smooth-inline-spinner')) {
+                    submitter.insertAdjacentHTML('afterbegin', '<span class="smooth-inline-spinner" aria-hidden="true"></span>');
+                }
+            }
+
+            window.setTimeout(function () {
+                if (!event.defaultPrevented) {
+                    showLoader('Dang xu ly yeu cau...', 18);
+                }
+            }, 80);
+        }, true);
+
+        window.JobPortalLoader = {
+            show: showLoader,
+            hide: hideLoader
+        };
+
+        startSimulation(0);
+
+        if (document.readyState === 'complete') {
+            hideLoader();
+        } else {
+            window.addEventListener('load', hideLoader, { once: true });
+        }
+
+        window.addEventListener('pageshow', function (event) {
+            if (event.persisted) {
+                hideLoader();
+            }
+        });
+
+        window.setTimeout(function () {
+            if (!loader.classList.contains('is-hidden')) {
+                hideLoader();
+            }
+        }, 5000);
+    })();
+</script>

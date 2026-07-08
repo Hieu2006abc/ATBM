@@ -1,0 +1,763 @@
+﻿@model BTL_2.Models.ViewModels.LoginViewModel
+
+@{
+    ViewData["Title"] = "Đăng nhập";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+    :root {
+        --primary: #2563eb;
+        --primary-dark: #1d4ed8;
+        --primary-light: #dbeafe;
+        --secondary: #64748b;
+        --success: #22c55e;
+        --warning: #f59e0b;
+        --danger: #ef4444;
+        --background: #f8fafc;
+        --card-bg: #ffffff;
+        --text-primary: #1e293b;
+        --text-secondary: #475569;
+        --text-muted: #94a3b8;
+        --border: #e2e8f0;
+        --border-light: #f1f5f9;
+        --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+        --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+        --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1);
+        --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1);
+        --transition: all 0.18s ease;
+    }
+
+    .login-wrapper {
+        min-height: calc(100vh - 200px);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 2rem 1rem;
+        background: linear-gradient(180deg, #eef4ff 0%, #f8fafc 100%);
+    }
+
+    .login-container {
+        max-width: 980px;
+        width: 100%;
+        background: var(--card-bg);
+        border: 1px solid var(--border);
+        border-radius: 18px;
+        box-shadow: 0 22px 60px rgba(15, 23, 42, 0.12);
+        overflow: hidden;
+        animation: slideUp 0.5s ease;
+        display: grid;
+        grid-template-columns: 1.05fr .95fr;
+    }
+
+    .auth-showcase {
+        grid-row: 1 / span 2;
+        padding: 2rem;
+        background: linear-gradient(160deg, #1d4ed8, #0ea5e9);
+        color: #fff;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        min-height: 560px;
+    }
+
+    .auth-showcase h2 {
+        font-size: 2rem;
+        font-weight: 800;
+        line-height: 1.25;
+        margin-bottom: 1rem;
+    }
+
+    .auth-showcase p {
+        color: rgba(255,255,255,.82);
+        line-height: 1.6;
+    }
+
+    .auth-benefit {
+        display: flex;
+        gap: .75rem;
+        padding: .9rem;
+        border-radius: 8px;
+        background: rgba(255,255,255,.1);
+        border: 1px solid rgba(255,255,255,.14);
+        margin-top: .75rem;
+    }
+
+    .auth-benefit i {
+        color: #86efac;
+        margin-top: .25rem;
+    }
+
+    @@keyframes slideUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .login-header {
+        background: #ffffff;
+        padding: 2rem;
+        text-align: left;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .login-header::before {
+        display: none;
+    }
+
+    .login-header::after {
+        content: "";
+        position: absolute;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        height: 4px;
+        background: linear-gradient(90deg, #2563eb, #22c55e);
+    }
+
+    .login-header h1 {
+        font-size: 2.2rem;
+        font-weight: 700;
+        color: #0f172a;
+        margin-bottom: 0.5rem;
+        position: relative;
+        z-index: 1;
+    }
+
+    .login-header p {
+        color: #475569;
+        font-size: 1rem;
+        position: relative;
+        z-index: 1;
+    }
+
+    .login-body {
+        padding: 2.5rem 2rem;
+    }
+
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+
+    .form-label {
+        display: block;
+        font-weight: 600;
+        color: var(--text-primary);
+        margin-bottom: 0.5rem;
+        font-size: 0.95rem;
+    }
+
+    .form-label i {
+        color: var(--primary);
+        margin-right: 0.5rem;
+        width: 20px;
+    }
+
+    .input-group {
+        position: relative;
+    }
+
+    .input-icon {
+        position: absolute;
+        left: 1rem;
+        top: 50%;
+        transform: translateY(-50%);
+        color: var(--text-muted);
+        z-index: 1;
+    }
+
+    .form-control {
+        width: 100%;
+        padding: 0.9rem 1rem 0.9rem 2.8rem;
+        border: 2px solid var(--border);
+        border-radius: 8px;
+        font-size: 1rem;
+        transition: var(--transition);
+        background: var(--background);
+    }
+
+    .form-control:focus {
+        border-color: var(--primary);
+        outline: none;
+        box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.10);
+        background: white;
+    }
+
+    .form-control.is-invalid {
+        border-color: var(--danger);
+    }
+
+    .invalid-feedback {
+        color: var(--danger);
+        font-size: 0.85rem;
+        margin-top: 0.5rem;
+        display: block;
+    }
+
+    .password-toggle {
+        position: absolute;
+        right: 1rem;
+        top: 50%;
+        transform: translateY(-50%);
+        cursor: pointer;
+        color: var(--text-muted);
+        transition: var(--transition);
+        background: transparent;
+        border: none;
+    }
+
+    .password-toggle:hover {
+        color: var(--primary);
+    }
+
+    .remember-forgot {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 1.5rem;
+    }
+
+    .remember-checkbox {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        cursor: pointer;
+    }
+
+    .remember-checkbox input[type="checkbox"] {
+        width: 18px;
+        height: 18px;
+        cursor: pointer;
+        accent-color: var(--primary);
+    }
+
+    .remember-checkbox span {
+        color: var(--text-secondary);
+        font-size: 0.95rem;
+    }
+
+    .forgot-password {
+        color: var(--primary);
+        text-decoration: none;
+        font-size: 0.95rem;
+        font-weight: 500;
+        transition: var(--transition);
+    }
+
+    .forgot-password:hover {
+        color: var(--primary-dark);
+        text-decoration: underline;
+    }
+
+    .btn-login {
+        width: 100%;
+        padding: 1rem;
+        background: var(--primary);
+        color: white;
+        border: none;
+        border-radius: 8px;
+        font-size: 1.1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: var(--transition);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .btn-login::before {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 0;
+        height: 0;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.3);
+        transform: translate(-50%, -50%);
+        transition: width 0.6s, height 0.6s;
+    }
+
+    .btn-login:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 25px rgba(37, 99, 235, 0.28);
+    }
+
+    .btn-login:hover::before {
+        width: 300px;
+        height: 300px;
+    }
+
+    .btn-login i {
+        margin-right: 0.5rem;
+    }
+
+    .register-link {
+        text-align: center;
+        margin-top: 2rem;
+        padding-top: 1.5rem;
+        border-top: 2px solid var(--border-light);
+    }
+
+    .register-link p {
+        color: var(--text-secondary);
+        margin-bottom: 0.5rem;
+    }
+
+    .register-link a {
+        color: var(--primary);
+        text-decoration: none;
+        font-weight: 600;
+        font-size: 1.1rem;
+        transition: var(--transition);
+    }
+
+    .register-link a:hover {
+        color: var(--primary-dark);
+        text-decoration: underline;
+    }
+
+    .alert {
+        padding: 1rem 1.5rem;
+        border-radius: 8px;
+        margin-bottom: 1.5rem;
+        animation: slideIn 0.3s ease;
+    }
+
+    .alert-success {
+        background: #d4edda;
+        color: #155724;
+        border: 1px solid #c3e6cb;
+    }
+
+    .alert-danger {
+        background: #f8d7da;
+        color: #721c24;
+        border: 1px solid #f5c6cb;
+    }
+
+    .alert i {
+        margin-right: 0.5rem;
+    }
+
+    @@keyframes slideIn {
+        from {
+            opacity: 0;
+            transform: translateY(-10px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    /* Loading Spinner */
+    .spinner {
+        display: inline-block;
+        width: 20px;
+        height: 20px;
+        border: 3px solid rgba(255,255,255,0.3);
+        border-radius: 50%;
+        border-top-color: white;
+        animation: spin 1s ease-in-out infinite;
+        margin-right: 0.5rem;
+    }
+
+    @@keyframes spin {
+        to { transform: rotate(360deg); }
+    }
+
+    .login-wrapper {
+        background:
+            radial-gradient(circle at 18% 10%, rgba(125, 211, 252, .22), transparent 30%),
+            linear-gradient(135deg, #f8fcff 0%, #eef6ff 52%, #e7f2ff 100%);
+        transition: background .25s ease, color .25s ease;
+    }
+
+    .login-container {
+        border-color: #dce8f7;
+        border-radius: 24px;
+        box-shadow: 0 24px 70px rgba(37, 99, 235, .12);
+        transition: background .25s ease, border-color .25s ease, box-shadow .25s ease;
+    }
+
+    .auth-showcase {
+        background:
+            radial-gradient(circle at 14% 10%, rgba(255,255,255,.16), transparent 30%),
+            linear-gradient(160deg, #2563eb 0%, #0ea5e9 100%);
+    }
+
+    .auth-benefit {
+        border-radius: 14px;
+        background: rgba(255,255,255,.12);
+        border-color: rgba(255,255,255,.18);
+    }
+
+    .login-header,
+    .login-body {
+        background: #ffffff;
+        transition: background .25s ease, color .25s ease;
+    }
+
+    .login-header::after {
+        background: linear-gradient(90deg, #60a5fa, #2563eb);
+    }
+
+    .form-control {
+        border-color: #dbe7f5;
+        border-radius: 14px;
+        background: #f8fbff;
+    }
+
+    .form-control:focus {
+        border-color: #60a5fa;
+        box-shadow: 0 0 0 4px rgba(96, 165, 250, .16);
+    }
+
+    .btn-login {
+        border-radius: 14px;
+        background: linear-gradient(135deg, #60a5fa 0%, #2563eb 100%);
+    }
+
+    .btn-login:hover {
+        box-shadow: 0 14px 30px rgba(37, 99, 235, .28);
+    }
+
+    .alert {
+        border-radius: 14px;
+    }
+
+    body.dark-mode .login-wrapper {
+        background:
+            radial-gradient(circle at 80% 8%, rgba(96, 165, 250, .14), transparent 34%),
+            linear-gradient(135deg, #0b1220 0%, #0f172a 50%, #111827 100%);
+    }
+
+    body.dark-mode .login-container {
+        background: #101a2c;
+        border-color: rgba(147, 197, 253, .18);
+        box-shadow: 0 28px 80px rgba(2, 6, 23, .36);
+    }
+
+    body.dark-mode .auth-showcase {
+        background:
+            radial-gradient(circle at 14% 10%, rgba(147, 197, 253, .14), transparent 30%),
+            linear-gradient(160deg, #1e3a8a 0%, #0f172a 100%);
+    }
+
+    body.dark-mode .auth-benefit {
+        background: rgba(16, 26, 44, .54);
+        border-color: rgba(147, 197, 253, .18);
+    }
+
+    body.dark-mode .login-header,
+    body.dark-mode .login-body {
+        background: #101a2c;
+    }
+
+    body.dark-mode .login-header h1,
+    body.dark-mode .form-label {
+        color: #eaf2ff;
+    }
+
+    body.dark-mode .login-header p,
+    body.dark-mode .remember-checkbox span,
+    body.dark-mode .register-link p {
+        color: #9fb0c8;
+    }
+
+    body.dark-mode .form-control {
+        background: #0f172a;
+        color: #eaf2ff;
+        border-color: rgba(147, 197, 253, .22);
+    }
+
+    body.dark-mode .form-control:focus {
+        background: #111827;
+        border-color: #60a5fa;
+        box-shadow: 0 0 0 4px rgba(96, 165, 250, .16);
+    }
+
+    body.dark-mode .input-icon,
+    body.dark-mode .password-toggle {
+        color: #9fb0c8;
+    }
+
+    body.dark-mode .register-link {
+        border-color: rgba(147, 197, 253, .16);
+    }
+
+    /* Responsive */
+    @@media (max-width: 480px) {
+        .login-container {
+            display: block;
+        }
+
+        .auth-showcase {
+            min-height: auto;
+        }
+
+        .login-header {
+            padding: 2rem 1.5rem;
+        }
+
+        .login-header h1 {
+            font-size: 1.8rem;
+        }
+
+        .login-body {
+            padding: 2rem 1.5rem;
+        }
+
+        .remember-forgot {
+            flex-direction: column;
+            gap: 1rem;
+            align-items: flex-start;
+        }
+    }
+</style>
+
+<div class="login-wrapper">
+    <div class="login-container">
+        <aside class="auth-showcase">
+            <div>
+                @if ((ViewBag.RoleHint as string) == "employer")
+                {
+                    <h2>Đăng nhập nhà tuyển dụng để xem và quản lý CV ứng viên.</h2>
+                    <p>Bạn sẽ được chuyển thẳng tới trang quản lý hồ sơ ứng tuyển của công ty được cấp quyền.</p>
+                }
+                else
+                {
+                    <h2>Tìm việc, theo dõi hồ sơ và quản lý CV trong một nơi.</h2>
+                    <p>Đăng nhập để ứng tuyển nhanh, lưu việc phù hợp và nhận thông báo trạng thái hồ sơ từ nhà tuyển dụng.</p>
+                }
+            </div>
+            <div>
+                <div class="auth-benefit">
+                    <i class="fas fa-shield-alt"></i>
+                    <div>
+                        <strong>CV được bảo mật</strong>
+                        <p class="mb-0">Chỉ công ty được cấp quyền mới có thể xem hoặc tải CV.</p>
+                    </div>
+                </div>
+                <div class="auth-benefit">
+                    <i class="fas fa-bolt"></i>
+                    <div>
+                        <strong>Ứng tuyển nhanh</strong>
+                        <p class="mb-0">Nộp hồ sơ và theo dõi kết quả ngay trong tài khoản.</p>
+                    </div>
+                </div>
+            </div>
+        </aside>
+        <div class="login-header">
+            <h1><i class="fas fa-sign-in-alt me-2"></i>Đăng nhập</h1>
+            <p>Chào mừng bạn trở lại JobPortal</p>
+        </div>
+
+        <div class="login-body">
+            <form asp-action="Login" method="post" id="loginForm">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="returnUrl" value="@ViewBag.ReturnUrl" />
+
+                <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+                <!-- Email -->
+                <div class="form-group">
+                    <label asp-for="Email" class="form-label">
+                        <i class="fas fa-envelope"></i>Email
+                    </label>
+                    <div class="input-group">
+                        <i class="fas fa-envelope input-icon"></i>
+                        <input asp-for="Email" class="form-control" placeholder="Nhập email của bạn" />
+                    </div>
+                    <span asp-validation-for="Email" class="invalid-feedback"></span>
+                </div>
+
+                <!-- Mật khẩu -->
+                <div class="form-group">
+                    <label asp-for="Password" class="form-label">
+                        <i class="fas fa-lock"></i>Mật khẩu
+                    </label>
+                    <div class="input-group">
+                        <i class="fas fa-lock input-icon"></i>
+                        <input asp-for="Password" type="password" class="form-control" id="password" placeholder="Nhập mật khẩu" />
+                        <button type="button" class="password-toggle" onclick="togglePassword()">
+                            <i class="fas fa-eye" id="toggleIcon"></i>
+                        </button>
+                    </div>
+                    <span asp-validation-for="Password" class="invalid-feedback"></span>
+                </div>
+
+                <!-- Remember & Forgot -->
+                <div class="remember-forgot">
+                    <label class="remember-checkbox">
+                        <input asp-for="RememberMe" type="checkbox" />
+                        <span>Ghi nhớ đăng nhập</span>
+                    </label>
+                    <a href="@Url.Action("ForgotPassword", "Account")" class="forgot-password">
+                        <i class="fas fa-question-circle me-1"></i>Quên mật khẩu?
+                    </a>
+                </div>
+
+                <!-- Nút đăng nhập -->
+                <button type="submit" class="btn-login" id="loginBtn">
+                    <i class="fas fa-sign-in-alt"></i> Đăng nhập
+                </button>
+
+                <!-- Link đăng ký -->
+                <div class="register-link">
+                    <p>Chưa có tài khoản?</p>
+                    <a asp-action="Register">
+                        <i class="fas fa-user-plus me-2"></i>Đăng ký ngay
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Quên mật khẩu -->
+<div class="modal fade" id="forgotPasswordModal" tabindex="-1" aria-labelledby="forgotPasswordModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content" style="border-radius: 8px; overflow: hidden;">
+            <div class="modal-header" style="background: #0f172a; color: white; border: none;">
+                <h5 class="modal-title" id="forgotPasswordModalLabel">
+                    <i class="fas fa-key me-2"></i>Quên mật khẩu
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-4">
+                <p class="text-muted mb-4">Nhập email của bạn để nhận mã xác thực OTP.</p>
+                
+                <div class="form-group mb-4">
+                    <label class="form-label">
+                        <i class="fas fa-envelope"></i>Email
+                    </label>
+                    <div class="input-group">
+                        <i class="fas fa-envelope input-icon" style="left: 1rem; top: 50%; transform: translateY(-50%); position: absolute;"></i>
+                        <input type="email" class="form-control" id="resetEmail" placeholder="Nhập email của bạn" style="padding-left: 2.8rem;">
+                    </div>
+                </div>
+
+                <div id="resetMessage" class="alert" style="display: none;"></div>
+            </div>
+            <div class="modal-footer border-0">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" style="border-radius: 8px; padding: 0.75rem 1.5rem;">Hủy</button>
+                <button type="button" class="btn btn-primary" onclick="sendResetLink()" id="resetBtn" style="border-radius: 8px; padding: 0.75rem 1.5rem; background: #2563eb; border: none;">
+                    <i class="fas fa-paper-plane me-2"></i>Gửi yêu cầu
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        // Hiển thị/ẩn mật khẩu
+        function togglePassword() {
+            var password = document.getElementById('password');
+            var icon = document.getElementById('toggleIcon');
+            
+            if (password.type === 'password') {
+                password.type = 'text';
+                icon.classList.remove('fa-eye');
+                icon.classList.add('fa-eye-slash');
+            } else {
+                password.type = 'password';
+                icon.classList.remove('fa-eye-slash');
+                icon.classList.add('fa-eye');
+            }
+        }
+
+        // Xử lý submit form đăng nhập
+        $('#loginForm').submit(function() {
+            var btn = $('#loginBtn');
+            btn.html('<span class="spinner"></span> Đang xử lý...');
+            btn.prop('disabled', true);
+        });
+
+        // Xử lý quên mật khẩu - GỬI REQUEST THẬT
+        function sendResetLink() {
+            var email = $('#resetEmail').val();
+            var resetBtn = $('#resetBtn');
+            var messageDiv = $('#resetMessage');
+
+            // Kiểm tra email
+            if (!email) {
+                messageDiv.removeClass('alert-success').addClass('alert-danger')
+                    .html('<i class="fas fa-exclamation-circle me-2"></i>Vui lòng nhập email').show();
+                return;
+            }
+
+            // Kiểm tra định dạng email
+            var emailRegex = /^[^\s@@]+@@[^\s@@]+\.[^\s@@]+$/;
+            if (!emailRegex.test(email)) {
+                messageDiv.removeClass('alert-success').addClass('alert-danger')
+                    .html('<i class="fas fa-exclamation-circle me-2"></i>Email không hợp lệ').show();
+                return;
+            }
+
+            // Disable button và hiển thị loading
+            resetBtn.html('<span class="spinner-border spinner-border-sm me-2"></span> Đang gửi...');
+            resetBtn.prop('disabled', true);
+
+            // Gửi AJAX request đến server
+            $.ajax({
+                url: '@Url.Action("ForgotPassword", "Account")',
+                type: 'POST',
+                data: {
+                    email: email,
+                    __RequestVerificationToken: $('input[name="__RequestVerificationToken"]').val()
+                },
+                success: function(response) {
+                    console.log('Server response:', response);
+                    
+                    if (response.success) {
+                        messageDiv.removeClass('alert-danger').addClass('alert-success')
+                            .html('<i class="fas fa-check-circle me-2"></i>' + response.message).show();
+                        
+                        // Chuyển đến trang xác thực OTP sau 2 giây
+                        setTimeout(function() {
+                            window.location.href = '@Url.Action("VerifyOtp", "Account")?email=' + encodeURIComponent(email);
+                        }, 2000);
+                    } else {
+                        messageDiv.removeClass('alert-success').addClass('alert-danger')
+                            .html('<i class="fas fa-exclamation-circle me-2"></i>' + response.message).show();
+                        
+                        resetBtn.html('<i class="fas fa-paper-plane me-2"></i>Gửi yêu cầu');
+                        resetBtn.prop('disabled', false);
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.log('AJAX Error:', error);
+                    console.log('Response Text:', xhr.responseText);
+                    
+                    messageDiv.removeClass('alert-success').addClass('alert-danger')
+                        .html('<i class="fas fa-exclamation-circle me-2"></i>Có lỗi xảy ra: ' + error).show();
+                    
+                    resetBtn.html('<i class="fas fa-paper-plane me-2"></i>Gửi yêu cầu');
+                    resetBtn.prop('disabled', false);
+                }
+            });
+        }
+
+        // Tự động ẩn thông báo sau 5 giây
+        setTimeout(function() {
+            $('.alert').fadeOut(500);
+        }, 5000);
+
+        // Xử lý Enter key trong modal
+        $('#resetEmail').keypress(function(e) {
+            if (e.which === 13) {
+                e.preventDefault();
+                sendResetLink();
+            }
+        });
+    </script>
+}

@@ -1,0 +1,524 @@
+﻿@model List<BTL_2.Models.Announcement>
+
+@{
+    ViewData["Title"] = "Quản lý thông báo";
+    Layout = "~/Views/Shared/_Layout_Admin.cshtml";
+}
+
+<style>
+    /* ==================== MODERN DESIGN SYSTEM ==================== */
+    :root {
+        --primary: #6366f1;
+        --primary-dark: #4f46e5;
+        --success: #22c55e;
+        --warning: #f59e0b;
+        --danger: #ef4444;
+        --gray-300: #cbd5e1;
+        --gray-400: #94a3b8;
+        --gray-500: #64748b;
+        --gray-600: #475569;
+        --gray-700: #334155;
+        --gray-800: #1e293b;
+        --radius-sm: 0.5rem;
+        --radius-md: 0.75rem;
+        --radius-lg: 1rem;
+        --radius-xl: 1.5rem;
+        --transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    body {
+        background: linear-gradient(145deg, #1e293b 0%, #0f172a 100%);
+        font-family: 'Inter', sans-serif;
+    }
+
+    .page-wrapper {
+        padding: 1.5rem;
+        max-width: 1400px;
+        margin: 0 auto;
+    }
+
+    /* Header */
+    .page-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+
+    .page-header h1 {
+        font-size: 1.75rem;
+        font-weight: 700;
+        background: linear-gradient(135deg, #a855f7, #6366f1);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        margin-bottom: 0.25rem;
+    }
+
+    .page-header p {
+        color: #cbd5e1 !important;
+        font-size: 0.875rem;
+    }
+
+    .btn-create {
+        background: linear-gradient(135deg, #6366f1, #4f46e5);
+        color: white;
+        padding: 0.75rem 1.5rem;
+        border-radius: var(--radius-md);
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-weight: 500;
+        transition: var(--transition);
+        border: none;
+        cursor: pointer;
+    }
+
+    .btn-create:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(99, 102, 241, 0.4);
+    }
+
+    /* Card */
+    .card-modern {
+        background: rgba(255, 255, 255, 0.03);
+        backdrop-filter: blur(20px);
+        border-radius: var(--radius-xl);
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        overflow: hidden;
+    }
+
+    /* Table */
+    .table-responsive {
+        overflow-x: auto;
+    }
+
+    .table-modern {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    .table-modern th {
+        padding: 1rem;
+        text-align: left;
+        font-size: 0.75rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        color: #94a3b8 !important;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        background: rgba(0, 0, 0, 0.2);
+    }
+
+    .table-modern td {
+        padding: 1rem;
+        color: #e2e8f0 !important;
+        font-size: 0.875rem;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .table-modern td strong {
+        color: white !important;
+    }
+
+    .table-modern tr:hover {
+        background: rgba(255, 255, 255, 0.05);
+    }
+
+    /* Badges */
+    .badge-modern {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.25rem;
+        padding: 0.25rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.7rem;
+        font-weight: 500;
+    }
+
+    .badge-info { background: rgba(59, 130, 246, 0.2); color: #93c5fd !important; }
+    .badge-success { background: rgba(34, 197, 94, 0.2); color: #86efac !important; }
+    .badge-warning { background: rgba(245, 158, 11, 0.2); color: #fed7aa !important; }
+    .badge-danger { background: rgba(239, 68, 68, 0.2); color: #fecaca !important; }
+    .badge-secondary { background: rgba(100, 116, 139, 0.2); color: #94a3b8 !important; }
+
+    /* Action Buttons */
+    .action-buttons {
+        display: flex;
+        gap: 0.5rem;
+    }
+
+    .btn-icon {
+        width: 32px;
+        height: 32px;
+        border-radius: var(--radius-md);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        color: #94a3b8 !important;
+        transition: var(--transition);
+        cursor: pointer;
+        text-decoration: none;
+    }
+
+    .btn-icon:hover { background: var(--primary); color: white !important; transform: translateY(-2px); }
+    .btn-icon.delete:hover { background: var(--danger); }
+
+    /* Modal Styles - TẤT CẢ CHỮ TRẮNG */
+    .modal-modern {
+        background: linear-gradient(145deg, #1e293b, #0f172a);
+        border-radius: var(--radius-xl);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .modal-modern .modal-header {
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        padding: 1.25rem 1.5rem;
+    }
+
+    .modal-modern .modal-title {
+        color: white !important;
+        font-weight: 600;
+    }
+
+    .modal-modern .modal-body {
+        padding: 1.5rem;
+    }
+
+    .modal-modern .modal-footer {
+        border-top: 1px solid rgba(255, 255, 255, 0.05);
+        padding: 1rem 1.5rem;
+    }
+
+    /* Form Controls trong Modal - MÀU TRẮNG */
+    .modal-modern .form-label {
+        color: #e2e8f0 !important;
+        font-weight: 500;
+        margin-bottom: 0.5rem;
+        display: block;
+    }
+
+    .modal-modern .form-control,
+    .modal-modern .form-select {
+        background: rgba(0, 0, 0, 0.4) !important;
+        border: 1px solid rgba(255, 255, 255, 0.2) !important;
+        border-radius: var(--radius-md);
+        padding: 0.7rem 1rem;
+        font-size: 0.875rem;
+        color: white !important;
+        transition: var(--transition);
+    }
+
+    .modal-modern .form-control:focus,
+    .modal-modern .form-select:focus {
+        outline: none;
+        border-color: var(--primary) !important;
+        box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+        background: rgba(0, 0, 0, 0.6) !important;
+    }
+
+    .modal-modern .form-control::placeholder {
+        color: #94a3b8 !important;
+    }
+
+    .modal-modern .form-select option {
+        background: #1e293b;
+        color: white !important;
+    }
+
+    /* Alert */
+    .alert-modern {
+        padding: 1rem 1.25rem;
+        border-radius: var(--radius-lg);
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .alert-success-modern { 
+        background: rgba(34, 197, 94, 0.15); 
+        border-left: 4px solid var(--success); 
+        color: #bef264 !important; 
+    }
+
+    /* Buttons trong modal */
+    .modal-modern .btn-secondary {
+        background: rgba(255, 255, 255, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        color: #e2e8f0 !important;
+        padding: 0.6rem 1.2rem;
+        border-radius: var(--radius-md);
+        transition: var(--transition);
+    }
+
+    .modal-modern .btn-secondary:hover {
+        background: rgba(255, 255, 255, 0.2);
+        color: white !important;
+    }
+
+    .modal-modern .btn-primary {
+        background: linear-gradient(135deg, #6366f1, #4f46e5);
+        border: none;
+        color: white !important;
+        padding: 0.6rem 1.2rem;
+        border-radius: var(--radius-md);
+        transition: var(--transition);
+    }
+
+    .modal-modern .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
+    }
+
+    /* Text Danger trong modal */
+    .modal-modern .text-danger {
+        color: #f87171 !important;
+    }
+
+    /* Text Muted */
+    .text-muted {
+        color: #94a3b8 !important;
+    }
+
+    /* Responsive */
+    @@media (max-width: 768px) {
+        .page-wrapper { padding: 1rem; }
+        .page-header { flex-direction: column; align-items: flex-start; }
+        .table-modern { font-size: 0.8rem; }
+        .table-modern th, .table-modern td { padding: 0.75rem 0.5rem; }
+        .action-buttons { flex-direction: column; }
+        .btn-icon { width: 100%; }
+    }
+</style>
+
+<div class="page-wrapper">
+    <div class="page-header">
+        <div>
+            <h1><i class="fas fa-bullhorn me-2"></i>Quản lý thông báo</h1>
+            <p>Quản lý tất cả thông báo hiển thị trên hệ thống</p>
+        </div>
+        <button class="btn-create" data-bs-toggle="modal" data-bs-target="#addModal">
+            <i class="fas fa-plus-circle"></i> Thêm thông báo
+        </button>
+    </div>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert-modern alert-success-modern">
+            <i class="fas fa-check-circle"></i>
+            <span>@TempData["SuccessMessage"]</span>
+        </div>
+    }
+
+    <div class="card-modern">
+        <div class="table-responsive">
+            <table class="table-modern">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Tiêu đề</th>
+                        <th>Nội dung</th>
+                        <th>Loại</th>
+                        <th>Đối tượng</th>
+                        <th>Ngày tạo</th>
+                        <th>Hết hạn</th>
+                        <th>Trạng thái</th>
+                        <th>Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var ann in Model)
+                    {
+                        <tr>
+                            <td>@ann.Id</td>
+                            <td><strong>@ann.Title</strong></td>
+                            <td>@(ann.Content?.Length > 50 ? ann.Content.Substring(0, 50) + "..." : ann.Content)</td>
+                            <td>
+                                <span class="badge-modern @(ann.Type == "success" ? "badge-success" : ann.Type == "warning" ? "badge-warning" : ann.Type == "danger" ? "badge-danger" : "badge-info")">
+                                    @(ann.Type == "success" ? "✅ Thành công" : ann.Type == "warning" ? "⚠️ Cảnh báo" : ann.Type == "danger" ? "❌ Lỗi" : "ℹ️ Thông tin")
+                                </span>
+                            </td>
+                            <td>@(ann.TargetRole ?? "👥 Tất cả")</td>
+                            <td>@ann.CreatedAt.ToString("dd/MM/yyyy")</td>
+                            <td>@(ann.ExpiryDate?.ToString("dd/MM/yyyy") ?? "Không")</td>
+                            <td>
+                                <span class="badge-modern @(ann.IsActive ? "badge-success" : "badge-secondary")">
+                                    @(ann.IsActive ? "Hoạt động" : "Ẩn")
+                                </span>
+                            </td>
+                            <td>
+                                <div class="action-buttons">
+                                    <button class="btn-icon" onclick="editAnnouncement(@ann.Id)"><i class="fas fa-edit"></i></button>
+                                    <button class="btn-icon delete" onclick="toggleAnnouncement(@ann.Id)"><i class="fas fa-@(ann.IsActive ? "toggle-off" : "toggle-on")"></i></button>
+                                    <button class="btn-icon delete" onclick="deleteAnnouncement(@ann.Id)"><i class="fas fa-trash"></i></button>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Add Modal -->
+<div class="modal fade" id="addModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content modal-modern">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="fas fa-plus-circle me-2"></i>Thêm thông báo mới</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <form asp-action="AddAnnouncement" method="post">
+                @Html.AntiForgeryToken()
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Tiêu đề <span class="text-danger">*</span></label>
+                        <input type="text" name="Title" class="form-control" placeholder="Nhập tiêu đề thông báo" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Nội dung <span class="text-danger">*</span></label>
+                        <textarea name="Content" class="form-control" rows="3" placeholder="Nhập nội dung thông báo" required></textarea>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Loại thông báo</label>
+                            <select name="Type" class="form-select">
+                                <option value="info">ℹ️ Thông tin</option>
+                                <option value="success">✅ Thành công</option>
+                                <option value="warning">⚠️ Cảnh báo</option>
+                                <option value="danger">❌ Nguy hiểm</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Đối tượng</label>
+                            <select name="TargetRole" class="form-select">
+                                <option value="All">👥 Tất cả</option>
+                                <option value="Candidate">🎓 Ứng viên</option>
+                                <option value="Employer">🏢 Nhà tuyển dụng</option>
+                                <option value="Admin">🛡️ Admin</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Link liên kết (nếu có)</label>
+                        <input type="text" name="LinkUrl" class="form-control" placeholder="https://example.com">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Ngày hết hạn</label>
+                        <input type="date" name="ExpiryDate" class="form-control">
+                        <small class="text-muted">Để trống nếu không có hạn</small>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                    <button type="submit" class="btn btn-primary">Thêm thông báo</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Modal -->
+<div class="modal fade" id="editModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content modal-modern">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="fas fa-edit me-2"></i>Sửa thông báo</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <form asp-action="UpdateAnnouncement" method="post">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="Id" id="editId">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Tiêu đề <span class="text-danger">*</span></label>
+                        <input type="text" name="Title" id="editTitle" class="form-control" placeholder="Nhập tiêu đề thông báo" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Nội dung <span class="text-danger">*</span></label>
+                        <textarea name="Content" id="editContent" class="form-control" rows="3" placeholder="Nhập nội dung thông báo" required></textarea>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Loại thông báo</label>
+                            <select name="Type" id="editType" class="form-select">
+                                <option value="info">ℹ️ Thông tin</option>
+                                <option value="success">✅ Thành công</option>
+                                <option value="warning">⚠️ Cảnh báo</option>
+                                <option value="danger">❌ Nguy hiểm</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Đối tượng</label>
+                            <select name="TargetRole" id="editTargetRole" class="form-select">
+                                <option value="All">👥 Tất cả</option>
+                                <option value="Candidate">🎓 Ứng viên</option>
+                                <option value="Employer">🏢 Nhà tuyển dụng</option>
+                                <option value="Admin">🛡️ Admin</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Link liên kết (nếu có)</label>
+                        <input type="text" name="LinkUrl" id="editLinkUrl" class="form-control" placeholder="https://example.com">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Ngày hết hạn</label>
+                        <input type="date" name="ExpiryDate" id="editExpiryDate" class="form-control">
+                        <small class="text-muted">Để trống nếu không có hạn</small>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                    <button type="submit" class="btn btn-primary">Cập nhật</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function toggleAnnouncement(id) {
+            if (confirm('Bạn có chắc muốn thay đổi trạng thái thông báo này?')) {
+                $.post('@Url.Action("ToggleAnnouncement", "Admin")', { 
+                    id: id, 
+                    __RequestVerificationToken: $('input[name="__RequestVerificationToken"]').val() 
+                }, function(response) { 
+                    if(response.success) location.reload(); 
+                    else alert('Có lỗi xảy ra'); 
+                });
+            }
+        }
+        
+        function deleteAnnouncement(id) {
+            if (confirm('Bạn có chắc muốn xóa thông báo này? Hành động này không thể hoàn tác.')) {
+                $.post('@Url.Action("DeleteAnnouncement", "Admin")', { 
+                    id: id, 
+                    __RequestVerificationToken: $('input[name="__RequestVerificationToken"]').val() 
+                }, function(response) { 
+                    if(response.success) location.reload(); 
+                    else alert('Có lỗi xảy ra'); 
+                });
+            }
+        }
+        
+        function editAnnouncement(id) {
+            $.get('@Url.Action("GetAnnouncement", "Admin")', { id: id }, function(data) {
+                $('#editId').val(data.id);
+                $('#editTitle').val(data.title);
+                $('#editContent').val(data.content);
+                $('#editType').val(data.type);
+                $('#editTargetRole').val(data.targetRole);
+                $('#editLinkUrl').val(data.linkUrl);
+                $('#editExpiryDate').val(data.expiryDate);
+                new bootstrap.Modal(document.getElementById('editModal')).show();
+            });
+        }
+    </script>
+}

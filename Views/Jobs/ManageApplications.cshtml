@@ -1,0 +1,656 @@
+﻿@model List<BTL_2.Models.ViewModels.ApplicationWithDetails>
+@{
+    ViewData["Title"] = "Quản lý ứng viên";
+    var jobs = ViewBag.Jobs as List<BTL_2.Models.ViewModels.JobSummary>;
+    var selectedJobId = ViewBag.SelectedJobId;
+}
+
+<style>
+    body {
+        background:
+            radial-gradient(circle at 10% 0%, rgba(37, 99, 235, 0.10), transparent 28%),
+            linear-gradient(180deg, #0f172a 0%, #111827 100%);
+        color: #e5e7eb;
+    }
+
+    .applications-shell {
+        max-width: 1440px;
+        margin: 0 auto;
+        padding: 2rem 1.25rem;
+        color: #e5e7eb;
+    }
+
+    .applications-hero {
+        background: rgba(15, 23, 42, 0.86);
+        color: white;
+        border: 1px solid rgba(148, 163, 184, 0.18);
+        border-radius: 24px;
+        padding: 1.5rem;
+        box-shadow: 0 24px 60px rgba(37, 99, 235, 0.22);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 1rem;
+        flex-wrap: wrap;
+        margin-bottom: 1.25rem;
+    }
+
+    .applications-hero h1 {
+        margin: 0;
+        font-size: clamp(1.5rem, 2vw, 2.25rem);
+        font-weight: 900;
+    }
+
+    .applications-hero p {
+        margin: 0.35rem 0 0;
+        color: rgba(255, 255, 255, 0.82);
+    }
+
+    .hero-actions {
+        display: flex;
+        gap: 0.75rem;
+        flex-wrap: wrap;
+    }
+
+    .hero-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        border: 1px solid rgba(255, 255, 255, 0.28);
+        border-radius: 999px;
+        padding: 0.75rem 1rem;
+        color: white;
+        text-decoration: none;
+        font-weight: 800;
+        background: rgba(255, 255, 255, 0.14);
+        backdrop-filter: blur(12px);
+    }
+
+    .hero-btn:hover {
+        color: white;
+        transform: translateY(-2px);
+    }
+
+    .filter-panel,
+    .applications-panel {
+        background: rgba(15, 23, 42, 0.78);
+        border: 1px solid rgba(148, 163, 184, 0.22);
+        border-radius: 18px;
+        box-shadow: 0 18px 45px rgba(0, 0, 0, 0.18);
+    }
+
+    .filter-panel {
+        padding: 1.25rem;
+        margin-bottom: 1.25rem;
+    }
+
+    .filter-panel .form-label {
+        color: #dbeafe !important;
+        font-weight: 800;
+    }
+
+    .filter-panel .form-select {
+        border-radius: 12px;
+        border-color: rgba(148, 163, 184, 0.28);
+        padding: 0.8rem 1rem;
+        max-width: 440px;
+        background-color: #111827;
+        color: #f8fafc;
+    }
+
+    .applications-panel {
+        overflow: hidden;
+        color: #e5e7eb;
+    }
+
+    .applications-table {
+        margin: 0;
+        vertical-align: middle;
+        color: #e5e7eb;
+        background: transparent;
+    }
+
+    .applications-table thead {
+        background: rgba(2, 6, 23, 0.82);
+    }
+
+    .applications-table th {
+        color: #e2e8f0 !important;
+        font-size: 0.78rem;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+        border-bottom: 1px solid rgba(148, 163, 184, 0.22);
+        padding: 1rem;
+        white-space: nowrap;
+    }
+
+    .applications-table td {
+        padding: 1rem;
+        border-color: rgba(148, 163, 184, 0.18);
+        color: #dbeafe !important;
+        background: rgba(15, 23, 42, 0.7) !important;
+        vertical-align: middle;
+    }
+
+    .applications-table tbody tr:hover td {
+        background: rgba(30, 41, 59, 0.86) !important;
+    }
+
+    .candidate-name {
+        font-weight: 900;
+        color: #f8fafc !important;
+    }
+
+    .muted-text {
+        color: #a8b5c7 !important;
+        font-size: 0.9rem;
+    }
+
+    .secure-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        padding: 0.45rem 0.7rem;
+        border-radius: 999px;
+        font-weight: 800;
+        font-size: 0.78rem;
+    }
+
+    .secure-pill.ok {
+        background: #dcfce7;
+        color: #166534;
+    }
+
+    .secure-pill.warn {
+        background: #fef3c7;
+        color: #92400e;
+    }
+
+    .secure-pill.fail {
+        background: #fee2e2;
+        color: #991b1b;
+    }
+
+    .btn-token {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        border: 0;
+        border-radius: 14px;
+        padding: 0.7rem 0.9rem;
+        color: white;
+        background: linear-gradient(135deg, #059669, #10b981);
+        font-weight: 900;
+        text-decoration: none;
+        min-width: 142px;
+    }
+
+    .btn-token:hover {
+        color: white;
+        transform: translateY(-2px);
+        box-shadow: 0 12px 28px rgba(16, 185, 129, 0.24);
+    }
+
+    .btn-token.disabled-token,
+    .btn-token.disabled-token:hover {
+        background: #475569;
+        color: #cbd5e1;
+        cursor: not-allowed;
+        transform: none;
+        box-shadow: none;
+    }
+
+    .btn-old-cv {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        border: 1px solid #cbd5e1;
+        border-radius: 14px;
+        padding: 0.7rem 0.9rem;
+        color: #334155;
+        background: #f8fafc;
+        font-weight: 800;
+        text-decoration: none;
+    }
+
+    .applications-panel .text-muted,
+    .applications-table .text-muted {
+        color: #a8b5c7 !important;
+    }
+
+    .status-select {
+        background-color: #111827 !important;
+        border-color: rgba(148, 163, 184, 0.28) !important;
+        color: #f8fafc !important;
+    }
+
+    .security-explainer {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 0.75rem;
+        margin-bottom: 1.25rem;
+    }
+
+    .security-item {
+        border: 1px solid rgba(148, 163, 184, 0.22);
+        border-radius: 12px;
+        background: rgba(15, 23, 42, 0.78);
+        padding: 0.9rem;
+        box-shadow: 0 12px 28px rgba(15, 23, 42, 0.06);
+    }
+
+    .security-item strong {
+        display: block;
+        color: #f8fafc;
+        font-size: 0.92rem;
+        margin-bottom: 0.25rem;
+    }
+
+    .security-item span {
+        color: #b6c2d2;
+        font-size: 0.82rem;
+        line-height: 1.35;
+    }
+
+    .empty-panel {
+        text-align: center;
+        padding: 3rem;
+        color: #b6c2d2;
+    }
+
+    .token-link-panel {
+        background: rgba(6, 78, 59, 0.45);
+        border: 1px solid rgba(52, 211, 153, 0.36);
+        border-radius: 20px;
+        padding: 1rem;
+        margin-bottom: 1.25rem;
+        color: #d1fae5;
+        box-shadow: 0 14px 34px rgba(16, 185, 129, 0.12);
+    }
+
+    .token-link-panel label {
+        font-weight: 900;
+        margin-bottom: 0.5rem;
+    }
+
+    .token-link-row {
+        display: flex;
+        gap: 0.75rem;
+        flex-wrap: wrap;
+    }
+
+    .token-link-row input {
+        flex: 1 1 420px;
+        min-height: 46px;
+        border: 1px solid rgba(52, 211, 153, 0.36);
+        border-radius: 12px;
+        padding: 0.75rem;
+        color: #d1fae5;
+        background: rgba(15, 23, 42, 0.86);
+    }
+
+    .token-download-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        border: 0;
+        border-radius: 14px;
+        min-height: 46px;
+        padding: 0.75rem 1rem;
+        background: #047857;
+        color: #fff;
+        font-weight: 900;
+        text-decoration: none;
+    }
+
+    .token-download-btn:hover {
+        color: #fff;
+        background: #065f46;
+    }
+
+    @@media (max-width: 1100px) {
+        .security-explainer {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+    }
+
+    @@media (max-width: 768px) {
+        .applications-shell {
+            padding: 1rem;
+        }
+
+        .hero-actions,
+        .hero-btn {
+            width: 100%;
+        }
+
+        .hero-btn {
+            justify-content: center;
+        }
+
+        .security-explainer {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+
+<div class="applications-shell">
+    <form id="__AjaxAntiForgeryForm" method="post" class="d-none">
+        @Html.AntiForgeryToken()
+    </form>
+
+    <div class="applications-hero">
+        <div>
+            <h1><i class="fas fa-users me-2"></i>Quản lý ứng viên</h1>
+            <p>Theo dõi hồ sơ, tạo token tải CV và kiểm thử bảo mật.</p>
+        </div>
+        <div class="hero-actions">
+            <a class="hero-btn" href="@Url.Action("Index", "TestSecurity")">
+                <i class="fas fa-shield-alt"></i> Kiểm thử bảo mật
+            </a>
+            <a class="hero-btn" href="@Url.Action("CVAccessLogs", "Jobs")">
+                <i class="fas fa-clipboard-list"></i> Log truy cập CV
+            </a>
+        </div>
+    </div>
+
+    <div class="security-explainer" aria-label="Tóm tắt bảo mật CV">
+        <div class="security-item">
+            <strong><i class="fas fa-file-shield me-1 text-primary"></i> Mã hóa CV</strong>
+            <span>CV mới được lưu dạng .enc, kèm metadata, nonce, IV và SHA-256 để kiểm tra toàn vẹn.</span>
+        </div>
+        <div class="security-item">
+            <strong><i class="fas fa-key me-1 text-success"></i> Token một lần</strong>
+            <span>Nút tạo link sinh token ngắn hạn, dùng một lần và gắn với tài khoản/phiên đăng nhập hiện tại.</span>
+        </div>
+        <div class="security-item">
+            <strong><i class="fas fa-user-lock me-1 text-warning"></i> Kiểm tra quyền</strong>
+            <span>Employer chỉ xem và tải CV của ứng viên ứng tuyển vào job thuộc công ty của mình.</span>
+        </div>
+        <div class="security-item">
+            <strong><i class="fas fa-clipboard-list me-1 text-info"></i> Log truy cập</strong>
+            <span>Mỗi lần tạo token, tải thành công, token sai, hết hạn hoặc lỗi file đều ghi vào log.</span>
+        </div>
+    </div>
+
+    @if (TempData["DownloadUrl"] != null)
+    {
+        var downloadUrl = TempData["DownloadUrl"]?.ToString();
+        <div class="token-link-panel">
+            <label><i class="fas fa-key me-2"></i>Link tải CV bảo mật đã được tạo</label>
+            <div class="token-link-row">
+                <input id="downloadTokenUrl" value="@downloadUrl" readonly />
+                <button type="button" class="token-download-btn" onclick="copyDownloadLink()">
+                    <i class="fas fa-copy"></i> Sao chép
+                </button>
+                <a class="token-download-btn" href="@downloadUrl">
+                    <i class="fas fa-download"></i> Tải bằng link
+                </a>
+            </div>
+            <div class="muted-text mt-2">
+                Link này chỉ dùng một lần, có hạn ngắn và chỉ tài khoản nhà tuyển dụng đúng quyền với CV mới tải được.
+            </div>
+        </div>
+    }
+
+    <div class="filter-panel">
+        <label class="form-label">Lọc theo công việc</label>
+        <select class="form-select" id="jobFilter" onchange="filterByJob()">
+            <option value="">-- Tất cả công việc --</option>
+            @if (jobs != null)
+            {
+                foreach (var job in jobs)
+                {
+                    @if (selectedJobId == job.JobId)
+                    {
+                        <option value="@job.JobId" selected>@job.Title</option>
+                    }
+                    else
+                    {
+                        <option value="@job.JobId">@job.Title</option>
+                    }
+                }
+            }
+        </select>
+    </div>
+            
+    @if (!Model.Any())
+    {
+        <div class="applications-panel empty-panel">
+            <i class="fas fa-info-circle me-2"></i>Chưa có ứng viên nào ứng tuyển
+        </div>
+    }
+    else
+    {
+        <div class="applications-panel">
+            <div class="table-responsive">
+                <table class="table table-hover applications-table">
+                    <thead>
+                        <tr>
+                            <th>Ứng viên</th>
+                            <th>Email</th>
+                            <th>Công việc</th>
+                            <th>Ngày ứng tuyển</th>
+                            <th>Bảo mật CV</th>
+                            <th>Trạng thái</th>
+                            <th>Thư xin việc</th>
+                            <th>Thao tác</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var app in Model)
+                        {
+                            <tr>
+                                <td class="candidate-name">@app.UserName</td>
+                                <td>@app.UserEmail</td>
+                                <td>@app.JobTitle</td>
+                                <td>@(app.ApplyDate?.ToString("dd/MM/yyyy HH:mm"))</td>
+                                <td>
+                                    @if (app.CVMetadataId.HasValue)
+                                    {
+                                        var cvStatus = string.IsNullOrWhiteSpace(app.CVIntegrityStatus)
+                                            ? "Chưa quét"
+                                            : app.CVIntegrityStatus;
+                                        <span class="secure-pill @(app.CanDownloadSecureCV ? "ok" : "fail")">
+                                            <i class="fas @(app.CanDownloadSecureCV ? "fa-circle-check" : "fa-triangle-exclamation")"></i> @cvStatus
+                                        </span>
+                                        <div class="muted-text mt-1">
+                                            Metadata #@app.CVMetadataId · Hết hạn: @(app.CVExpireTime?.ToLocalTime().ToString("dd/MM/yyyy HH:mm") ?? "N/A")
+                                        </div>
+                                        @if (!app.CanDownloadSecureCV)
+                                        {
+                                            <div class="muted-text mt-1" title="@app.CVIntegrityDetail">
+                                                Chỉ CV trạng thái Valid mới được tải.
+                                            </div>
+                                        }
+                                    }
+                                    else
+                                    {
+                                        <span class="secure-pill warn">
+                                            <i class="fas fa-triangle-exclamation"></i> Chưa có metadata
+                                        </span>
+                                    }
+                                </td>
+                                <td>
+                                    <select class="form-select form-select-sm status-select"
+                                            data-id="@app.ApplicationId"
+                                            style="width: 145px;">
+                                        @if (app.Status == "Pending")
+                                        {
+                                            <option value="Pending" selected>Đang chờ</option>
+                                            <option value="Reviewed">Đã xem</option>
+                                            <option value="Interview">Phỏng vấn</option>
+                                            <option value="Approved">Chấp nhận</option>
+                                            <option value="Rejected">Từ chối</option>
+                                        }
+                                        else if (app.Status == "Reviewed")
+                                        {
+                                            <option value="Pending">Đang chờ</option>
+                                            <option value="Reviewed" selected>Đã xem</option>
+                                            <option value="Interview">Phỏng vấn</option>
+                                            <option value="Approved">Chấp nhận</option>
+                                            <option value="Rejected">Từ chối</option>
+                                        }
+                                        else if (app.Status == "Interview")
+                                        {
+                                            <option value="Pending">Đang chờ</option>
+                                            <option value="Reviewed">Đã xem</option>
+                                            <option value="Interview" selected>Phỏng vấn</option>
+                                            <option value="Approved">Chấp nhận</option>
+                                            <option value="Rejected">Từ chối</option>
+                                        }
+                                        else if (app.Status == "Accepted" || app.Status == "Approved")
+                                        {
+                                            <option value="Pending">Đang chờ</option>
+                                            <option value="Reviewed">Đã xem</option>
+                                            <option value="Interview">Phỏng vấn</option>
+                                            <option value="Approved" selected>Chấp nhận</option>
+                                            <option value="Rejected">Từ chối</option>
+                                        }
+                                        else if (app.Status == "Rejected")
+                                        {
+                                            <option value="Pending">Đang chờ</option>
+                                            <option value="Reviewed">Đã xem</option>
+                                            <option value="Interview">Phỏng vấn</option>
+                                            <option value="Approved">Chấp nhận</option>
+                                            <option value="Rejected" selected>Từ chối</option>
+                                        }
+                                        else
+                                        {
+                                            <option value="Pending">Đang chờ</option>
+                                            <option value="Reviewed">Đã xem</option>
+                                            <option value="Interview">Phỏng vấn</option>
+                                            <option value="Approved">Chấp nhận</option>
+                                            <option value="Rejected">Từ chối</option>
+                                        }
+                                    </select>
+                                </td>
+                                <td>
+                                    @if (!string.IsNullOrEmpty(app.CoverLetter))
+                                    {
+                                        <button type="button" class="btn btn-sm btn-outline-info"
+                                                data-bs-toggle="modal" data-bs-target="#coverModal@(app.ApplicationId)">
+                                            <i class="fas fa-envelope"></i> Xem
+                                        </button>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">Không có</span>
+                                    }
+                                </td>
+                                <td>
+                                    @if (app.CVMetadataId.HasValue && app.CanDownloadSecureCV)
+                                    {
+                                        <form asp-action="DownloadDecryptedCV" asp-controller="Jobs" method="post" class="d-inline">
+                                            @Html.AntiForgeryToken()
+                                            <input type="hidden" name="applicationId" value="@app.ApplicationId" />
+                                            <button type="submit" class="btn-token border-0">
+                                                <i class="fas fa-key"></i> Tạo link tải
+                                            </button>
+                                        </form>
+                                    }
+                                    else if (app.CVMetadataId.HasValue)
+                                    {
+                                        <span class="btn-token disabled-token" title="@app.CVIntegrityDetail">
+                                            <i class="fas fa-ban"></i> Không tải
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">Cần CV secure</span>
+                                    }
+                                </td>
+                            </tr>
+                            
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        @foreach (var app in Model.Where(a => !string.IsNullOrEmpty(a.CoverLetter)))
+        {
+            <div class="modal fade" id="coverModal@(app.ApplicationId)" tabindex="-1">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header bg-info text-white">
+                            <h5 class="modal-title">
+                                <i class="fas fa-envelope me-2"></i>Thư xin việc - @app.UserName
+                            </h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="p-3 bg-light rounded text-dark">
+                                @Html.Raw(app.CoverLetter?.Replace("\n", "<br/>"))
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    }
+</div>
+
+@section Scripts {
+    <script>
+        function filterByJob() {
+            var jobId = $('#jobFilter').val();
+            if (jobId) {
+                window.location.href = '@Url.Action("ManageApplications")?jobId=' + jobId;
+            } else {
+                window.location.href = '@Url.Action("ManageApplications")';
+            }
+        }
+
+        function copyDownloadLink() {
+            var input = document.getElementById('downloadTokenUrl');
+            if (!input) return;
+            input.select();
+            input.setSelectionRange(0, 99999);
+            navigator.clipboard.writeText(input.value).then(function () {
+                alert('Đã sao chép link tải CV bảo mật');
+            }).catch(function () {
+                document.execCommand('copy');
+                alert('Đã sao chép link tải CV bảo mật');
+            });
+        }
+        
+        // Cập nhật trạng thái
+        $(document).ready(function() {
+            $('.status-select').change(function() {
+                var select = $(this);
+                var applicationId = select.data('id');
+                var status = select.val();
+                
+                $.ajax({
+                    url: '@Url.Action("UpdateApplicationStatus")',
+                    type: 'POST',
+                    data: {
+                        applicationId: applicationId,
+                        status: status,
+                        __RequestVerificationToken: $('#__AjaxAntiForgeryForm input[name="__RequestVerificationToken"]').val()
+                    },
+                    success: function(response) {
+                        if (response.success) {
+                            select.css('background-color', '#d4edda');
+                            setTimeout(function() {
+                                select.css('background-color', '');
+                            }, 500);
+                            alert(response.message);
+                        } else {
+                            alert(response.message);
+                            location.reload();
+                        }
+                    },
+                    error: function() {
+                        alert('Có lỗi xảy ra, vui lòng thử lại');
+                        location.reload();
+                    }
+                });
+            });
+        });
+    </script>
+}

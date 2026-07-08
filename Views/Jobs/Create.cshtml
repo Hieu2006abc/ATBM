@@ -1,0 +1,98 @@
+﻿@model BTL_2.Models.Job
+
+@{
+    ViewData["Title"] = "Đăng tin tuyển dụng";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-10">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0"><i class="fas fa-plus-circle me-2"></i>Đăng tin tuyển dụng</h4>
+                </div>
+                <div class="card-body">
+                    <form asp-action="Create" method="post">
+                        @Html.AntiForgeryToken()
+
+                        <div class="row">
+                            <div class="col-md-8 mb-3">
+                                <label asp-for="Title" class="form-label fw-bold">Tiêu đề công việc</label>
+                                <input asp-for="Title" class="form-control" required />
+                                <span asp-validation-for="Title" class="text-danger"></span>
+                            </div>
+
+                            <div class="col-md-4 mb-3">
+                                <label asp-for="CompanyId" class="form-label fw-bold">Công ty</label>
+                                <select asp-for="CompanyId" class="form-select" asp-items="ViewBag.Companies">
+                                    <option value="">-- Chọn công ty --</option>
+                                </select>
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="Location" class="form-label fw-bold">Địa điểm</label>
+                                <input asp-for="Location" class="form-control" />
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="JobType" class="form-label fw-bold">Loại công việc</label>
+                                <select asp-for="JobType" class="form-select">
+                                    <option value="Full-time">Full-time</option>
+                                    <option value="Part-time">Part-time</option>
+                                    <option value="Remote">Remote</option>
+                                    <option value="Intern">Intern</option>
+                                </select>
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="SalaryMin" class="form-label fw-bold">Lương tối thiểu</label>
+                                <input asp-for="SalaryMin" class="form-control" type="number" />
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="SalaryMax" class="form-label fw-bold">Lương tối đa</label>
+                                <input asp-for="SalaryMax" class="form-control" type="number" />
+                            </div>
+
+                            <div class="col-12 mb-3">
+                                <label asp-for="Description" class="form-label fw-bold">Mô tả công việc</label>
+                                <textarea asp-for="Description" class="form-control" rows="5"></textarea>
+                            </div>
+
+                            <div class="col-12 mb-3">
+                                <label asp-for="Requirement" class="form-label fw-bold">Yêu cầu</label>
+                                <textarea asp-for="Requirement" class="form-control" rows="5"></textarea>
+                            </div>
+
+                            <div class="col-12 mb-3">
+                                <label asp-for="Benefit" class="form-label fw-bold">Quyền lợi</label>
+                                <textarea asp-for="Benefit" class="form-control" rows="5"></textarea>
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="Deadline" class="form-label fw-bold">Hạn nộp</label>
+                                <input asp-for="Deadline" class="form-control" type="date" />
+                            </div>
+                        </div>
+
+                        <hr class="my-4">
+
+                        <div class="d-flex justify-content-between">
+                            <a asp-action="Index" class="btn btn-outline-secondary">
+                                <i class="fas fa-arrow-left me-2"></i>Hủy
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-check-circle me-2"></i>Đăng tin
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

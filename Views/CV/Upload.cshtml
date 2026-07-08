@@ -1,0 +1,119 @@
+@{
+    ViewData["Title"] = "Tải CV bảo mật";
+}
+
+<style>
+    .secure-upload-shell {
+        max-width: 920px;
+        margin: 0 auto;
+        padding: 2rem 1rem;
+    }
+
+    .secure-upload-panel {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) 280px;
+        gap: 1rem;
+        align-items: start;
+    }
+
+    .secure-upload-card,
+    .secure-policy-card {
+        background: #ffffff;
+        border: 1px solid #dbe7f7;
+        border-radius: 8px;
+        box-shadow: 0 18px 42px rgba(15, 23, 42, 0.08);
+        padding: 1.25rem;
+    }
+
+    .secure-upload-card h1 {
+        font-size: 1.55rem;
+        font-weight: 850;
+        color: #0f172a;
+        margin-bottom: 0.35rem;
+    }
+
+    .secure-upload-card p,
+    .secure-policy-card li,
+    .secure-policy-card p {
+        color: #64748b;
+    }
+
+    .secure-policy-card h2 {
+        font-size: 1rem;
+        font-weight: 800;
+        color: #0f172a;
+    }
+
+    .secure-policy-card ul {
+        padding-left: 1.1rem;
+        margin-bottom: 0;
+    }
+
+    body.dark-mode .secure-upload-card,
+    body.dark-mode .secure-policy-card {
+        background: #101a2c !important;
+        border-color: rgba(147, 197, 253, 0.2) !important;
+    }
+
+    body.dark-mode .secure-upload-card h1,
+    body.dark-mode .secure-policy-card h2 {
+        color: #eaf2ff !important;
+    }
+
+    body.dark-mode .secure-upload-card p,
+    body.dark-mode .secure-policy-card li,
+    body.dark-mode .secure-policy-card p {
+        color: #9fb0c8 !important;
+    }
+
+    @@media (max-width: 820px) {
+        .secure-upload-panel {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+
+<div class="secure-upload-shell">
+    <div class="secure-upload-panel">
+        <section class="secure-upload-card">
+            <h1>Tải CV bảo mật</h1>
+            <p>CV được mã hóa trước khi lưu. Nhà tuyển dụng chỉ tải được khi có quyền, token hợp lệ và file còn nguyên vẹn.</p>
+
+            <form asp-action="Upload" method="post" enctype="multipart/form-data">
+                @Html.AntiForgeryToken()
+                <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+                <div class="mb-3">
+                    <label class="form-label" for="jobId">Mã công việc</label>
+                    <input id="jobId" type="number" name="jobId" class="form-control" min="1" required placeholder="Nhập Job ID" />
+                    <div class="form-text">Candidate ID được lấy từ phiên đăng nhập, không nhập thủ công.</div>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label" for="cvFile">File CV</label>
+                    <input id="cvFile" type="file" name="cvFile" class="form-control" accept=".pdf,.doc,.docx" required />
+                    <div class="form-text">Chỉ chấp nhận PDF, DOC, DOCX và tối đa 5MB.</div>
+                </div>
+
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-lock me-2"></i>Tải lên và mã hóa
+                </button>
+            </form>
+        </section>
+
+        <aside class="secure-policy-card">
+            <h2>Chính sách bảo mật</h2>
+            <ul>
+                <li>Không xác thực chỉ bằng IP.</li>
+                <li>Token dùng một lần, ràng buộc phiên.</li>
+                <li>Metadata có nonce và thời gian hết hạn.</li>
+                <li>Hash SHA-256 phát hiện file bị sửa.</li>
+                <li>Mọi lượt tải đều được ghi log.</li>
+            </ul>
+        </aside>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

@@ -1,0 +1,53 @@
+﻿@using BTL_2.Models
+@model ErrorViewModel
+@{
+    ViewData["Title"] = "Lỗi";
+}
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8 text-center">
+            <div class="error-template">
+                <h1 class="display-1 text-danger">
+                    <i class="fas fa-exclamation-triangle"></i> 500
+                </h1>
+                <h2 class="display-4 text-muted mb-4">Oops! Đã xảy ra lỗi</h2>
+                
+                <div class="error-details text-muted mb-4">
+                    <p>Rất tiếc, đã xảy ra lỗi trong quá trình xử lý yêu cầu của bạn.</p>
+                    @if (Model?.ShowRequestId ?? false)
+                    {
+                        <p class="small">
+                            <strong>Request ID:</strong> <code>@Model.RequestId</code>
+                        </p>
+                    }
+                </div>
+                
+                <div class="error-actions">
+                    <a href="@Url.Action("Index", "Home")" class="btn btn-primary btn-lg">
+                        <i class="fas fa-home me-2"></i>Về trang chủ
+                    </a>
+                    <a href="javascript:history.back()" class="btn btn-outline-secondary btn-lg ms-2">
+                        <i class="fas fa-arrow-left me-2"></i>Quay lại
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .error-template {
+        padding: 40px 15px;
+    }
+    
+    .error-actions {
+        margin-top: 30px;
+        margin-bottom: 30px;
+    }
+    
+    .btn {
+        border-radius: 30px;
+        padding: 12px 30px;
+    }
+</style>

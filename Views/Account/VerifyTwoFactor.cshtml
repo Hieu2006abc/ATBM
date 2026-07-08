@@ -1,0 +1,139 @@
+@model BTL_2.Models.ViewModels.VerifyTwoFactorViewModel
+
+@{
+    ViewData["Title"] = "Xác thực 2FA";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+    main.py-4 {
+        padding-top: 0 !important;
+        padding-bottom: 0 !important;
+    }
+
+    .twofa-wrapper {
+        min-height: calc(100vh - 80px);
+        display: grid;
+        place-items: center;
+        padding: 48px 20px;
+        background:
+            radial-gradient(circle at 10% 10%, rgba(125, 211, 252, 0.28), transparent 28%),
+            linear-gradient(135deg, rgba(239, 246, 255, 0.94), rgba(255, 255, 255, 0.98));
+    }
+
+    .twofa-card {
+        width: min(100%, 520px);
+        border: 1px solid #dbe7f7;
+        border-radius: 24px;
+        background: rgba(255, 255, 255, 0.96);
+        box-shadow: 0 26px 80px rgba(37, 99, 235, 0.13);
+        overflow: hidden;
+    }
+
+    .twofa-header {
+        padding: 30px;
+        color: #ffffff;
+        background:
+            radial-gradient(circle at 78% 20%, rgba(255, 255, 255, 0.18), transparent 28%),
+            linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
+
+    .twofa-header h1 {
+        margin: 0;
+        font-size: 1.55rem;
+        font-weight: 900;
+    }
+
+    .twofa-header p {
+        margin: 10px 0 0;
+        color: rgba(255, 255, 255, 0.86);
+    }
+
+    .twofa-body {
+        padding: 30px;
+    }
+
+    .code-input {
+        width: 100%;
+        border: 2px solid #e2e8f0;
+        border-radius: 14px;
+        padding: 15px 16px;
+        font-size: 1.35rem;
+        font-weight: 900;
+        letter-spacing: 6px;
+        text-align: center;
+        transition: border-color 180ms ease, box-shadow 180ms ease;
+    }
+
+    .code-input:focus {
+        border-color: #667eea;
+        box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.12);
+        outline: none;
+    }
+
+    .btn-twofa {
+        width: 100%;
+        border: 0;
+        border-radius: 14px;
+        padding: 14px 18px;
+        color: #ffffff;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        font-weight: 900;
+        box-shadow: 0 16px 34px rgba(102, 126, 234, 0.25);
+    }
+
+    .twofa-help {
+        margin-top: 18px;
+        color: #64748b;
+        font-size: 0.92rem;
+        line-height: 1.6;
+    }
+
+    body.dark-mode .twofa-wrapper {
+        background: linear-gradient(135deg, #101827, #0f172a);
+    }
+
+    body.dark-mode .twofa-card,
+    body.dark-mode .twofa-body {
+        background: rgba(15, 23, 42, 0.94);
+        border-color: rgba(148, 163, 184, 0.22);
+    }
+
+    body.dark-mode .code-input {
+        background: rgba(15, 23, 42, 0.95);
+        border-color: rgba(148, 163, 184, 0.28);
+        color: #f8fafc;
+    }
+</style>
+
+<div class="twofa-wrapper">
+    <section class="twofa-card">
+        <div class="twofa-header">
+            <h1><i class="fas fa-shield-alt me-2"></i>Xác thực hai lớp</h1>
+            <p>Nhập mã 6 số từ Google Authenticator để hoàn tất đăng nhập.</p>
+        </div>
+        <div class="twofa-body">
+            <form asp-action="VerifyTwoFactor" method="post">
+                @Html.AntiForgeryToken()
+                <input type="hidden" asp-for="ReturnUrl" />
+                <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+                <label asp-for="Code" class="form-label fw-bold">Mã xác thực</label>
+                <input asp-for="Code" class="code-input" inputmode="numeric" maxlength="6" autocomplete="one-time-code" placeholder="000000" autofocus />
+                <span asp-validation-for="Code" class="text-danger d-block mt-2"></span>
+
+                <button type="submit" class="btn-twofa mt-4">
+                    <i class="fas fa-check me-2"></i>Xác nhận
+                </button>
+            </form>
+
+            <p class="twofa-help">
+                Mã thay đổi sau mỗi 30 giây. Nếu mã không đúng, kiểm tra lại thời gian trên thiết bị đang cài Google Authenticator.
+            </p>
+        </div>
+    </section>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

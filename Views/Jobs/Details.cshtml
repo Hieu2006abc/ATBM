@@ -1,0 +1,235 @@
+﻿@model BTL_2.Models.ViewModels.JobDetailsViewModel
+
+@{
+    ViewData["Title"] = Model.Job.Title;
+}
+
+<div class="container my-5">
+    <!-- Job Header -->
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-body p-4">
+            <div class="row align-items-center">
+                <div class="col-md-8">
+                    <div class="d-flex align-items-center">
+                        <img src="@(Model.Job.Company?.Logo ?? "https://via.placeholder.com/80")"
+                             class="rounded me-4" style="width: 80px; height: 80px; object-fit: cover;" alt="logo">
+                        <div>
+                            <h1 class="h2 fw-bold mb-2">@Model.Job.Title</h1>
+                            <p class="text-muted mb-2">
+                                <i class="fas fa-building me-2"></i>@Model.Job.Company?.CompanyName
+                            </p>
+                            <div class="d-flex flex-wrap gap-2">
+                                <span class="badge bg-primary">@Model.Job.JobType</span>
+                                <span class="badge bg-success">
+                                    <i class="fas fa-dollar-sign me-1"></i>
+                                    @if (Model.Job.SalaryMin.HasValue && Model.Job.SalaryMax.HasValue)
+                                    {
+                                        @($"{Model.Job.SalaryMin.Value:N0} - {Model.Job.SalaryMax.Value:N0} VNĐ")
+                                    }
+                                    else if (Model.Job.SalaryMin.HasValue)
+                                    {
+                                        @($"Từ {Model.Job.SalaryMin.Value:N0} VNĐ")
+                                    }
+                                    else if (Model.Job.SalaryMax.HasValue)
+                                    {
+                                        @($"Đến {Model.Job.SalaryMax.Value:N0} VNĐ")
+                                    }
+                                    else
+                                    {
+                                        @("Thỏa thuận")
+                                    }
+                                </span>
+                                <span class="badge bg-info">
+                                    <i class="fas fa-map-marker-alt me-1"></i>@Model.Job.Location
+                                </span>
+                                <span class="badge bg-warning text-dark">
+                                    <i class="far fa-clock me-1"></i>
+                                    @(Model.Job.CreatedDate.HasValue? Model.Job.CreatedDate.Value.ToString("dd/MM/yyyy") : "N/A")
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4 text-md-end mt-3 mt-md-0">
+                    @if (Context.Session.GetString("UserId") != null &&
+                                             Context.Session.GetString("UserRole") == "Candidate" &&
+                                             Model.HasApplied == false)
+                    {
+                        <a href="@Url.Action("Apply", new { id = Model.Job.JobId })"
+                               class="btn btn-success btn-lg">
+                            <i class="fas fa-paper-plane me-2"></i>Ứng tuyển ngay
+                        </a>
+                    }
+                    else if (Context.Session.GetString("UserId") == null)
+                    {
+                        <a href="@Url.Action("Login", "Account")"
+                               class="btn btn-primary btn-lg">
+                            <i class="fas fa-sign-in-alt me-2"></i>Đăng nhập để ứng tuyển
+                        </a>
+                    }
+                    else if (Model.HasApplied == true)
+                    {
+                        <button class="btn btn-secondary btn-lg" disabled>
+                            <i class="fas fa-check me-2"></i>Đã ứng tuyển
+                        </button>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Job Details -->
+        <div class="col-lg-8">
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-white py-3">
+                    <h5 class="mb-0">
+                        <i class="fas fa-info-circle text-primary me-2"></i>Mô tả công việc
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="job-description">
+                        @Html.Raw(Model.Job.Description?.Replace("\n", "<br>"))
+                    </div>
+                </div>
+            </div>
+
+            @if (!string.IsNullOrEmpty(Model.Job.Requirement))
+            {
+                <div class="card border-0 shadow-sm mb-4">
+                    <div class="card-header bg-white py-3">
+                        <h5 class="mb-0">
+                            <i class="fas fa-list-check text-primary me-2"></i>Yêu cầu ứng viên
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="job-requirement">
+                            @Html.Raw(Model.Job.Requirement?.Replace("\n", "<br>"))
+                        </div>
+                    </div>
+                </div>
+            }
+
+            @if (!string.IsNullOrEmpty(Model.Job.Benefit))
+            {
+                <div class="card border-0 shadow-sm mb-4">
+                    <div class="card-header bg-white py-3">
+                        <h5 class="mb-0">
+                            <i class="fas fa-gift text-primary me-2"></i>Quyền lợi
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="job-benefit">
+                            @Html.Raw(Model.Job.Benefit?.Replace("\n", "<br>"))
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+
+        <!-- Company Info & Related Jobs -->
+        <div class="col-lg-4">
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-white py-3">
+                    <h5 class="mb-0">
+                        <i class="fas fa-building text-primary me-2"></i>Thông tin công ty
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <h6 class="fw-bold">@Model.Job.Company?.CompanyName</h6>
+                    
+                    @if (!string.IsNullOrEmpty(Model.Job.Company?.Address))
+                    {
+                        <p class="mb-2">
+                            <i class="fas fa-map-marker-alt text-muted me-2"></i>
+                            @Model.Job.Company.Address
+                        </p>
+                    }
+                    
+                    @if (!string.IsNullOrEmpty(Model.Job.Company?.Phone))
+                    {
+                        <p class="mb-2">
+                            <i class="fas fa-phone text-muted me-2"></i>
+                            @Model.Job.Company.Phone
+                        </p>
+                    }
+                    
+                    @if (!string.IsNullOrEmpty(Model.Job.Company?.Email))
+                    {
+                        <p class="mb-2">
+                            <i class="fas fa-envelope text-muted me-2"></i>
+                            @Model.Job.Company.Email
+                        </p>
+                    }
+                    
+                    @if (!string.IsNullOrEmpty(Model.Job.Company?.Website))
+                    {
+                        <p class="mb-2">
+                            <i class="fas fa-globe text-muted me-2"></i>
+                            <a href="@Model.Job.Company.Website" target="_blank">@Model.Job.Company.Website</a>
+                        </p>
+                    }
+                    
+                    @if (!string.IsNullOrEmpty(Model.Job.Company?.Description))
+                    {
+                        <hr>
+                        <p class="text-muted small">
+                            @Model.Job.Company.Description
+                        </p>
+                    }
+                </div>
+            </div>
+
+            @if (Model.RelatedJobs != null && Model.RelatedJobs.Any())
+            {
+                <div class="card border-0 shadow-sm">
+                    <div class="card-header bg-white py-3">
+                        <h5 class="mb-0">
+                            <i class="fas fa-briefcase text-primary me-2"></i>Việc làm cùng công ty
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        @foreach (var relatedJob in Model.RelatedJobs)
+                        {
+                            <div class="mb-3 pb-2 border-bottom">
+                                <h6 class="fw-bold mb-1">
+                                    <a href="@Url.Action("Details", new { id = relatedJob.JobId })"
+                                           class="text-decoration-none">
+                                        @relatedJob.Title
+                                    </a>
+                                </h6>
+                                <p class="small text-muted mb-0">
+                                    <i class="fas fa-map-marker-alt me-1"></i>@relatedJob.Location
+                                </p>
+                                <p class="small text-muted mb-0">
+                                    <i class="fas fa-tag me-1"></i>@relatedJob.JobType
+                                </p>
+                                <p class="small text-success mb-0">
+                                    @{
+                                        // Kiểm tra an toàn với HasValue
+                                        if (relatedJob.SalaryMin.HasValue && relatedJob.SalaryMax.HasValue)
+                                        {
+                                            @($"{relatedJob.SalaryMin.Value:N0} - {relatedJob.SalaryMax.Value:N0} VNĐ")
+                                        }
+                                        else if (relatedJob.SalaryMin.HasValue)
+                                        {
+                                            @($"Từ {relatedJob.SalaryMin.Value:N0} VNĐ")
+                                        }
+                                        else if (relatedJob.SalaryMax.HasValue)
+                                        {
+                                            @($"Đến {relatedJob.SalaryMax.Value:N0} VNĐ")
+                                        }
+                                        else
+                                        {
+                                            @("Thương lượng")
+                                        }
+                                    }
+                                </p>
+                            </div>
+                        }
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</div>

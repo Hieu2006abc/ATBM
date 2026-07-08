@@ -1,0 +1,362 @@
+@model BTL_2.Models.ViewModels.CVDownloadAccessViewModel
+@{
+    ViewData["Title"] = Model.Title;
+}
+
+<section class="cv-access-page" aria-labelledby="cvAccessTitle">
+    <div class="container">
+        <div class="cv-access-shell">
+            <div class="cv-access-visual" aria-hidden="true">
+                <div class="document-stack document-stack-back"></div>
+                <div class="document-card">
+                    <div class="document-top">
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                    </div>
+                    <div class="document-avatar">
+                        <i class="fas fa-user"></i>
+                    </div>
+                    <div class="document-line wide"></div>
+                    <div class="document-line"></div>
+                    <div class="document-line short"></div>
+                    <div class="document-lock">
+                        <i class="fas @Model.IconClass"></i>
+                    </div>
+                </div>
+            </div>
+
+            <div class="cv-access-content">
+                <div class="status-row">
+                    <span class="status-code">@Model.StatusCode</span>
+                    <span class="status-badge">
+                        <i class="fas @Model.IconClass"></i>
+                        @Model.BadgeText
+                    </span>
+                </div>
+
+                <h1 id="cvAccessTitle">@Model.Title</h1>
+                <p class="lead-text">@Model.Message</p>
+
+                @if (!string.IsNullOrWhiteSpace(Model.Detail))
+                {
+                    <div class="reason-box">
+                        <span>Lý do</span>
+                        <strong>@Model.Detail</strong>
+                    </div>
+                }
+
+                <div class="security-note">
+                    <i class="fas fa-shield-halved"></i>
+                    <span>@Model.SupportText</span>
+                </div>
+
+                <div class="cv-access-actions">
+                    <a class="btn btn-primary" href="@Model.PrimaryActionUrl">
+                        <i class="fas fa-folder-open me-2"></i>@Model.PrimaryActionText
+                    </a>
+                    <a class="btn btn-outline-secondary" href="@Model.SecondaryActionUrl">
+                        <i class="fas fa-briefcase me-2"></i>@Model.SecondaryActionText
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<style>
+    .cv-access-page {
+        padding: 3rem 0 4rem;
+        background:
+            radial-gradient(circle at 18% 15%, rgba(37, 99, 235, 0.12), transparent 28%),
+            linear-gradient(180deg, #f8fbff 0%, #ffffff 65%);
+    }
+
+    .cv-access-shell {
+        display: grid;
+        grid-template-columns: minmax(260px, 0.85fr) minmax(0, 1.15fr);
+        gap: 2.5rem;
+        align-items: center;
+        max-width: 980px;
+        margin: 0 auto;
+        padding: 2.25rem;
+        border: 1px solid #e4edf8;
+        border-radius: 8px;
+        background: rgba(255, 255, 255, 0.92);
+        box-shadow: 0 24px 70px rgba(15, 23, 42, 0.1);
+    }
+
+    .cv-access-visual {
+        position: relative;
+        min-height: 360px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .document-stack,
+    .document-card {
+        width: min(100%, 270px);
+        height: 330px;
+        border-radius: 8px;
+        background: #ffffff;
+        border: 1px solid #dbe7f6;
+        box-shadow: 0 18px 48px rgba(37, 99, 235, 0.14);
+    }
+
+    .document-stack-back {
+        position: absolute;
+        transform: rotate(-7deg) translate(-18px, 18px);
+        background: #edf5ff;
+    }
+
+    .document-card {
+        position: relative;
+        padding: 1.25rem;
+        overflow: hidden;
+    }
+
+    .document-card::before {
+        content: "";
+        position: absolute;
+        inset: 0 0 auto 0;
+        height: 6px;
+        background: linear-gradient(90deg, #2563eb, #0ea5e9, #14b8a6);
+    }
+
+    .document-top {
+        display: flex;
+        gap: 0.5rem;
+        margin: 0.5rem 0 1.4rem;
+    }
+
+    .document-top span {
+        width: 38px;
+        height: 8px;
+        border-radius: 8px;
+        background: #dbeafe;
+    }
+
+    .document-avatar {
+        width: 74px;
+        height: 74px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        background: #eef6ff;
+        color: #2563eb;
+        font-size: 1.8rem;
+        margin-bottom: 1.4rem;
+    }
+
+    .document-line {
+        height: 12px;
+        border-radius: 12px;
+        background: #e8eef7;
+        margin-bottom: 0.85rem;
+        width: 72%;
+    }
+
+    .document-line.wide {
+        width: 92%;
+    }
+
+    .document-line.short {
+        width: 54%;
+    }
+
+    .document-lock {
+        position: absolute;
+        right: 1.2rem;
+        bottom: 1.2rem;
+        width: 72px;
+        height: 72px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        background: #fff7ed;
+        color: #ea580c;
+        border: 1px solid #fed7aa;
+        font-size: 1.75rem;
+    }
+
+    .status-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.75rem;
+        align-items: center;
+        margin-bottom: 1rem;
+    }
+
+    .status-code {
+        font-size: 0.85rem;
+        font-weight: 800;
+        color: #2563eb;
+        background: #eff6ff;
+        border: 1px solid #bfdbfe;
+        border-radius: 999px;
+        padding: 0.42rem 0.75rem;
+    }
+
+    .status-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        font-size: 0.85rem;
+        font-weight: 800;
+        color: #9a3412;
+        background: #fff7ed;
+        border: 1px solid #fed7aa;
+        border-radius: 999px;
+        padding: 0.42rem 0.75rem;
+    }
+
+    .cv-access-content h1 {
+        color: #0f172a;
+        font-size: clamp(2rem, 4vw, 3.3rem);
+        font-weight: 850;
+        letter-spacing: 0;
+        line-height: 1.08;
+        margin-bottom: 1rem;
+    }
+
+    .lead-text {
+        color: #475569;
+        font-size: 1.08rem;
+        line-height: 1.7;
+        margin-bottom: 1.25rem;
+    }
+
+    .reason-box {
+        display: grid;
+        gap: 0.35rem;
+        padding: 1rem 1.1rem;
+        margin-bottom: 1rem;
+        border-radius: 8px;
+        border: 1px solid #e2e8f0;
+        background: #f8fafc;
+    }
+
+    .reason-box span {
+        color: #64748b;
+        font-size: 0.78rem;
+        font-weight: 800;
+        text-transform: uppercase;
+    }
+
+    .reason-box strong {
+        color: #1e293b;
+        font-weight: 700;
+        line-height: 1.55;
+    }
+
+    .security-note {
+        display: flex;
+        gap: 0.75rem;
+        align-items: flex-start;
+        color: #475569;
+        background: #f0fdfa;
+        border: 1px solid #99f6e4;
+        border-radius: 8px;
+        padding: 0.95rem 1rem;
+        margin-bottom: 1.35rem;
+    }
+
+    .security-note i {
+        color: #0f766e;
+        margin-top: 0.2rem;
+    }
+
+    .cv-access-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.8rem;
+    }
+
+    .cv-access-actions .btn {
+        border-radius: 8px;
+        font-weight: 800;
+        padding: 0.75rem 1.05rem;
+    }
+
+    body.dark-mode .cv-access-page {
+        background:
+            radial-gradient(circle at 18% 15%, rgba(59, 130, 246, 0.16), transparent 30%),
+            linear-gradient(180deg, #0f172a 0%, #111827 100%);
+    }
+
+    body.dark-mode .cv-access-shell,
+    body.dark-mode .document-card {
+        background: #111827;
+        border-color: #243244;
+    }
+
+    body.dark-mode .document-stack-back {
+        background: #172033;
+        border-color: #243244;
+    }
+
+    body.dark-mode .cv-access-content h1,
+    body.dark-mode .reason-box strong {
+        color: #f8fafc;
+    }
+
+    body.dark-mode .lead-text,
+    body.dark-mode .security-note,
+    body.dark-mode .reason-box span {
+        color: #cbd5e1;
+    }
+
+    body.dark-mode .reason-box {
+        background: #0f172a;
+        border-color: #243244;
+    }
+
+    body.dark-mode .document-line {
+        background: #263449;
+    }
+
+    @@media (max-width: 768px) {
+        .cv-access-page {
+            padding: 1.5rem 0 2.5rem;
+        }
+
+        .cv-access-shell {
+            grid-template-columns: 1fr;
+            gap: 1.5rem;
+            padding: 1.25rem;
+        }
+
+        .cv-access-visual {
+            min-height: 245px;
+        }
+
+        .document-stack,
+        .document-card {
+            width: 205px;
+            height: 250px;
+        }
+
+        .document-avatar {
+            width: 58px;
+            height: 58px;
+            font-size: 1.35rem;
+        }
+
+        .document-lock {
+            width: 58px;
+            height: 58px;
+            font-size: 1.35rem;
+        }
+
+        .cv-access-content h1 {
+            font-size: 2rem;
+        }
+
+        .cv-access-actions .btn {
+            width: 100%;
+        }
+    }
+</style>

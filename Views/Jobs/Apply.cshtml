@@ -1,0 +1,558 @@
+﻿@model BTL_2.Models.ViewModels.ApplicationViewModel
+
+@{
+    ViewData["Title"] = "Ứng tuyển công việc";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@section Styles {
+    <style>
+        /* ==================== APPLICATION FORM STYLES ==================== */
+        
+        /* Container và Card styling */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .card {
+            border: none;
+            border-radius: 8px;
+            box-shadow: 0 18px 48px rgba(15, 23, 42, 0.12);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            overflow: hidden;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 50px rgba(0, 0, 0, 0.15);
+        }
+
+        .card-header {
+            background: #0f172a;
+            border-radius: 8px 8px 0 0;
+            padding: 20px 25px;
+            border: none;
+            border-bottom: 4px solid #2563eb;
+        }
+
+        .card-header h4 {
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            margin: 0;
+            color: white;
+        }
+
+        .card-body {
+            padding: 30px;
+            background: #fff;
+        }
+
+        body.dark-mode .card-body,
+        body.dark-mode .company-info-card {
+            background: #2d2d2d;
+        }
+
+        body.dark-mode .form-label,
+        body.dark-mode .company-info-card .fs-5,
+        body.dark-mode .char-counter {
+            color: #f0f0f0 !important;
+        }
+
+        body.dark-mode input[type="file"],
+        body.dark-mode textarea.form-control {
+            background: #242424;
+            color: #f0f0f0;
+        }
+
+        /* Alert styling */
+        .alert {
+            border-radius: 10px;
+            border: none;
+            padding: 15px 20px;
+            margin-bottom: 20px;
+            animation: slideDown 0.5s ease;
+        }
+
+        .alert-danger {
+            background: #dc2626;
+            color: white;
+        }
+
+        .alert-info {
+            background: #2563eb;
+            color: white;
+            border: none;
+        }
+
+        .alert i {
+            font-size: 18px;
+        }
+
+        /* Form styling */
+        .form-label {
+            font-weight: 600;
+            color: #2d3748;
+            margin-bottom: 8px;
+            display: block;
+        }
+
+        .form-control {
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            padding: 12px 15px;
+            transition: all 0.3s ease;
+            font-size: 14px;
+        }
+
+        .form-control:focus {
+            border-color: #2563eb;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.10);
+            outline: none;
+        }
+
+        .form-control.is-invalid {
+            border-color: #f56565;
+            background-image: none;
+        }
+
+        .form-control.is-valid {
+            border-color: #48bb78;
+        }
+
+        /* File input styling */
+        input[type="file"] {
+            padding: 10px;
+            background: #f7fafc;
+            cursor: pointer;
+        }
+
+        input[type="file"]::file-selector-button {
+            padding: 8px 16px;
+            border-radius: 8px;
+            border: none;
+            background: #2563eb;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-right: 10px;
+        }
+
+        input[type="file"]::file-selector-button:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+        }
+
+        /* Textarea styling */
+        textarea.form-control {
+            resize: vertical;
+            min-height: 120px;
+        }
+
+        /* Button styling */
+        .btn {
+            padding: 12px 25px;
+            border-radius: 10px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            font-size: 14px;
+        }
+
+        .btn-primary {
+            background: #2563eb;
+            border: none;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-primary:active {
+            transform: translateY(0);
+        }
+
+        .btn-primary:disabled {
+            opacity: 0.7;
+            transform: none;
+            cursor: not-allowed;
+        }
+
+        .btn-outline-secondary {
+            border: 2px solid #e2e8f0;
+            color: #4a5568;
+            background: transparent;
+        }
+
+        .btn-outline-secondary:hover {
+            background: #f7fafc;
+            border-color: #cbd5e0;
+            transform: translateY(-2px);
+        }
+
+        /* Validation styling */
+        .text-danger {
+            color: #f56565;
+            font-size: 13px;
+            margin-top: 5px;
+            display: block;
+        }
+
+        .text-muted {
+            color: #718096;
+            font-size: 12px;
+            margin-top: 5px;
+            display: block;
+        }
+
+        /* Company info card */
+        .company-info-card {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-left: 4px solid #2563eb;
+            padding: 15px 20px;
+            border-radius: 10px;
+            margin-bottom: 25px;
+        }
+
+        /* Grid và spacing utilities */
+        .d-grid {
+            display: grid;
+        }
+
+        .gap-2 {
+            gap: 0.5rem;
+        }
+
+        .gap-3 {
+            gap: 1rem;
+        }
+
+        .mt-1 { margin-top: 0.25rem; }
+        .mt-2 { margin-top: 0.5rem; }
+        .mt-3 { margin-top: 1rem; }
+        .mt-4 { margin-top: 1.5rem; }
+        .mb-0 { margin-bottom: 0; }
+        .mb-3 { margin-bottom: 1rem; }
+        .me-1 { margin-right: 0.25rem; }
+        .me-2 { margin-right: 0.5rem; }
+
+        /* File info display */
+        .file-info {
+            background: #f7fafc;
+            border-radius: 8px;
+            padding: 10px 15px;
+            margin-top: 10px;
+            font-size: 13px;
+            display: none;
+        }
+
+        .file-info.show {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+
+        /* Responsive design */
+        @@media (max-width: 768px) {
+            .card-body {
+                padding: 20px;
+            }
+            
+            .btn {
+                padding: 10px 20px;
+                font-size: 13px;
+            }
+            
+            .form-control {
+                padding: 10px 12px;
+            }
+            
+            .card-header {
+                padding: 15px 20px;
+            }
+            
+            .card-header h4 {
+                font-size: 18px;
+            }
+        }
+
+        /* Animations */
+        @@keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @@keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+
+        @@keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .spinner-border {
+            display: inline-block;
+            width: 1rem;
+            height: 1rem;
+            vertical-align: text-bottom;
+            border: 0.2em solid currentColor;
+            border-right-color: transparent;
+            border-radius: 50%;
+            animation: spin 0.75s linear infinite;
+        }
+
+        .spinner-border-sm {
+            width: 1rem;
+            height: 1rem;
+            border-width: 0.2em;
+        }
+
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e0;
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #a0aec0;
+        }
+
+        /* Character counter */
+        .char-counter {
+            text-align: right;
+            font-size: 12px;
+            color: #718096;
+            margin-top: 5px;
+        }
+
+        .char-counter.warning {
+            color: #f56565;
+        }
+
+        /* Success animation */
+        @@keyframes pulse {
+            0% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.05);
+            }
+            100% {
+                transform: scale(1);
+            }
+        }
+
+        .btn-success {
+            animation: pulse 0.5s ease;
+        }
+    </style>
+}
+
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-8 mx-auto">
+            <div class="card shadow">
+                <div class="card-header">
+                    <h4 class="mb-0">
+                        <i class="fas fa-paper-plane me-2"></i>Ứng tuyển: @Model.JobTitle
+                    </h4>
+                </div>
+                <div class="card-body">
+                    @if (!ViewData.ModelState.IsValid)
+                    {
+                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                            <i class="fas fa-exclamation-circle me-2"></i>Vui lòng kiểm tra lại thông tin
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    }
+
+                    <!-- Company Info Card -->
+                    <div class="company-info-card">
+                        <div class="d-flex align-items-center">
+                            <i class="fas fa-building fa-2x me-3" style="color: #2563eb;"></i>
+                            <div>
+                                <div class="fw-bold mb-1">Công ty tuyển dụng</div>
+                                <div class="fs-5 fw-semibold" style="color: #2d3748;">@Model.CompanyName</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <form asp-action="Apply" method="post" enctype="multipart/form-data" id="applyForm">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" asp-for="JobId" />
+                        <input type="hidden" asp-for="JobTitle" />
+                        <input type="hidden" asp-for="CompanyName" />
+
+                        <div class="mb-4">
+                            <label asp-for="CVFile" class="form-label fw-bold">
+                                <i class="fas fa-file-pdf me-2"></i>CV của bạn
+                            </label>
+                            <input asp-for="CVFile" type="file" class="form-control" accept=".pdf,.doc,.docx" id="cvFile">
+                            <span asp-validation-for="CVFile" class="text-danger"></span>
+                            <small class="text-muted">
+                                <i class="fas fa-info-circle me-1"></i>Chấp nhận file PDF, DOC, DOCX (tối đa 5MB)
+                            </small>
+                            <div id="fileInfo" class="file-info">
+                                <i class="fas fa-file-alt me-1"></i>
+                                <span id="fileName"></span> - <span id="fileSize"></span>
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <label asp-for="CoverLetter" class="form-label fw-bold">
+                                <i class="fas fa-envelope me-2"></i>Thư xin việc
+                            </label>
+                            <textarea asp-for="CoverLetter" class="form-control" rows="6" id="coverLetter"
+                                      placeholder="Giới thiệu ngắn gọn về bản thân và lý do bạn phù hợp với công việc..."></textarea>
+                            <span asp-validation-for="CoverLetter" class="text-danger"></span>
+                            <div class="char-counter">
+                                <span id="charCount">0</span> / 1000 ký tự
+                            </div>
+                        </div>
+
+                        <div class="d-grid gap-3">
+                            <button type="submit" class="btn btn-primary" id="submitBtn">
+                                <i class="fas fa-check-circle me-2"></i>Xác nhận ứng tuyển
+                            </button>
+                            <a asp-action="Details" asp-route-id="@Model.JobId" class="btn btn-outline-secondary">
+                                <i class="fas fa-arrow-left me-2"></i>Quay lại
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        $(document).ready(function() {
+            // Hiển thị thông tin file khi chọn
+            $('#cvFile').on('change', function() {
+                var file = this.files[0];
+                if (file) {
+                    // Kiểm tra kích thước file (max 5MB)
+                    var maxSize = 5 * 1024 * 1024; // 5MB
+                    if (file.size > maxSize) {
+                        alert('File quá lớn! Vui lòng chọn file nhỏ hơn 5MB.');
+                        $(this).val('');
+                        $('#fileInfo').removeClass('show');
+                        return;
+                    }
+                    
+                    // Kiểm tra định dạng file
+                    var validTypes = ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
+                    if (!validTypes.includes(file.type)) {
+                        alert('Định dạng file không được hỗ trợ! Vui lòng chọn file PDF, DOC hoặc DOCX.');
+                        $(this).val('');
+                        $('#fileInfo').removeClass('show');
+                        return;
+                    }
+                    
+                    // Hiển thị thông tin file
+                    var fileName = file.name;
+                    var fileSize = (file.size / 1024 / 1024).toFixed(2) + ' MB';
+                    
+                    $('#fileName').text(fileName);
+                    $('#fileSize').text(fileSize);
+                    $('#fileInfo').addClass('show');
+                } else {
+                    $('#fileInfo').removeClass('show');
+                }
+            });
+
+            // Đếm số ký tự trong Cover Letter
+            $('#coverLetter').on('input', function() {
+                var maxLength = 1000;
+                var currentLength = $(this).val().length;
+                var remaining = maxLength - currentLength;
+                
+                $('#charCount').text(currentLength);
+                
+                if (remaining < 0) {
+                    $(this).val($(this).val().substring(0, maxLength));
+                    $('#charCount').text(maxLength);
+                }
+                
+                if (remaining <= 50 && remaining >= 0) {
+                    $('.char-counter').addClass('warning');
+                } else {
+                    $('.char-counter').removeClass('warning');
+                }
+            });
+            
+            // Trigger character count on load
+            $('#coverLetter').trigger('input');
+
+            // Xử lý submit form
+            $('#applyForm').on('submit', function(e) {
+                // Kiểm tra file đã được chọn chưa
+                var cvFile = $('#cvFile')[0].files[0];
+                if (!cvFile) {
+                    alert('Vui lòng chọn file CV để ứng tuyển!');
+                    e.preventDefault();
+                    return false;
+                }
+                
+                // Kiểm tra cover letter
+                var coverLetter = $('#coverLetter').val().trim();
+                if (!coverLetter) {
+                    alert('Vui lòng nhập thư xin việc!');
+                    e.preventDefault();
+                    return false;
+                }
+                
+                // Kiểm tra validation của form
+                if ($(this).valid()) {
+                    var btn = $('#submitBtn');
+                    btn.html('<span class="spinner-border spinner-border-sm me-2"></span>Đang xử lý...');
+                    btn.prop('disabled', true);
+                    return true;
+                }
+                return false;
+            });
+
+            function resetButton() {
+                var btn = $('#submitBtn');
+                btn.html('<i class="fas fa-check-circle me-2"></i>Xác nhận ứng tuyển');
+                btn.prop('disabled', false);
+            }
+
+            // Hiển thị lỗi validation ngay lập tức
+            $.validator.setDefaults({
+                highlight: function(element) {
+                    $(element).addClass('is-invalid');
+                },
+                unhighlight: function(element) {
+                    $(element).removeClass('is-invalid');
+                }
+            });
+        });
+    </script>
+}

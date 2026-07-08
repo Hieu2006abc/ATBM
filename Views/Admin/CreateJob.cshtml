@@ -1,0 +1,836 @@
+﻿@model BTL_2.Models.ViewModels.CreateJobViewModel
+@using BTL_2.Models
+@using System.Linq
+
+@{
+    ViewData["Title"] = "Đăng tin tuyển dụng";
+    Layout = "~/Views/Shared/_Layout_Admin.cshtml";
+    
+    var hasModel = Model != null;
+    var companies = hasModel ? (Model.Companies ?? new List<Company>()) : new List<Company>();
+    var deadlineValue = hasModel && Model.Deadline.HasValue ? Model.Deadline.Value.ToString("yyyy-MM-dd") : DateTime.Now.AddDays(30).ToString("yyyy-MM-dd");
+    var numberOfRecruitsValue = hasModel ? Model.NumberOfRecruits : 1;
+}
+
+<style>
+    /* ==================== MODERN DESIGN SYSTEM ==================== */
+    :root {
+        --primary: #6366f1;
+        --primary-dark: #4f46e5;
+        --success: #22c55e;
+        --danger: #ef4444;
+        --warning: #f59e0b;
+        --gray-400: #94a3b8;
+        --gray-500: #64748b;
+        --radius-md: 0.75rem;
+        --radius-lg: 1rem;
+        --radius-xl: 1.5rem;
+        --transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
+    body {
+        background: linear-gradient(145deg, #1e293b 0%, #0f172a 100%);
+        min-height: 100vh;
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+    }
+
+    .page-wrapper {
+        max-width: 900px;
+        margin: 0 auto;
+        padding: 2rem;
+    }
+
+    /* Card */
+    .form-card {
+        background: rgba(255, 255, 255, 0.03);
+        backdrop-filter: blur(20px);
+        border-radius: var(--radius-xl);
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        overflow: hidden;
+        animation: fadeInUp 0.5s ease;
+    }
+
+    @@keyframes fadeInUp {
+        from { opacity: 0; transform: translateY(30px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Header */
+    .form-header {
+        background: rgba(99, 102, 241, 0.1);
+        padding: 2rem;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        text-align: center;
+    }
+
+    .form-header h1 {
+        font-size: 1.75rem;
+        font-weight: 700;
+        background: linear-gradient(135deg, #a855f7, #6366f1);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        margin-bottom: 0.5rem;
+    }
+
+    .form-header p {
+        color: var(--gray-400);
+        font-size: 0.875rem;
+    }
+
+    /* Body */
+    .form-body {
+        padding: 2rem;
+    }
+
+    /* Form Groups */
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+
+    .form-label {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-weight: 600;
+        color: #e2e8f0 !important;
+        margin-bottom: 0.5rem;
+        font-size: 0.875rem;
+    }
+
+    .form-label i {
+        color: #818cf8;
+        width: 20px;
+    }
+
+    .form-label .required {
+        color: #f87171;
+        margin-left: 0.25rem;
+    }
+
+    .form-control, .form-select {
+        width: 100%;
+        padding: 0.75rem 1rem;
+        background: rgba(0, 0, 0, 0.4) !important;
+        border: 1px solid rgba(255, 255, 255, 0.2) !important;
+        border-radius: var(--radius-md);
+        font-size: 0.875rem;
+        color: white !important;
+        transition: var(--transition);
+    }
+
+    .form-control:focus, .form-select:focus {
+        outline: none;
+        border-color: #6366f1 !important;
+        background: rgba(0, 0, 0, 0.6) !important;
+        box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+    }
+
+    .form-control::placeholder {
+        color: #94a3b8 !important;
+    }
+
+    textarea.form-control {
+        min-height: 120px;
+        resize: vertical;
+    }
+
+    .form-select {
+        cursor: pointer;
+        appearance: none;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 0.75rem center;
+    }
+
+    .form-select option {
+        background: #1e293b;
+        color: white !important;
+    }
+
+    .form-check {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .form-check-input {
+        width: 1rem;
+        height: 1rem;
+        cursor: pointer;
+        accent-color: var(--primary);
+    }
+
+    .form-check-label {
+        color: #e2e8f0 !important;
+        font-size: 0.875rem;
+        cursor: pointer;
+    }
+
+    .text-danger {
+        color: #f87171 !important;
+        font-size: 0.75rem;
+        margin-top: 0.25rem;
+        display: block;
+    }
+
+    .text-muted {
+        color: #94a3b8 !important;
+        font-size: 0.7rem;
+        margin-top: 0.25rem;
+        display: block;
+    }
+
+    /* Row */
+    .row {
+        display: flex;
+        flex-wrap: wrap;
+        margin: 0 -0.75rem;
+    }
+
+    .col-md-6 {
+        flex: 0 0 50%;
+        max-width: 50%;
+        padding: 0 0.75rem;
+    }
+
+    /* Alerts */
+    .alert-modern {
+        padding: 1rem 1.25rem;
+        border-radius: var(--radius-lg);
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .alert-success-modern {
+        background: rgba(34, 197, 94, 0.15);
+        border-left: 4px solid var(--success);
+        color: #bef264 !important;
+    }
+
+    .alert-danger-modern {
+        background: rgba(239, 68, 68, 0.15);
+        border-left: 4px solid var(--danger);
+        color: #fecaca !important;
+    }
+
+    .alert-warning-modern {
+        background: rgba(245, 158, 11, 0.15);
+        border-left: 4px solid var(--warning);
+        color: #fed7aa !important;
+    }
+
+    .info-box {
+        background: rgba(99, 102, 241, 0.1);
+        border-left: 4px solid var(--primary);
+        padding: 1rem;
+        border-radius: var(--radius-md);
+        margin-bottom: 1.5rem;
+        font-size: 0.875rem;
+        color: #e2e8f0 !important;
+    }
+
+    /* Company Info */
+    .company-logo-container {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        margin-top: 1rem;
+        padding: 1rem;
+        background: rgba(0, 0, 0, 0.2);
+        border-radius: var(--radius-md);
+        border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .logo-preview {
+        width: 60px;
+        height: 60px;
+        border-radius: var(--radius-md);
+        object-fit: cover;
+        border: 2px solid var(--primary);
+    }
+
+    .company-name {
+        font-weight: 600;
+        color: white !important;
+        margin-bottom: 0.25rem;
+    }
+
+    /* Upload Area */
+    .upload-area {
+        border: 2px dashed rgba(255, 255, 255, 0.2);
+        border-radius: var(--radius-md);
+        padding: 1.5rem;
+        text-align: center;
+        background: rgba(0, 0, 0, 0.2);
+        cursor: pointer;
+        transition: var(--transition);
+    }
+
+    .upload-area:hover {
+        border-color: var(--primary);
+        background: rgba(99, 102, 241, 0.05);
+    }
+
+    .upload-area i {
+        font-size: 2rem;
+        color: #94a3b8;
+        margin-bottom: 0.5rem;
+    }
+
+    .upload-area p {
+        color: #cbd5e1 !important;
+        margin: 0;
+        font-size: 0.875rem;
+    }
+
+    .upload-area small {
+        color: #64748b !important;
+        font-size: 0.7rem;
+    }
+
+    .logo-preview-container {
+        margin-top: 1rem;
+        text-align: center;
+    }
+
+    .logo-preview-img {
+        max-height: 100px;
+        max-width: 200px;
+        border-radius: var(--radius-md);
+        border: 2px solid var(--primary);
+    }
+
+    /* Buttons */
+    .form-actions {
+        display: flex;
+        gap: 1rem;
+        margin-top: 2rem;
+    }
+
+    .btn-submit, .btn-cancel {
+        flex: 1;
+        padding: 0.75rem 1.5rem;
+        border-radius: var(--radius-md);
+        font-weight: 600;
+        font-size: 0.875rem;
+        transition: var(--transition);
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        border: none;
+        text-decoration: none;
+    }
+
+    .btn-submit {
+        background: linear-gradient(135deg, #6366f1, #4f46e5);
+        color: white !important;
+        box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+    }
+
+    .btn-submit:hover:not(:disabled) {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(99, 102, 241, 0.4);
+    }
+
+    .btn-cancel {
+        background: rgba(255, 255, 255, 0.05);
+        color: #cbd5e1 !important;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .btn-cancel:hover {
+        background: rgba(255, 255, 255, 0.1);
+        border-color: rgba(255, 255, 255, 0.2);
+        color: white !important;
+        transform: translateY(-2px);
+    }
+
+    .btn-outline-primary {
+        background: transparent;
+        border: 1px solid var(--primary);
+        color: var(--primary) !important;
+        padding: 0.4rem 0.75rem;
+        border-radius: var(--radius-md);
+        font-size: 0.75rem;
+        cursor: pointer;
+        transition: var(--transition);
+    }
+
+    .btn-outline-primary:hover {
+        background: var(--primary);
+        color: white !important;
+    }
+
+    .btn-submit:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+        transform: none;
+    }
+
+    .spinner-border {
+        display: inline-block;
+        width: 1rem;
+        height: 1rem;
+        border: 0.15em solid currentColor;
+        border-right-color: transparent;
+        border-radius: 50%;
+        animation: spinner-border .75s linear infinite;
+    }
+
+    @@keyframes spinner-border {
+        to { transform: rotate(360deg); }
+    }
+
+    .section-title {
+        font-weight: 600;
+        margin: 1.5rem 0 1rem;
+        color: #e2e8f0 !important;
+        font-size: 1rem;
+    }
+
+    /* Responsive */
+    @@media (max-width: 768px) {
+        .page-wrapper { padding: 1rem; }
+        .form-body { padding: 1.5rem; }
+        .form-header { padding: 1.5rem; }
+        .form-header h1 { font-size: 1.5rem; }
+        .row { flex-direction: column; }
+        .col-md-6 { flex: 0 0 100%; max-width: 100%; }
+        .form-actions { flex-direction: column; }
+    }
+</style>
+
+<div class="page-wrapper">
+    <div class="form-card">
+        <div class="form-header">
+            <h1><i class="fas fa-briefcase me-2"></i>Đăng tin tuyển dụng mới</h1>
+            <p>Vui lòng điền đầy đủ thông tin bên dưới</p>
+        </div>
+
+        <div class="form-body">
+            @if (TempData["SuccessMessage"] != null)
+            {
+                <div class="alert-modern alert-success-modern">
+                    <i class="fas fa-check-circle"></i>
+                    <span>@TempData["SuccessMessage"]</span>
+                </div>
+            }
+
+            @if (TempData["ErrorMessage"] != null)
+            {
+                <div class="alert-modern alert-danger-modern">
+                    <i class="fas fa-exclamation-circle"></i>
+                    <span>@TempData["ErrorMessage"]</span>
+                </div>
+            }
+
+            @if (TempData["WarningMessage"] != null)
+            {
+                <div class="alert-modern alert-warning-modern">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <span>@TempData["WarningMessage"]</span>
+                </div>
+            }
+
+            <div class="info-box">
+                <i class="fas fa-info-circle me-2"></i>
+                Các trường có dấu <span class="text-danger">*</span> là bắt buộc.
+            </div>
+
+            <form asp-action="CreateJob" asp-controller="Admin" method="post" enctype="multipart/form-data" id="jobForm">
+                @Html.AntiForgeryToken()
+
+                <!-- Title -->
+                <div class="form-group">
+                    <label asp-for="Title" class="form-label">
+                        <i class="fas fa-heading"></i>Tiêu đề công việc <span class="required">*</span>
+                    </label>
+                    <input asp-for="Title" class="form-control" placeholder="Ví dụ: Nhân viên kinh doanh, Lập trình viên..." />
+                    <span asp-validation-for="Title" class="text-danger"></span>
+                </div>
+
+                <!-- Company -->
+                <div class="form-group">
+                    <label asp-for="CompanyId" class="form-label">
+                        <i class="fas fa-building"></i>Công ty <span class="required">*</span>
+                    </label>
+                    
+                    @if (companies.Any())
+                    {
+                        <select asp-for="CompanyId" class="form-select" id="companySelect">
+                            <option value="">-- Chọn công ty --</option>
+                            @foreach (var company in companies)
+                            {
+                                <option value="@company.CompanyId">@company.CompanyName</option>
+                            }
+                        </select>
+                    }
+                    else
+                    {
+                        <select asp-for="CompanyId" class="form-select" id="companySelect">
+                            <option value="">-- Không có công ty nào --</option>
+                        </select>
+                        <div class="alert-modern alert-warning-modern mt-2">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            <span>Bạn chưa có công ty nào. Vui lòng <a asp-controller="Admin" asp-action="CreateCompany" class="text-primary">tạo công ty</a> trước khi đăng tin.</span>
+                        </div>
+                    }
+                    <span asp-validation-for="CompanyId" class="text-danger"></span>
+                </div>
+
+                <!-- Company Info Display -->
+                @if (companies.Any())
+                {
+                    <div class="company-logo-container" id="companyInfo" style="display: none;">
+                        <img id="companyLogo" class="logo-preview" src="" alt="Company Logo" />
+                        <div>
+                            <div class="company-name" id="companyNameDisplay"></div>
+                            <span class="badge" style="background: var(--primary); font-size: 0.7rem; color: white;">© BẢN QUYỀN CÔNG TY</span>
+                        </div>
+                    </div>
+                }
+
+                <!-- Upload Logo -->
+                <div class="form-group">
+                    <label class="form-label">
+                        <i class="fas fa-image"></i>Logo công ty (tùy chọn)
+                    </label>
+                    <div class="upload-area" onclick="document.getElementById('JobImageFile').click();">
+                        <i class="fas fa-cloud-upload-alt"></i>
+                        <p>Nhấn để tải lên logo công ty</p>
+                        <small>Hỗ trợ: JPG, PNG, GIF (tối đa 5MB)</small>
+                    </div>
+                    <input asp-for="JobImageFile" type="file" id="JobImageFile" class="d-none" accept="image/*" />
+                    <span asp-validation-for="JobImageFile" class="text-danger"></span>
+                    
+                    <div id="logoPreviewContainer" class="logo-preview-container" style="display: none;">
+                        <p class="text-muted mb-2">Logo đã chọn:</p>
+                        <img id="logoPreview" class="logo-preview-img" src="" alt="Logo Preview" />
+                    </div>
+                </div>
+
+                <!-- Location -->
+                <div class="form-group">
+                    <label asp-for="Location" class="form-label">
+                        <i class="fas fa-map-marker-alt"></i>Địa điểm <span class="required">*</span>
+                    </label>
+                    <input asp-for="Location" class="form-control" placeholder="Ví dụ: Hà Nội, TP.HCM..." />
+                    <span asp-validation-for="Location" class="text-danger"></span>
+                </div>
+
+                <!-- Job Type -->
+                <div class="form-group">
+                    <label asp-for="JobType" class="form-label">
+                        <i class="fas fa-clock"></i>Loại công việc <span class="required">*</span>
+                    </label>
+                    <select asp-for="JobType" class="form-select">
+                        <option value="">-- Chọn loại công việc --</option>
+                        <option value="Full-time">Full-time (Toàn thời gian)</option>
+                        <option value="Part-time">Part-time (Bán thời gian)</option>
+                        <option value="Remote">Remote (Làm việc từ xa)</option>
+                        <option value="Hybrid">Hybrid (Kết hợp)</option>
+                        <option value="Freelance">Freelance (Tự do)</option>
+                        <option value="Internship">Internship (Thực tập)</option>
+                        <option value="Contract">Contract (Hợp đồng)</option>
+                    </select>
+                    <span asp-validation-for="JobType" class="text-danger"></span>
+                </div>
+
+                <!-- Salary -->
+                <div class="section-title">💰 Mức lương (không bắt buộc)</div>
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label asp-for="SalaryMin" class="form-label">Từ (VNĐ)</label>
+                            <input asp-for="SalaryMin" type="number" class="form-control" placeholder="Lương tối thiểu..." />
+                            <span asp-validation-for="SalaryMin" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label asp-for="SalaryMax" class="form-label">Đến (VNĐ)</label>
+                            <input asp-for="SalaryMax" type="number" class="form-control" placeholder="Lương tối đa..." />
+                            <span asp-validation-for="SalaryMax" class="text-danger"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Description -->
+                <div class="form-group">
+                    <label asp-for="Description" class="form-label">
+                        <i class="fas fa-align-left"></i>Mô tả công việc <span class="required">*</span>
+                    </label>
+                    <textarea asp-for="Description" class="form-control" rows="4" placeholder="Nhập mô tả chi tiết về công việc..."></textarea>
+                    <span asp-validation-for="Description" class="text-danger"></span>
+                </div>
+
+                <!-- Requirement -->
+                <div class="form-group">
+                    <label asp-for="Requirement" class="form-label">
+                        <i class="fas fa-check-circle"></i>Yêu cầu công việc <span class="required">*</span>
+                    </label>
+                    <textarea asp-for="Requirement" class="form-control" rows="4" placeholder="Nhập yêu cầu về kỹ năng, kinh nghiệm..."></textarea>
+                    <span asp-validation-for="Requirement" class="text-danger"></span>
+                </div>
+
+                <!-- Benefit -->
+                <div class="form-group">
+                    <label asp-for="Benefit" class="form-label">
+                        <i class="fas fa-gift"></i>Quyền lợi <span class="required">*</span>
+                    </label>
+                    <textarea asp-for="Benefit" class="form-control" rows="4" placeholder="Nhập quyền lợi, phúc lợi..."></textarea>
+                    <span asp-validation-for="Benefit" class="text-danger"></span>
+                </div>
+
+                <!-- Skills -->
+                <div class="form-group">
+                    <label asp-for="Skills" class="form-label">
+                        <i class="fas fa-code"></i>Kỹ năng yêu cầu
+                    </label>
+                    <select asp-for="Skills" class="form-select" id="Skills">
+                        <option value="">-- Chọn kỹ năng --</option>
+                        <option value="C#">C#</option>
+                        <option value="Java">Java</option>
+                        <option value="Python">Python</option>
+                        <option value="JavaScript">JavaScript</option>
+                        <option value="PHP">PHP</option>
+                        <option value="SQL">SQL</option>
+                        <option value="HTML/CSS">HTML/CSS</option>
+                        <option value="React">React</option>
+                        <option value="Angular">Angular</option>
+                        <option value="Vue.js">Vue.js</option>
+                        <option value="Node.js">Node.js</option>
+                        <option value=".NET">.NET</option>
+                    </select>
+                    <div class="d-flex gap-2 mt-2">
+                        <input type="text" id="customSkill" class="form-control" placeholder="Hoặc nhập kỹ năng khác..." />
+                        <button type="button" class="btn-outline-primary" onclick="addCustomSkill()">➕ Thêm</button>
+                    </div>
+                    <span asp-validation-for="Skills" class="text-danger"></span>
+                </div>
+
+                <!-- Experience -->
+                <div class="form-group">
+                    <label asp-for="Experience" class="form-label">
+                        <i class="fas fa-chart-line"></i>Kinh nghiệm
+                    </label>
+                    <select asp-for="Experience" class="form-select">
+                        <option value="">-- Chọn kinh nghiệm --</option>
+                        <option value="Không yêu cầu">Không yêu cầu</option>
+                        <option value="Dưới 1 năm">Dưới 1 năm</option>
+                        <option value="1 năm">1 năm</option>
+                        <option value="2 năm">2 năm</option>
+                        <option value="3 năm">3 năm</option>
+                        <option value="4 năm">4 năm</option>
+                        <option value="5 năm">5 năm</option>
+                        <option value="Trên 5 năm">Trên 5 năm</option>
+                    </select>
+                    <span asp-validation-for="Experience" class="text-danger"></span>
+                </div>
+
+                <!-- Education -->
+                <div class="form-group">
+                    <label asp-for="Education" class="form-label">
+                        <i class="fas fa-graduation-cap"></i>Trình độ học vấn
+                    </label>
+                    <select asp-for="Education" class="form-select">
+                        <option value="">-- Chọn trình độ --</option>
+                        <option value="Không yêu cầu">Không yêu cầu</option>
+                        <option value="Trung học">Trung học</option>
+                        <option value="Trung cấp">Trung cấp</option>
+                        <option value="Cao đẳng">Cao đẳng</option>
+                        <option value="Đại học">Đại học</option>
+                        <option value="Cử nhân">Cử nhân</option>
+                        <option value="Kỹ sư">Kỹ sư</option>
+                        <option value="Thạc sĩ">Thạc sĩ</option>
+                        <option value="Tiến sĩ">Tiến sĩ</option>
+                    </select>
+                    <span asp-validation-for="Education" class="text-danger"></span>
+                </div>
+
+                <!-- Number of Recruits -->
+                <div class="form-group">
+                    <label asp-for="NumberOfRecruits" class="form-label">
+                        <i class="fas fa-users"></i>Số lượng tuyển
+                    </label>
+                    <input asp-for="NumberOfRecruits" type="number" class="form-control" value="@numberOfRecruitsValue" placeholder="Ví dụ: 5" />
+                    <span asp-validation-for="NumberOfRecruits" class="text-danger"></span>
+                </div>
+
+                <!-- Deadline -->
+                <div class="form-group">
+                    <label asp-for="Deadline" class="form-label">
+                        <i class="fas fa-calendar-alt"></i>Hạn nộp hồ sơ
+                    </label>
+                    <input asp-for="Deadline" type="date" class="form-control" value="@deadlineValue" />
+                    <span asp-validation-for="Deadline" class="text-danger"></span>
+                </div>
+
+                <!-- Video URL -->
+                <div class="form-group">
+                    <label asp-for="VideoUrl" class="form-label">
+                        <i class="fab fa-youtube"></i>Video giới thiệu (URL)
+                    </label>
+                    <input asp-for="VideoUrl" class="form-control" placeholder="https://www.youtube.com/..." />
+                    <span asp-validation-for="VideoUrl" class="text-danger"></span>
+                </div>
+
+                <!-- Tags -->
+                <div class="form-group">
+                    <label asp-for="Tags" class="form-label">
+                        <i class="fas fa-tags"></i>Tags
+                    </label>
+                    <input asp-for="Tags" class="form-control" placeholder="Ví dụ: IT, Marketing, Kế toán..." />
+                    <span asp-validation-for="Tags" class="text-danger"></span>
+                </div>
+
+                <!-- Options -->
+                <div class="section-title">⚙️ Tùy chọn</div>
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="form-check">
+                            <input asp-for="IsFeatured" class="form-check-input" />
+                            <label asp-for="IsFeatured" class="form-check-label">🌟 Tin nổi bật</label>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-check">
+                            <input asp-for="IsUrgent" class="form-check-input" />
+                            <label asp-for="IsUrgent" class="form-check-label">⚠️ Tin khẩn cấp</label>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-check">
+                            <input asp-for="IsRemote" class="form-check-input" />
+                            <label asp-for="IsRemote" class="form-check-label">🏠 Làm việc từ xa</label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Submit Buttons -->
+                <div class="form-actions">
+                    <a asp-action="ManageJobs" asp-controller="Admin" class="btn-cancel">
+                        <i class="fas fa-arrow-left"></i>Quay lại
+                    </a>
+                    <button type="submit" class="btn-submit" id="submitBtn">
+                        <i class="fas fa-paper-plane"></i>ĐĂNG TIN TUYỂN DỤNG
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    
+    <script>
+        function addCustomSkill() {
+            var customSkill = document.getElementById('customSkill').value.trim();
+            if (customSkill) {
+                var select = document.getElementById('Skills');
+                var exists = false;
+                for (var i = 0; i < select.options.length; i++) {
+                    if (select.options[i].value.toLowerCase() === customSkill.toLowerCase()) {
+                        exists = true;
+                        break;
+                    }
+                }
+                if (!exists) {
+                    var option = document.createElement('option');
+                    option.value = customSkill;
+                    option.text = customSkill;
+                    option.selected = true;
+                    select.add(option);
+                    document.getElementById('customSkill').value = '';
+                } else {
+                    alert('⚠️ Kỹ năng này đã có trong danh sách!');
+                }
+            } else {
+                alert('❌ Vui lòng nhập kỹ năng!');
+            }
+        }
+
+        var companySelect = document.getElementById('companySelect');
+        if (companySelect) {
+            companySelect.addEventListener('change', function() {
+                var selectedOption = this.options[this.selectedIndex];
+                var companyName = selectedOption.text;
+                var companyId = this.value;
+                
+                if (companyId && companyId !== "") {
+                    document.getElementById('companyNameDisplay').textContent = companyName;
+                    document.getElementById('companyInfo').style.display = 'flex';
+                    document.getElementById('companyLogo').src = 'https://ui-avatars.com/api/?name=' + encodeURIComponent(companyName) + '&size=60&background=6366f1&color=fff';
+                } else {
+                    document.getElementById('companyInfo').style.display = 'none';
+                }
+            });
+        }
+
+        var jobImageFile = document.getElementById('JobImageFile');
+        if (jobImageFile) {
+            jobImageFile.addEventListener('change', function(e) {
+                var file = e.target.files[0];
+                if (file) {
+                    if (file.size > 5 * 1024 * 1024) {
+                        alert('❌ File quá lớn! Vui lòng chọn file dưới 5MB.');
+                        this.value = '';
+                        return;
+                    }
+                    var reader = new FileReader();
+                    reader.onload = function(e) {
+                        var preview = document.getElementById('logoPreview');
+                        preview.src = e.target.result;
+                        document.getElementById('logoPreviewContainer').style.display = 'block';
+                    }
+                    reader.readAsDataURL(file);
+                }
+            });
+        }
+
+        // ==================== SỬA LỖI SUBMIT - CHỈ DISABLE KHI FORM HỢP LỆ ====================
+        document.addEventListener('DOMContentLoaded', function() {
+            var form = document.getElementById('jobForm');
+            var submitBtn = document.getElementById('submitBtn');
+            var originalText = submitBtn ? submitBtn.innerHTML : '';
+
+            if (form && submitBtn) {
+                form.addEventListener('submit', function(e) {
+                    // Kiểm tra form có hợp lệ không
+                    if (form.checkValidity()) {
+                        // Nếu hợp lệ thì disable button và hiển thị loading
+                        submitBtn.disabled = true;
+                        submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Đang xử lý...';
+                        return true;
+                    } else {
+                        // Nếu không hợp lệ, KHÔNG disable, vẫn giữ nguyên button
+                        e.preventDefault();
+                        // Kích hoạt validation của browser
+                        form.reportValidity();
+                        return false;
+                    }
+                });
+            }
+
+            // Khôi phục nút nếu có lỗi từ server
+            if (document.querySelector('.alert-danger-modern') || document.querySelector('.text-danger')) {
+                if (submitBtn) {
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = originalText;
+                }
+            }
+        });
+    </script>
+}

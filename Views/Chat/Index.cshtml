@@ -1,0 +1,605 @@
+﻿@{
+    ViewData["Title"] = "Tin nhắn";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+    body.dark-mode {
+        background:
+            radial-gradient(circle at 12% 0%, rgba(37, 99, 235, 0.12), transparent 28%),
+            linear-gradient(180deg, #0f172a 0%, #111827 100%) !important;
+    }
+
+    html.dark-mode-preload .chat-container,
+    html.dark-mode-preload .chat-sidebar,
+    html.dark-mode-preload .chat-header,
+    html.dark-mode-preload .chat-messages,
+    html.dark-mode-preload .chat-input {
+        background: rgba(15, 23, 42, 0.82) !important;
+        color: #e5e7eb !important;
+        border-color: rgba(148, 163, 184, 0.24) !important;
+    }
+
+    html.dark-mode-preload .chat-header h5,
+    html.dark-mode-preload .company-info h6,
+    html.dark-mode-preload .conversation-item h6 {
+        color: #f8fafc !important;
+    }
+
+    html.dark-mode-preload .message-content,
+    html.dark-mode-preload .company-item,
+    html.dark-mode-preload .conversation-item {
+        background: rgba(30, 41, 59, 0.88) !important;
+        color: #e5e7eb !important;
+        border-color: rgba(148, 163, 184, 0.18) !important;
+    }
+
+    html.dark-mode-preload .chat-input input {
+        background: #0f172a !important;
+        color: #f8fafc !important;
+        border-color: rgba(148, 163, 184, 0.28) !important;
+    }
+
+    .chat-container {
+        height: calc(100vh - 200px);
+        background: white;
+        border-radius: 15px;
+        box-shadow: 0 5px 20px rgba(0,0,0,0.05);
+        overflow: hidden;
+    }
+
+    body.dark-mode .chat-container {
+        background: rgba(15, 23, 42, 0.82) !important;
+        border: 1px solid rgba(148, 163, 184, 0.24);
+        box-shadow: 0 18px 45px rgba(0, 0, 0, 0.2);
+    }
+
+    .chat-sidebar {
+        height: 100%;
+        border-right: 1px solid #eef2f6;
+        overflow-y: auto;
+    }
+
+    body.dark-mode .chat-sidebar {
+        background: rgba(15, 23, 42, 0.72);
+        border-right-color: rgba(148, 163, 184, 0.2);
+    }
+
+    .chat-main {
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .chat-header {
+        padding: 1rem;
+        border-bottom: 1px solid #eef2f6;
+        background: #f8fafc;
+    }
+
+    body.dark-mode .chat-header,
+    body.dark-mode .chat-input {
+        background: rgba(2, 6, 23, 0.7) !important;
+        border-color: rgba(148, 163, 184, 0.2) !important;
+        color: #f8fafc;
+    }
+
+    body.dark-mode .chat-header h5 {
+        color: #f8fafc !important;
+    }
+
+    .chat-messages {
+        flex: 1;
+        overflow-y: auto;
+        padding: 1rem;
+        background: #f8fafc;
+    }
+
+    body.dark-mode .chat-messages {
+        background: rgba(15, 23, 42, 0.55) !important;
+    }
+
+    .message {
+        margin-bottom: 1rem;
+        max-width: 70%;
+        animation: fadeIn 0.3s ease;
+    }
+
+    .message-sent {
+        margin-left: auto;
+    }
+
+    .message-content {
+        padding: 0.75rem 1rem;
+        border-radius: 15px;
+        background: white;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        position: relative;
+        word-wrap: break-word;
+    }
+
+    body.dark-mode .message-content {
+        background: rgba(30, 41, 59, 0.88) !important;
+        color: #e5e7eb !important;
+        box-shadow: none;
+        border: 1px solid rgba(148, 163, 184, 0.16);
+    }
+
+    body.dark-mode .message-sent .message-content {
+        background: linear-gradient(135deg, #2563eb, #4f46e5) !important;
+        color: white !important;
+        border-color: rgba(96, 165, 250, 0.36);
+    }
+
+    .message-sent .message-content {
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        color: white;
+    }
+
+    .message-time {
+        font-size: 0.7rem;
+        color: #94a3b8;
+        margin-top: 0.25rem;
+        text-align: right;
+    }
+
+    body.dark-mode .message-time {
+        color: #9fb0c7;
+    }
+
+    .message-sent .message-time {
+        color: rgba(255,255,255,0.7);
+    }
+
+    .chat-input {
+        padding: 1rem;
+        border-top: 1px solid #eef2f6;
+        background: white;
+    }
+
+    body.dark-mode .chat-input input {
+        background: #0f172a !important;
+        border-color: rgba(148, 163, 184, 0.28) !important;
+        color: #f8fafc !important;
+    }
+
+    body.dark-mode .chat-input input::placeholder {
+        color: #94a3b8 !important;
+    }
+
+    .chat-input input {
+        border: 2px solid #eef2f6;
+        border-radius: 25px;
+        padding: 0.75rem 1.5rem;
+    }
+
+    .chat-input input:focus {
+        border-color: #667eea;
+        box-shadow: none;
+    }
+
+    .chat-input button {
+        border-radius: 25px;
+        padding: 0.75rem 2rem;
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        border: none;
+    }
+
+    .chat-input button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+    }
+
+    .company-item {
+        padding: 1rem;
+        border-bottom: 1px solid #eef2f6;
+        cursor: pointer;
+        transition: all 0.3s;
+    }
+
+    body.dark-mode .company-item,
+    body.dark-mode .conversation-item {
+        border-color: rgba(148, 163, 184, 0.18) !important;
+        color: #e5e7eb;
+    }
+
+    body.dark-mode .company-item:hover,
+    body.dark-mode .conversation-item:hover {
+        background: rgba(30, 41, 59, 0.72) !important;
+        transform: translateX(5px);
+    }
+
+    body.dark-mode .company-info h6,
+    body.dark-mode .conversation-item h6 {
+        color: #f8fafc !important;
+    }
+
+    body.dark-mode .company-info small,
+    body.dark-mode .conversation-item small,
+    body.dark-mode .text-muted {
+        color: #9fb0c7 !important;
+    }
+
+    .company-item:hover {
+        background: #f8fafc;
+        transform: translateX(5px);
+    }
+
+    .company-logo {
+        width: 50px;
+        height: 50px;
+        border-radius: 10px;
+        object-fit: cover;
+    }
+
+    .company-info h6 {
+        margin-bottom: 0.25rem;
+        font-weight: 600;
+    }
+
+    .company-info small {
+        color: #64748b;
+    }
+
+    .conversation-item {
+        padding: 1rem;
+        border-bottom: 1px solid #eef2f6;
+        cursor: pointer;
+        transition: all 0.3s;
+    }
+
+    .conversation-item:hover {
+        background: #f8fafc;
+    }
+
+    .conversation-item.active {
+        background: #eef2ff;
+        border-left: 4px solid #667eea;
+    }
+
+    body.dark-mode .conversation-item.active {
+        background: rgba(37, 99, 235, 0.16) !important;
+        border-left-color: #60a5fa;
+    }
+
+    .conversation-avatar {
+        width: 45px;
+        height: 45px;
+        border-radius: 50%;
+        object-fit: cover;
+    }
+
+    .unread-badge {
+        background: #667eea;
+        color: white;
+        font-size: 0.7rem;
+        padding: 0.25rem 0.5rem;
+        border-radius: 10px;
+        min-width: 20px;
+        text-align: center;
+    }
+
+    .tab-buttons {
+        display: flex;
+        border-bottom: 1px solid #eef2f6;
+    }
+
+    body.dark-mode .tab-buttons {
+        border-bottom-color: rgba(148, 163, 184, 0.2);
+    }
+
+    .tab-btn {
+        flex: 1;
+        padding: 1rem;
+        background: none;
+        border: none;
+        font-weight: 500;
+        color: #64748b;
+        transition: all 0.3s;
+    }
+
+    body.dark-mode .tab-btn {
+        color: #9fb0c7;
+    }
+
+    body.dark-mode .tab-btn.active {
+        color: #93c5fd;
+        border-bottom-color: #60a5fa;
+    }
+
+    .tab-btn.active {
+        color: #667eea;
+        border-bottom: 3px solid #667eea;
+    }
+
+    @@keyframes fadeIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    @@media (max-width: 768px) {
+        .chat-container {
+            height: calc(100vh - 150px);
+        }
+        
+        .message {
+            max-width: 85%;
+        }
+    }
+</style>
+<div class="container mt-4">
+    <div class="chat-container">
+        <div class="row g-0 h-100">
+            <!-- Sidebar -->
+            <div class="col-md-4">
+                <div class="chat-sidebar">
+                    <div class="tab-buttons">
+                        <button class="tab-btn active" id="tabConversations" onclick="switchTab('conversations')">
+                            <i class="fas fa-comments me-2"></i>Đoạn chat
+                        </button>
+                        <button class="tab-btn" id="tabCompanies" onclick="switchTab('companies')">
+                            <i class="fas fa-building me-2"></i>Công ty
+                        </button>
+                    </div>
+
+                    <div id="conversationsList" style="display: block;">
+                        <!-- Load conversations -->
+                    </div>
+
+                    <div id="companiesList" style="display: none;">
+                        <!-- Load companies -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Main Chat -->
+            <div class="col-md-8">
+                <div class="chat-main">
+                    <div class="chat-header" id="chatHeader">
+                        <h5 class="mb-0">Chọn một cuộc trò chuyện</h5>
+                    </div>
+                    
+                    <div class="chat-messages" id="messageList">
+                        <!-- Load messages -->
+                    </div>
+
+                    <div class="chat-input">
+                        <div class="input-group">
+                            <input type="text" class="form-control" id="messageInput" 
+                                   placeholder="Nhập tin nhắn..." disabled>
+                            <button class="btn btn-primary" id="sendButton" disabled onclick="sendMessage()">
+                                <i class="fas fa-paper-plane"></i> Gửi
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        var currentConversationId = null;
+        var currentReceiverId = null;
+        var currentReceiverName = '';
+
+        // Switch tab
+        function switchTab(tab) {
+            if (tab === 'conversations') {
+                $('#tabConversations').addClass('active');
+                $('#tabCompanies').removeClass('active');
+                $('#conversationsList').show();
+                $('#companiesList').hide();
+                loadConversations();
+            } else {
+                $('#tabCompanies').addClass('active');
+                $('#tabConversations').removeClass('active');
+                $('#companiesList').show();
+                $('#conversationsList').hide();
+                loadCompanies();
+            }
+        }
+
+        // Load companies
+        function loadCompanies() {
+            $.get('@Url.Action("GetCompanies", "Chat")', function(data) {
+                var list = $('#companiesList');
+                list.empty();
+                
+                if (data.length === 0) {
+                    list.append('<div class="text-center p-4"><i class="fas fa-building fa-3x text-muted mb-3"></i><p class="text-muted">Chưa có công ty nào</p></div>');
+                    return;
+                }
+                
+                data.forEach(function(company) {
+                    list.append(`
+                        <div class="company-item" onclick="startChatWithCompany(${company.companyId}, '${company.companyName}')">
+                            <div class="d-flex align-items-center">
+                                <img src="${company.logo}" class="company-logo me-3">
+                                <div class="company-info">
+                                    <h6 class="mb-1">${company.companyName}</h6>
+                                    <small>${company.jobCount} việc đang tuyển</small>
+                                </div>
+                            </div>
+                        </div>
+                    `);
+                });
+            });
+        }
+
+        // Start chat with company
+        function startChatWithCompany(companyId, companyName) {
+            $.ajax({
+                url: '@Url.Action("StartChatWithCompany", "Chat")',
+                type: 'POST',
+                data: {
+                    companyId: companyId,
+                    __RequestVerificationToken: $('input[name="__RequestVerificationToken"]').val()
+                },
+                success: function(response) {
+                    if (response.success) {
+                        currentConversationId = response.conversationId;
+                        currentReceiverId = response.receiverId;
+                        currentReceiverName = companyName;
+                        
+                        $('#chatHeader').html(`<h5 class="mb-0">Chat với ${companyName}</h5>`);
+                        $('#messageInput, #sendButton').prop('disabled', false);
+                        $('#messageInput').focus();
+                        
+                        // Chuyển sang tab conversations
+                        switchTab('conversations');
+                        
+                        // Load messages
+                        loadMessages();
+                        
+                        // Refresh conversations list
+                        loadConversations();
+                    } else {
+                        alert(response.message || 'Có lỗi xảy ra');
+                    }
+                },
+                error: function() {
+                    alert('Không thể kết nối đến server');
+                }
+            });
+        }
+
+        // Load conversations
+        function loadConversations() {
+            $.get('@Url.Action("GetConversations", "Chat")', function(data) {
+                var list = $('#conversationsList');
+                list.empty();
+                
+                if (data.length === 0) {
+                    list.append('<div class="text-center p-4"><i class="fas fa-comments fa-3x text-muted mb-3"></i><p class="text-muted">Chưa có cuộc trò chuyện nào</p><button class="btn btn-outline-primary mt-2" onclick="switchTab(\'companies\')"><i class="fas fa-building me-2"></i>Chat với công ty</button></div>');
+                    return;
+                }
+                
+                data.forEach(function(conv) {
+                    var activeClass = currentConversationId == conv.conversationId ? 'active' : '';
+                    list.append(`
+                        <div class="conversation-item ${activeClass}" onclick="selectConversation(${conv.conversationId}, ${conv.otherUserId}, '${conv.otherUserName}')">
+                            <div class="d-flex align-items-center">
+                                <img src="${conv.otherUserAvatar}" class="conversation-avatar me-3">
+                                <div class="flex-grow-1">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <h6 class="mb-0 fw-bold">${conv.otherUserName}</h6>
+                                        <small class="text-muted">${conv.timeAgo}</small>
+                                    </div>
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <small class="text-muted text-truncate" style="max-width: 120px;">${conv.lastMessage || 'Chưa có tin nhắn'}</small>
+                                        ${conv.unreadCount > 0 ? `<span class="unread-badge ms-2">${conv.unreadCount}</span>` : ''}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    `);
+                });
+            });
+        }
+
+        // Select conversation
+        function selectConversation(convId, receiverId, receiverName) {
+            currentConversationId = convId;
+            currentReceiverId = receiverId;
+            currentReceiverName = receiverName;
+            
+            $('#chatHeader').html(`<h5 class="mb-0">Chat với ${receiverName}</h5>`);
+            $('#messageInput, #sendButton').prop('disabled', false);
+            $('#messageInput').focus();
+            
+            loadMessages();
+            
+            // Update active state
+            $('.conversation-item').removeClass('active');
+            $(`.conversation-item:has([onclick*="selectConversation(${convId}"])`).addClass('active');
+        }
+
+        // Load messages
+        function loadMessages() {
+            if (!currentConversationId) return;
+            
+            $.get('@Url.Action("GetMessages", "Chat")', { conversationId: currentConversationId }, function(messages) {
+                var list = $('#messageList');
+                list.empty();
+                
+                messages.forEach(function(msg) {
+                    var messageClass = msg.isMe ? 'message-sent' : '';
+                    list.append(`
+                        <div class="message ${messageClass}">
+                            <div class="message-content">
+                                ${msg.content}
+                                <div class="message-time">${msg.timeAgo}</div>
+                            </div>
+                        </div>
+                    `);
+                });
+                
+                // Scroll to bottom
+                list.scrollTop(list[0].scrollHeight);
+            });
+        }
+
+        // Send message
+        function sendMessage() {
+            var content = $('#messageInput').val().trim();
+            if (!content || !currentReceiverId) return;
+            
+            $.ajax({
+                url: '@Url.Action("SendMessage", "Chat")',
+                type: 'POST',
+                data: {
+                    receiverId: currentReceiverId,
+                    content: content,
+                    __RequestVerificationToken: $('input[name="__RequestVerificationToken"]').val()
+                },
+                success: function(response) {
+                    if (response.success) {
+                        $('#messageInput').val('');
+                        loadMessages();
+                        loadConversations();
+                    } else {
+                        alert('Có lỗi xảy ra: ' + (response.error || 'Unknown error'));
+                    }
+                },
+                error: function() {
+                    alert('Không thể gửi tin nhắn');
+                }
+            });
+        }
+
+        // Enter key
+        $('#messageInput').keypress(function(e) {
+            if (e.which == 13) {
+                sendMessage();
+            }
+        });
+
+        // Load initial data
+        loadConversations();
+        
+        // Check URL for conversation parameter
+        var urlParams = new URLSearchParams(window.location.search);
+        var convId = urlParams.get('conversation');
+        if (convId) {
+            // Will be handled after conversations load
+            setTimeout(function() {
+                $(`.conversation-item`).each(function() {
+                    var onclick = $(this).attr('onclick');
+                    if (onclick && onclick.includes(`selectConversation(${convId}`)) {
+                        $(this).click();
+                    }
+                });
+            }, 500);
+        }
+        
+        // Refresh messages every 5 seconds
+        setInterval(function() {
+            if (currentConversationId) {
+                loadMessages();
+                loadConversations();
+            }
+        }, 5000);
+    </script>
+}

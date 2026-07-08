@@ -1,0 +1,673 @@
+﻿@model BTL_2.Models.ViewModels.RegisterViewModel
+
+@{
+    ViewData["Title"] = "Đăng ký tài khoản";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+    :root {
+        --primary: #2563eb;
+        --primary-dark: #1d4ed8;
+        --primary-light: #dbeafe;
+        --secondary: #64748b;
+        --success: #22c55e;
+        --warning: #f59e0b;
+        --danger: #ef4444;
+        --background: #f8fafc;
+        --card-bg: #ffffff;
+        --text-primary: #1e293b;
+        --text-secondary: #475569;
+        --text-muted: #94a3b8;
+        --border: #e2e8f0;
+        --border-light: #f1f5f9;
+        --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+        --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+        --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1);
+        --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1);
+        --transition: all 0.18s ease;
+    }
+
+    .register-wrapper {
+        min-height: calc(100vh - 200px);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 2rem 1rem;
+        background: linear-gradient(180deg, #eef4ff 0%, #f8fafc 100%);
+    }
+
+    .register-container {
+        max-width: 1080px;
+        width: 100%;
+        background: var(--card-bg);
+        border: 1px solid var(--border);
+        border-radius: 18px;
+        box-shadow: 0 22px 60px rgba(15, 23, 42, 0.12);
+        overflow: hidden;
+        animation: slideUp 0.5s ease;
+        display: grid;
+        grid-template-columns: .95fr 1.05fr;
+    }
+
+    .auth-showcase {
+        grid-row: 1 / span 2;
+        padding: 2rem;
+        background: linear-gradient(160deg, #1d4ed8, #0ea5e9);
+        color: #fff;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        min-height: 650px;
+    }
+
+    .auth-showcase h2 {
+        font-size: 2rem;
+        font-weight: 800;
+        line-height: 1.25;
+        margin-bottom: 1rem;
+    }
+
+    .auth-showcase p {
+        color: rgba(255,255,255,.82);
+        line-height: 1.6;
+    }
+
+    .auth-benefit {
+        display: flex;
+        gap: .75rem;
+        padding: .9rem;
+        border-radius: 8px;
+        background: rgba(255,255,255,.1);
+        border: 1px solid rgba(255,255,255,.14);
+        margin-top: .75rem;
+    }
+
+    .auth-benefit i {
+        color: #86efac;
+        margin-top: .25rem;
+    }
+
+    @@keyframes slideUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .register-header {
+        background: #ffffff;
+        padding: 2rem;
+        text-align: left;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .register-header::before {
+        display: none;
+    }
+
+    .register-header::after {
+        content: "";
+        position: absolute;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        height: 4px;
+        background: linear-gradient(90deg, #2563eb, #22c55e);
+    }
+
+    .register-header h1 {
+        font-size: 2.2rem;
+        font-weight: 700;
+        color: #0f172a;
+        margin-bottom: 0.5rem;
+        position: relative;
+        z-index: 1;
+    }
+
+    .register-header p {
+        color: #475569;
+        font-size: 1rem;
+        position: relative;
+        z-index: 1;
+    }
+
+    .register-body {
+        padding: 2.5rem 2rem;
+    }
+
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+
+    .form-label {
+        display: block;
+        font-weight: 600;
+        color: var(--text-primary);
+        margin-bottom: 0.5rem;
+        font-size: 0.95rem;
+    }
+
+    .form-label i {
+        color: var(--primary);
+        margin-right: 0.5rem;
+        width: 20px;
+    }
+
+    .input-group {
+        position: relative;
+    }
+
+    .input-icon {
+        position: absolute;
+        left: 1rem;
+        top: 50%;
+        transform: translateY(-50%);
+        color: var(--text-muted);
+        z-index: 1;
+    }
+
+    .form-control {
+        width: 100%;
+        padding: 0.9rem 1rem 0.9rem 2.8rem;
+        border: 2px solid var(--border);
+        border-radius: 8px;
+        font-size: 1rem;
+        transition: var(--transition);
+        background: var(--background);
+    }
+
+    .form-control:focus {
+        border-color: var(--primary);
+        outline: none;
+        box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.10);
+        background: white;
+    }
+
+    .form-control.is-invalid {
+        border-color: var(--danger);
+    }
+
+    .invalid-feedback {
+        color: var(--danger);
+        font-size: 0.85rem;
+        margin-top: 0.5rem;
+        display: block;
+    }
+
+    .text-muted {
+        color: var(--text-muted);
+        font-size: 0.8rem;
+        margin-top: 0.25rem;
+        display: block;
+    }
+
+    .text-muted i {
+        margin-right: 0.25rem;
+    }
+
+    .password-toggle {
+        position: absolute;
+        right: 1rem;
+        top: 50%;
+        transform: translateY(-50%);
+        cursor: pointer;
+        color: var(--text-muted);
+        transition: var(--transition);
+        background: transparent;
+        border: none;
+        z-index: 2;
+    }
+
+    .password-toggle:hover {
+        color: var(--primary);
+    }
+
+    .row-2 {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+    }
+
+    .btn-register {
+        width: 100%;
+        padding: 1rem;
+        background: var(--primary);
+        color: white;
+        border: none;
+        border-radius: 8px;
+        font-size: 1.1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: var(--transition);
+        position: relative;
+        overflow: hidden;
+        margin-top: 1rem;
+    }
+
+    .btn-register::before {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 0;
+        height: 0;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.3);
+        transform: translate(-50%, -50%);
+        transition: width 0.6s, height 0.6s;
+    }
+
+    .btn-register:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 25px rgba(37, 99, 235, 0.28);
+    }
+
+    .btn-register:hover::before {
+        width: 300px;
+        height: 300px;
+    }
+
+    .btn-register i {
+        margin-right: 0.5rem;
+    }
+
+    .login-link {
+        text-align: center;
+        margin-top: 2rem;
+        padding-top: 1.5rem;
+        border-top: 2px solid var(--border-light);
+    }
+
+    .login-link p {
+        color: var(--text-secondary);
+        margin-bottom: 0.5rem;
+    }
+
+    .login-link a {
+        color: var(--primary);
+        text-decoration: none;
+        font-weight: 600;
+        font-size: 1.1rem;
+        transition: var(--transition);
+    }
+
+    .login-link a:hover {
+        color: var(--primary-dark);
+        text-decoration: underline;
+    }
+
+    .alert {
+        padding: 1rem 1.5rem;
+        border-radius: 8px;
+        margin-bottom: 1.5rem;
+        animation: slideIn 0.3s ease;
+    }
+
+    .alert-success {
+        background: #d4edda;
+        color: #155724;
+        border: 1px solid #c3e6cb;
+    }
+
+    .alert-danger {
+        background: #f8d7da;
+        color: #721c24;
+        border: 1px solid #f5c6cb;
+    }
+
+    .alert i {
+        margin-right: 0.5rem;
+    }
+
+    @@keyframes slideIn {
+        from {
+            opacity: 0;
+            transform: translateY(-10px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    /* Loading Spinner */
+    .spinner {
+        display: inline-block;
+        width: 20px;
+        height: 20px;
+        border: 3px solid rgba(255,255,255,0.3);
+        border-radius: 50%;
+        border-top-color: white;
+        animation: spin 1s ease-in-out infinite;
+        margin-right: 0.5rem;
+    }
+
+    @@keyframes spin {
+        to { transform: rotate(360deg); }
+    }
+
+    .register-wrapper {
+        background:
+            radial-gradient(circle at 18% 10%, rgba(125, 211, 252, .22), transparent 30%),
+            linear-gradient(135deg, #f8fcff 0%, #eef6ff 52%, #e7f2ff 100%);
+        transition: background .25s ease, color .25s ease;
+    }
+
+    .register-container {
+        border-color: #dce8f7;
+        border-radius: 24px;
+        box-shadow: 0 24px 70px rgba(37, 99, 235, .12);
+        transition: background .25s ease, border-color .25s ease, box-shadow .25s ease;
+    }
+
+    .auth-showcase {
+        background:
+            radial-gradient(circle at 14% 10%, rgba(255,255,255,.16), transparent 30%),
+            linear-gradient(160deg, #2563eb 0%, #0ea5e9 100%);
+    }
+
+    .auth-benefit {
+        border-radius: 14px;
+        background: rgba(255,255,255,.12);
+        border-color: rgba(255,255,255,.18);
+    }
+
+    .register-header,
+    .register-body {
+        background: #ffffff;
+        transition: background .25s ease, color .25s ease;
+    }
+
+    .register-header::after {
+        background: linear-gradient(90deg, #60a5fa, #2563eb);
+    }
+
+    .form-control {
+        border-color: #dbe7f5;
+        border-radius: 14px;
+        background: #f8fbff;
+    }
+
+    .form-control:focus {
+        border-color: #60a5fa;
+        box-shadow: 0 0 0 4px rgba(96, 165, 250, .16);
+    }
+
+    .btn-register {
+        border-radius: 14px;
+        background: linear-gradient(135deg, #60a5fa 0%, #2563eb 100%);
+    }
+
+    .btn-register:hover {
+        box-shadow: 0 14px 30px rgba(37, 99, 235, .28);
+    }
+
+    .alert {
+        border-radius: 14px;
+    }
+
+    body.dark-mode .register-wrapper {
+        background:
+            radial-gradient(circle at 80% 8%, rgba(96, 165, 250, .14), transparent 34%),
+            linear-gradient(135deg, #0b1220 0%, #0f172a 50%, #111827 100%);
+    }
+
+    body.dark-mode .register-container {
+        background: #101a2c;
+        border-color: rgba(147, 197, 253, .18);
+        box-shadow: 0 28px 80px rgba(2, 6, 23, .36);
+    }
+
+    body.dark-mode .auth-showcase {
+        background:
+            radial-gradient(circle at 14% 10%, rgba(147, 197, 253, .14), transparent 30%),
+            linear-gradient(160deg, #1e3a8a 0%, #0f172a 100%);
+    }
+
+    body.dark-mode .auth-benefit {
+        background: rgba(16, 26, 44, .54);
+        border-color: rgba(147, 197, 253, .18);
+    }
+
+    body.dark-mode .register-header,
+    body.dark-mode .register-body {
+        background: #101a2c;
+    }
+
+    body.dark-mode .register-header h1,
+    body.dark-mode .form-label {
+        color: #eaf2ff;
+    }
+
+    body.dark-mode .register-header p,
+    body.dark-mode .text-muted,
+    body.dark-mode .login-link p {
+        color: #9fb0c8;
+    }
+
+    body.dark-mode .form-control {
+        background: #0f172a;
+        color: #eaf2ff;
+        border-color: rgba(147, 197, 253, .22);
+    }
+
+    body.dark-mode .form-control:focus {
+        background: #111827;
+        border-color: #60a5fa;
+        box-shadow: 0 0 0 4px rgba(96, 165, 250, .16);
+    }
+
+    body.dark-mode .input-icon,
+    body.dark-mode .password-toggle {
+        color: #9fb0c8;
+    }
+
+    body.dark-mode .login-link {
+        border-color: rgba(147, 197, 253, .16);
+    }
+
+    /* Responsive */
+    @@media (max-width: 576px) {
+        .register-container {
+            margin: 0;
+            display: block;
+        }
+
+        .auth-showcase {
+            min-height: auto;
+        }
+
+        .register-header {
+            padding: 2rem 1.5rem;
+        }
+
+        .register-header h1 {
+            font-size: 1.8rem;
+        }
+
+        .register-body {
+            padding: 2rem 1.5rem;
+        }
+
+        .row-2 {
+            grid-template-columns: 1fr;
+            gap: 0;
+        }
+    }
+</style>
+
+<div class="register-wrapper">
+    <div class="register-container">
+        <aside class="auth-showcase">
+            <div>
+                <h2>Tạo hồ sơ chuyên nghiệp để ứng tuyển dễ hơn.</h2>
+                <p>Đăng ký tài khoản để lưu việc, tải CV, nộp hồ sơ và nhận phản hồi tuyển dụng trong cùng một nơi.</p>
+            </div>
+            <div>
+                <div class="auth-benefit">
+                    <i class="fas fa-check-circle"></i>
+                    <div>
+                        <strong>Theo dõi trạng thái hồ sơ</strong>
+                        <p class="mb-0">Biết hồ sơ đang chờ duyệt, được nhận, từ chối hoặc đã rút.</p>
+                    </div>
+                </div>
+                <div class="auth-benefit">
+                    <i class="fas fa-lock"></i>
+                    <div>
+                        <strong>Bảo mật thông tin ứng viên</strong>
+                        <p class="mb-0">CV chỉ hiển thị cho nhà tuyển dụng thuộc công ty được cấp quyền.</p>
+                    </div>
+                </div>
+            </div>
+        </aside>
+        <div class="register-header">
+            <h1><i class="fas fa-user-plus me-2"></i>Đăng ký tài khoản</h1>
+            <p>Tham gia cộng đồng JobPortal ngay hôm nay</p>
+        </div>
+
+        <div class="register-body">
+            <form asp-action="Register" method="post" id="registerForm">
+                @Html.AntiForgeryToken()
+
+                <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+                <!-- Họ và tên -->
+                <div class="form-group">
+                    <label asp-for="FullName" class="form-label">
+                        <i class="fas fa-user"></i>Họ và tên
+                    </label>
+                    <div class="input-group">
+                        <i class="fas fa-user input-icon"></i>
+                        <input asp-for="FullName" class="form-control" placeholder="Nhập họ và tên" />
+                    </div>
+                    <span asp-validation-for="FullName" class="invalid-feedback"></span>
+                </div>
+
+                <!-- Email -->
+                <div class="form-group">
+                    <label asp-for="Email" class="form-label">
+                        <i class="fas fa-envelope"></i>Email
+                    </label>
+                    <div class="input-group">
+                        <i class="fas fa-envelope input-icon"></i>
+                        <input asp-for="Email" class="form-control" type="email" placeholder="Nhập email" />
+                    </div>
+                    <span asp-validation-for="Email" class="invalid-feedback"></span>
+                </div>
+
+                <!-- Số điện thoại -->
+                <div class="form-group">
+                    <label asp-for="Phone" class="form-label">
+                        <i class="fas fa-phone"></i>Số điện thoại
+                    </label>
+                    <div class="input-group">
+                        <i class="fas fa-phone input-icon"></i>
+                        <input asp-for="Phone" class="form-control" placeholder="Nhập số điện thoại" id="phoneInput" />
+                    </div>
+                    <span asp-validation-for="Phone" class="invalid-feedback"></span>
+                    <small class="text-muted"><i class="fas fa-info-circle"></i>Số điện thoại sẽ được bảo mật</small>
+                </div>
+
+                <!-- Nơi ở (Địa chỉ) -->
+                <div class="form-group">
+                    <label asp-for="Address" class="form-label">
+                        <i class="fas fa-map-marker-alt"></i>Nơi ở
+                    </label>
+                    <div class="input-group">
+                        <i class="fas fa-map-marker-alt input-icon"></i>
+                        <input asp-for="Address" class="form-control" placeholder="Nhập tỉnh/thành phố" />
+                    </div>
+                    <span asp-validation-for="Address" class="invalid-feedback"></span>
+                </div>
+
+                <!-- Mật khẩu và Xác nhận - 2 cột -->
+                <div class="row-2">
+                    <div class="form-group">
+                        <label asp-for="Password" class="form-label">
+                            <i class="fas fa-lock"></i>Mật khẩu
+                        </label>
+                        <div class="input-group">
+                            <i class="fas fa-lock input-icon"></i>
+                            <input asp-for="Password" type="password" class="form-control" id="password" placeholder="Nhập mật khẩu" />
+                            <button type="button" class="password-toggle" onclick="togglePassword('password', 'toggleIcon1')">
+                                <i class="fas fa-eye" id="toggleIcon1"></i>
+                            </button>
+                        </div>
+                        <span asp-validation-for="Password" class="invalid-feedback"></span>
+                        <small class="text-muted"><i class="fas fa-info-circle"></i>Ít nhất 6 ký tự</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label asp-for="ConfirmPassword" class="form-label">
+                            <i class="fas fa-lock"></i>Xác nhận mật khẩu
+                        </label>
+                        <div class="input-group">
+                            <i class="fas fa-lock input-icon"></i>
+                            <input asp-for="ConfirmPassword" type="password" class="form-control" id="confirmPassword" placeholder="Nhập lại mật khẩu" />
+                            <button type="button" class="password-toggle" onclick="togglePassword('confirmPassword', 'toggleIcon2')">
+                                <i class="fas fa-eye" id="toggleIcon2"></i>
+                            </button>
+                        </div>
+                        <span asp-validation-for="ConfirmPassword" class="invalid-feedback"></span>
+                    </div>
+                </div>
+
+                <!-- Nút đăng ký -->
+                <button type="submit" class="btn-register" id="registerBtn">
+                    <i class="fas fa-user-plus"></i> Đăng ký
+                </button>
+
+                <div class="login-link">
+                    <p>Đã có tài khoản?</p>
+                    <a asp-action="Login">
+                        <i class="fas fa-sign-in-alt me-2"></i>Đăng nhập ngay
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        // Hiển thị/ẩn mật khẩu
+        function togglePassword(inputId, iconId) {
+            var password = document.getElementById(inputId);
+            var icon = document.getElementById(iconId);
+            
+            if (password.type === 'password') {
+                password.type = 'text';
+                icon.classList.remove('fa-eye');
+                icon.classList.add('fa-eye-slash');
+            } else {
+                password.type = 'password';
+                icon.classList.remove('fa-eye-slash');
+                icon.classList.add('fa-eye');
+            }
+        }
+
+        // Xử lý submit form
+        $('#registerForm').submit(function() {
+            var btn = $('#registerBtn');
+            btn.html('<span class="spinner"></span> Đang xử lý...');
+            btn.prop('disabled', true);
+        });
+
+        // Validation số điện thoại (chỉ cho phép số)
+        $('#phoneInput').on('input', function() {
+            this.value = this.value.replace(/[^0-9]/g, '');
+        });
+
+        // Tự động ẩn thông báo sau 5 giây
+        setTimeout(function() {
+            $('.alert').fadeOut(500);
+        }, 5000);
+    </script>
+}

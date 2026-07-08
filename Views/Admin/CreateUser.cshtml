@@ -1,0 +1,592 @@
+﻿@model BTL_2.Models.User
+@{
+    ViewData["Title"] = "Thêm người dùng mới";
+    Layout = "~/Views/Shared/_Layout_Admin.cshtml";
+    
+    var roles = ViewBag.Roles as List<string> ?? new List<string> { "Candidate", "Employer", "Admin" };
+    var companies = ViewBag.Companies as List<BTL_2.Models.Company> ?? new List<BTL_2.Models.Company>();
+    var selectedCompanyIds = ViewBag.SelectedCompanyIds as HashSet<int> ?? new HashSet<int>();
+}
+
+<style>
+    /* ==================== MODERN DESIGN SYSTEM ==================== */
+    :root {
+        --primary: #6366f1;
+        --primary-dark: #4f46e5;
+        --primary-light: #eef2ff;
+        --success: #22c55e;
+        --success-dark: #16a34a;
+        --danger: #ef4444;
+        --danger-dark: #dc2626;
+        --warning: #f59e0b;
+        --info: #3b82f6;
+        --dark: #0f172a;
+        --light: #f8fafc;
+        --gray-50: #f9fafb;
+        --gray-100: #f1f5f9;
+        --gray-200: #e2e8f0;
+        --gray-300: #cbd5e1;
+        --gray-400: #94a3b8;
+        --gray-500: #64748b;
+        --gray-600: #475569;
+        --gray-700: #334155;
+        --gray-800: #1e293b;
+        --gray-900: #0f172a;
+        --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.05);
+        --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.06);
+        --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        --radius-sm: 0.5rem;
+        --radius-md: 0.75rem;
+        --radius-lg: 1rem;
+        --radius-xl: 1.5rem;
+        --transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
+    body {
+        background: linear-gradient(145deg, #1e293b 0%, #0f172a 100%);
+        min-height: 100vh;
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+    }
+
+    .page-wrapper {
+        max-width: 700px;
+        margin: 0 auto;
+        padding: 2rem;
+    }
+
+    /* ==================== CARD ==================== */
+    .form-card {
+        background: rgba(255, 255, 255, 0.03);
+        backdrop-filter: blur(20px);
+        border-radius: var(--radius-xl);
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        overflow: hidden;
+        animation: fadeInUp 0.5s ease;
+    }
+
+    @@keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    /* ==================== HEADER ==================== */
+    .form-header {
+        background: rgba(99, 102, 241, 0.1);
+        padding: 2rem;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        text-align: center;
+    }
+
+    .form-header h1 {
+        font-size: 1.75rem;
+        font-weight: 700;
+        background: linear-gradient(135deg, #a855f7, #6366f1);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin-bottom: 0.5rem;
+    }
+
+    .form-header p {
+        color: var(--gray-400);
+        font-size: 0.875rem;
+    }
+
+    /* ==================== BODY ==================== */
+    .form-body {
+        padding: 2rem;
+    }
+
+    /* ==================== FORM GROUPS ==================== */
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+
+    .form-label {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-weight: 600;
+        color: #e2e8f0 !important;
+        margin-bottom: 0.5rem;
+        font-size: 0.875rem;
+    }
+
+    .form-label i {
+        color: #818cf8;
+        width: 20px;
+    }
+
+    .form-label .required {
+        color: #f87171;
+        margin-left: 0.25rem;
+    }
+
+    .form-control, .form-select {
+        width: 100%;
+        padding: 0.75rem 1rem;
+        background: rgba(0, 0, 0, 0.4) !important;
+        border: 1px solid rgba(255, 255, 255, 0.2) !important;
+        border-radius: var(--radius-md);
+        font-size: 0.875rem;
+        color: white !important;
+        transition: var(--transition);
+    }
+
+    .form-control:focus, .form-select:focus {
+        outline: none;
+        border-color: #6366f1 !important;
+        background: rgba(0, 0, 0, 0.6) !important;
+        box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+    }
+
+    .form-control::placeholder {
+        color: #94a3b8 !important;
+    }
+
+    .form-select {
+        cursor: pointer;
+        appearance: none;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 0.75rem center;
+    }
+
+    .form-select option {
+        background: #1e293b;
+        color: white !important;
+    }
+
+    /* ==================== CHECKBOX ==================== */
+    .form-check {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .form-check-input {
+        width: 1rem;
+        height: 1rem;
+        cursor: pointer;
+        accent-color: var(--primary);
+    }
+
+    .form-check-label {
+        color: #e2e8f0 !important;
+        font-size: 0.875rem;
+        cursor: pointer;
+    }
+
+    /* ==================== ALERTS ==================== */
+    .alert-modern {
+        padding: 1rem 1.25rem;
+        border-radius: var(--radius-lg);
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        backdrop-filter: blur(10px);
+        animation: fadeInUp 0.3s ease;
+    }
+
+    .alert-modern i {
+        font-size: 1.25rem;
+    }
+
+    .alert-success-modern {
+        background: rgba(34, 197, 94, 0.15);
+        border-left: 4px solid var(--success);
+        color: #bef264 !important;
+    }
+
+    .alert-danger-modern {
+        background: rgba(239, 68, 68, 0.15);
+        border-left: 4px solid var(--danger);
+        color: #fecaca !important;
+    }
+
+    .alert ul {
+        margin: 0;
+        padding-left: 1.5rem;
+    }
+
+    .alert li {
+        margin: 0.25rem 0;
+        color: #fecaca;
+    }
+
+    /* ==================== INFO BOX ==================== */
+    .info-box {
+        background: rgba(99, 102, 241, 0.1);
+        border-left: 4px solid var(--primary);
+        padding: 1rem;
+        border-radius: var(--radius-md);
+        margin-bottom: 1.5rem;
+        font-size: 0.875rem;
+        color: #e2e8f0 !important;
+    }
+
+    .info-box i {
+        color: #818cf8;
+    }
+
+    .info-box strong {
+        color: white;
+    }
+
+    /* ==================== BUTTONS ==================== */
+    .form-actions {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+        margin-top: 2rem;
+    }
+
+    .btn-submit, .btn-cancel {
+        width: 100%;
+        padding: 0.75rem 1.5rem;
+        border-radius: var(--radius-md);
+        font-weight: 600;
+        font-size: 0.875rem;
+        transition: var(--transition);
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        border: none;
+        text-decoration: none;
+    }
+
+    .btn-submit {
+        background: linear-gradient(135deg, #6366f1, #4f46e5);
+        color: white !important;
+        box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+    }
+
+    .btn-submit:hover:not(:disabled) {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(99, 102, 241, 0.4);
+    }
+
+    .btn-cancel {
+        background: rgba(255, 255, 255, 0.05);
+        color: #cbd5e1 !important;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .btn-cancel:hover {
+        background: rgba(255, 255, 255, 0.1);
+        border-color: rgba(255, 255, 255, 0.2);
+        color: white !important;
+        transform: translateY(-2px);
+    }
+
+    .btn-submit:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+        transform: none;
+    }
+
+    /* ==================== SPINNER ==================== */
+    .spinner-border {
+        display: inline-block;
+        width: 1rem;
+        height: 1rem;
+        border: 0.15em solid currentColor;
+        border-right-color: transparent;
+        border-radius: 50%;
+        animation: spinner-border .75s linear infinite;
+    }
+
+    @@keyframes spinner-border {
+        to {
+            transform: rotate(360deg);
+        }
+    }
+
+    /* ==================== TEXT ==================== */
+    .text-danger {
+        color: #f87171 !important;
+        font-size: 0.75rem;
+        margin-top: 0.25rem;
+        display: block;
+    }
+
+    .text-muted {
+        color: #94a3b8 !important;
+        font-size: 0.7rem;
+        margin-top: 0.25rem;
+        display: block;
+    }
+
+    /* ==================== ROLE DESCRIPTION ==================== */
+    .role-description {
+        background: rgba(0, 0, 0, 0.2);
+        border-radius: var(--radius-md);
+        padding: 0.75rem;
+        margin-top: 0.5rem;
+        font-size: 0.8rem;
+        color: #cbd5e1;
+        border-left: 3px solid var(--primary);
+    }
+
+    /* ==================== RESPONSIVE ==================== */
+    @@media (max-width: 768px) {
+        .page-wrapper {
+            padding: 1rem;
+        }
+        
+        .form-body {
+            padding: 1.5rem;
+        }
+        
+        .form-header {
+            padding: 1.5rem;
+        }
+        
+        .form-header h1 {
+            font-size: 1.5rem;
+        }
+        
+        .form-actions {
+            gap: 0.75rem;
+        }
+    }
+</style>
+
+<div class="page-wrapper">
+    <div class="form-card">
+        <div class="form-header">
+            <h1><i class="fas fa-user-plus me-2"></i>Thêm người dùng mới</h1>
+            <p>Điền thông tin chi tiết bên dưới để tạo tài khoản</p>
+        </div>
+
+        <div class="form-body">
+            @if (TempData["SuccessMessage"] != null)
+            {
+                <div class="alert-modern alert-success-modern">
+                    <i class="fas fa-check-circle"></i>
+                    <span>@TempData["SuccessMessage"]</span>
+                </div>
+            }
+
+            @if (TempData["ErrorMessage"] != null)
+            {
+                <div class="alert-modern alert-danger-modern">
+                    <i class="fas fa-exclamation-circle"></i>
+                    <span>@TempData["ErrorMessage"]</span>
+                </div>
+            }
+
+            @if (!ViewData.ModelState.IsValid && ViewData.ModelState.ErrorCount > 0)
+            {
+                <div class="alert-modern alert-danger-modern">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <strong>Vui lòng kiểm tra lại thông tin:</strong>
+                    <ul class="mb-0 mt-2">
+                        @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+                        {
+                            <li>@error.ErrorMessage</li>
+                        }
+                    </ul>
+                </div>
+            }
+
+            <div class="info-box">
+                <i class="fas fa-info-circle me-2"></i>
+                Các trường có dấu <span class="text-danger">*</span> là bắt buộc.<br />
+                <i class="fas fa-key me-2 mt-1"></i>
+                Mật khẩu tạm thời sẽ được tạo ngẫu nhiên và gửi về email. Người dùng bắt buộc đổi mật khẩu sau lần đăng nhập đầu tiên.
+            </div>
+
+            <form asp-action="CreateUser" asp-controller="Admin" method="post" id="createUserForm">
+                @Html.AntiForgeryToken()
+
+                <!-- Họ tên -->
+                <div class="form-group">
+                    <label asp-for="FullName" class="form-label">
+                        <i class="fas fa-user"></i>Họ tên <span class="required">*</span>
+                    </label>
+                    <input asp-for="FullName" class="form-control" placeholder="Nhập họ tên đầy đủ" required />
+                    <span asp-validation-for="FullName" class="text-danger"></span>
+                </div>
+
+                <!-- Email -->
+                <div class="form-group">
+                    <label asp-for="Email" class="form-label">
+                        <i class="fas fa-envelope"></i>Email <span class="required">*</span>
+                    </label>
+                    <input asp-for="Email" class="form-control" type="email" placeholder="example@email.com" required />
+                    <span asp-validation-for="Email" class="text-danger"></span>
+                    <span class="text-muted">Email sẽ được dùng để đăng nhập</span>
+                </div>
+
+                <!-- Số điện thoại -->
+                <div class="form-group">
+                    <label asp-for="Phone" class="form-label">
+                        <i class="fas fa-phone"></i>Số điện thoại
+                    </label>
+                    <input asp-for="Phone" class="form-control" placeholder="Nhập số điện thoại" />
+                    <span asp-validation-for="Phone" class="text-danger"></span>
+                </div>
+
+                <!-- Địa chỉ -->
+                <div class="form-group">
+                    <label asp-for="Address" class="form-label">
+                        <i class="fas fa-map-marker-alt"></i>Địa chỉ
+                    </label>
+                    <input asp-for="Address" class="form-control" placeholder="Nhập địa chỉ" />
+                    <span asp-validation-for="Address" class="text-danger"></span>
+                </div>
+
+                <!-- Vai trò -->
+                <div class="form-group">
+                    <label asp-for="Role" class="form-label">
+                        <i class="fas fa-tag"></i>Vai trò <span class="required">*</span>
+                    </label>
+                    <select asp-for="Role" class="form-select" id="roleSelect" required>
+                        <option value="">-- Chọn vai trò --</option>
+                        @foreach (var role in roles)
+                        {
+                            <option value="@role">@(role == "Admin" ? "🛡️ Quản trị viên" : role == "Employer" ? "🏢 Nhà tuyển dụng" : "🎓 Ứng viên")</option>
+                        }
+                    </select>
+                    <span asp-validation-for="Role" class="text-danger"></span>
+                    <div id="roleDescription" class="role-description" style="display: none;"></div>
+                </div>
+
+                <div class="form-group" id="companyPermissionBox" style="display: none;">
+                    <label class="form-label">
+                        <i class="fas fa-building"></i>Công ty được phép tuyển dụng
+                    </label>
+                    <div class="role-description" style="display: block;">
+                        Tài khoản nhà tuyển dụng chỉ được duyệt hồ sơ, xem CV và tải CV của các công ty được chọn.
+                    </div>
+                    @if (companies.Any())
+                    {
+                        <div class="row mt-3">
+                            @foreach (var company in companies)
+                            {
+                                <div class="col-md-6 mb-2">
+                                    <label class="form-check p-2" style="border: 1px solid rgba(255,255,255,.12); border-radius: 8px;">
+                                        <input class="form-check-input me-2" type="checkbox" name="selectedCompanyIds" value="@company.CompanyId" @(selectedCompanyIds.Contains(company.CompanyId) ? "checked" : "") />
+                                        <span>@company.CompanyName</span>
+                                    </label>
+                                </div>
+                            }
+                        </div>
+                    }
+                    else
+                    {
+                        <span class="text-muted">Chưa có công ty nào để gán.</span>
+                    }
+                </div>
+
+                <!-- Trạng thái -->
+                <div class="form-group">
+                    <div class="form-check">
+                        <input type="checkbox" name="IsActive" value="true" class="form-check-input" id="IsActive" @(Model.IsActive == true ? "checked" : "") />
+                        <label class="form-check-label" for="IsActive">
+                            <i class="fas fa-check-circle me-1"></i>Kích hoạt tài khoản
+                        </label>
+                        <input type="hidden" name="IsActive" value="false" />
+                    </div>
+                    <span class="text-muted">Tài khoản sẽ được phép đăng nhập khi được kích hoạt</span>
+                </div>
+
+                <!-- Nút submit -->
+                <div class="form-actions">
+                    <button type="submit" class="btn-submit" id="submitBtn">
+                        <i class="fas fa-save"></i> Tạo tài khoản
+                    </button>
+                    <a asp-action="ManageUsers" asp-controller="Admin" class="btn-cancel">
+                        <i class="fas fa-arrow-left"></i> Quay lại danh sách
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    
+    <script>
+        // Hiển thị mô tả vai trò khi chọn
+        var roleSelect = document.getElementById('roleSelect');
+        var roleDescription = document.getElementById('roleDescription');
+        
+        var roleDescriptions = {
+            'Candidate': '📝 Ứng viên - Có thể tìm kiếm việc làm, ứng tuyển và theo dõi công ty.',
+            'Employer': '🏢 Nhà tuyển dụng - Có thể đăng tin tuyển dụng, quản lý ứng viên và công ty.',
+            'Admin': '⚙️ Quản trị viên - Có toàn quyền quản lý hệ thống, người dùng và nội dung.'
+        };
+        
+        if (roleSelect) {
+            roleSelect.addEventListener('change', function() {
+                var selectedRole = this.value;
+                if (selectedRole && roleDescriptions[selectedRole]) {
+                    roleDescription.innerHTML = '<i class="fas fa-info-circle me-2"></i>' + roleDescriptions[selectedRole];
+                    roleDescription.style.display = 'block';
+                } else {
+                    roleDescription.style.display = 'none';
+                }
+                toggleCompanyPermissions();
+            });
+        }
+
+        function toggleCompanyPermissions() {
+            var box = document.getElementById('companyPermissionBox');
+            if (!box || !roleSelect) return;
+            box.style.display = roleSelect.value === 'Employer' ? 'block' : 'none';
+        }
+
+        toggleCompanyPermissions();
+
+        // XỬ LÝ SUBMIT
+        document.addEventListener('DOMContentLoaded', function() {
+            var form = document.getElementById('createUserForm');
+            var submitBtn = document.getElementById('submitBtn');
+            var originalText = submitBtn ? submitBtn.innerHTML : '';
+            
+            if (form && submitBtn) {
+                form.addEventListener('submit', function(e) {
+                    // Kiểm tra form có hợp lệ không
+                    if (form.checkValidity()) {
+                        submitBtn.disabled = true;
+                        submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span> Đang xử lý...';
+                        return true;
+                    } else {
+                        e.preventDefault();
+                        alert('⚠️ Vui lòng điền đầy đủ thông tin bắt buộc!');
+                        return false;
+                    }
+                });
+            }
+            
+            // Khôi phục nút nếu có lỗi từ server
+            if (document.querySelector('.alert-danger-modern') || document.querySelector('.text-danger')) {
+                if (submitBtn) {
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = originalText;
+                }
+            }
+        });
+    </script>
+}

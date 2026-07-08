@@ -1,0 +1,541 @@
+﻿@model List<BTL_2.Models.ViewModels.SavedJobsViewModel>
+
+@{
+    ViewData["Title"] = "Việc đã lưu";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+    .page-wrapper {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 2rem;
+    }
+
+    .page-header {
+        margin-bottom: 2rem;
+    }
+
+    .page-header h1 {
+        font-size: 1.75rem;
+        font-weight: 700;
+        color: #1e293b;
+        margin-bottom: 0.5rem;
+    }
+
+    .page-header p {
+        color: #64748b;
+    }
+
+    /* Stats Card */
+    .stats-card {
+        background: #ffffff;
+        border-radius: 1rem;
+        padding: 1rem 1.5rem;
+        margin-bottom: 2rem;
+        border: 1px solid #e2e8f0;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+
+    .stats-info {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .stats-info i {
+        font-size: 2rem;
+        color: #f59e0b;
+    }
+
+    .stats-info h3 {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: #0f172a;
+        margin: 0;
+    }
+
+    .stats-info span {
+        color: #64748b;
+    }
+
+    .btn-outline {
+        background: #f1f5f9;
+        border: 1px solid #e2e8f0;
+        padding: 0.5rem 1rem;
+        border-radius: 0.75rem;
+        color: #334155;
+        text-decoration: none;
+        transition: all 0.2s;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .btn-outline:hover {
+        background: #6366f1;
+        border-color: #6366f1;
+        color: white;
+    }
+
+    /* Jobs Grid */
+    .jobs-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+        gap: 1.5rem;
+    }
+
+    .job-card {
+        background: #ffffff;
+        border-radius: 1rem;
+        border: 1px solid #e2e8f0;
+        transition: all 0.2s;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .job-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+    }
+
+    .card-header {
+        padding: 1rem 1.25rem;
+        border-bottom: 1px solid #e2e8f0;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    .company-info {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        flex: 1;
+    }
+
+    .company-logo {
+        width: 48px;
+        height: 48px;
+        border-radius: 0.75rem;
+        object-fit: cover;
+        border: 1px solid #e2e8f0;
+        background: #f8fafc;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .company-logo i {
+        font-size: 1.25rem;
+        color: #94a3b8;
+    }
+
+    .company-details {
+        flex: 1;
+    }
+
+    .company-name {
+        font-weight: 600;
+        color: #0f172a;
+        margin-bottom: 0.25rem;
+    }
+
+    .saved-date {
+        font-size: 0.7rem;
+        color: #94a3b8;
+        display: flex;
+        align-items: center;
+        gap: 0.25rem;
+    }
+
+    .btn-icon {
+        width: 32px;
+        height: 32px;
+        border-radius: 0.5rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: #f1f5f9;
+        border: 1px solid #e2e8f0;
+        color: #64748b;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+
+    .btn-icon:hover {
+        background: #fee2e2;
+        border-color: #ef4444;
+        color: #ef4444;
+    }
+
+    .card-body {
+        padding: 1rem 1.25rem;
+        flex: 1;
+    }
+
+    .job-title {
+        font-size: 1rem;
+        font-weight: 600;
+        color: #0f172a;
+        margin-bottom: 0.75rem;
+        line-height: 1.4;
+    }
+
+    .job-details {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+        margin-bottom: 1rem;
+    }
+
+    .job-detail-item {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        color: #475569;
+        font-size: 0.8rem;
+    }
+
+    .job-detail-item i {
+        width: 18px;
+        color: #6366f1;
+    }
+
+    .salary {
+        color: #16a34a;
+        font-weight: 600;
+    }
+
+    .job-type-badge {
+        display: inline-block;
+        padding: 0.2rem 0.6rem;
+        background: #eef2ff;
+        border-radius: 20px;
+        font-size: 0.7rem;
+        color: #4f46e5;
+    }
+
+    .deadline {
+        font-size: 0.7rem;
+        color: #ef4444;
+    }
+
+    .card-footer {
+        padding: 0.75rem 1.25rem 1.25rem;
+        border-top: none;
+        display: flex;
+        gap: 0.75rem;
+    }
+
+    .btn-view {
+        flex: 1;
+        padding: 0.6rem;
+        border-radius: 0.75rem;
+        font-weight: 500;
+        font-size: 0.8rem;
+        text-align: center;
+        text-decoration: none;
+        transition: all 0.2s;
+        background: #f1f5f9;
+        border: 1px solid #e2e8f0;
+        color: #334155;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+    }
+
+    .btn-view:hover {
+        background: #6366f1;
+        border-color: #6366f1;
+        color: white;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 4rem;
+        background: #ffffff;
+        border-radius: 1rem;
+        border: 1px solid #e2e8f0;
+    }
+
+    .empty-state i {
+        font-size: 4rem;
+        color: #cbd5e1;
+        margin-bottom: 1rem;
+    }
+
+    .empty-state h3 {
+        color: #1e293b;
+        margin-bottom: 0.5rem;
+    }
+
+    .empty-state p {
+        color: #64748b;
+        margin-bottom: 1.5rem;
+    }
+
+    .empty-state .btn-primary {
+        background: linear-gradient(135deg, #6366f1, #4f46e5);
+        color: white;
+        padding: 0.75rem 1.5rem;
+        border-radius: 0.75rem;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .empty-state .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+    }
+
+    .notification {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        z-index: 9999;
+        min-width: 300px;
+        padding: 12px 20px;
+        border-radius: 0.75rem;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        animation: slideIn 0.3s ease;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+
+    .notification-success {
+        background: #22c55e;
+        color: white;
+    }
+
+    .notification i {
+        font-size: 1.1rem;
+    }
+
+    .notification .close-btn {
+        background: none;
+        border: none;
+        color: white;
+        cursor: pointer;
+        margin-left: auto;
+        font-size: 1.2rem;
+    }
+
+    @@keyframes slideIn {
+        from {
+            opacity: 0;
+            transform: translateX(100px);
+        }
+        to {
+            opacity: 1;
+            transform: translateX(0);
+        }
+    }
+
+    @@media (max-width: 768px) {
+        .page-wrapper {
+            padding: 1rem;
+        }
+        
+        .jobs-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .stats-card {
+            flex-direction: column;
+            text-align: center;
+        }
+        
+        .card-header {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 0.75rem;
+        }
+        
+        .btn-icon {
+            align-self: flex-end;
+        }
+        
+        .card-footer {
+            flex-direction: column;
+        }
+    }
+</style>
+
+<div class="page-wrapper">
+    <div class="page-header">
+        <h1><i class="fas fa-bookmark me-2"></i>Việc đã lưu</h1>
+        <p>Danh sách các tin tuyển dụng bạn đã lưu để xem sau</p>
+    </div>
+
+    @if (Model.Any())
+    {
+        <div class="stats-card">
+            <div class="stats-info">
+                <i class="fas fa-bookmark"></i>
+                <div>
+                    <h3>@Model.Count</h3>
+                    <span>việc làm đã lưu</span>
+                </div>
+            </div>
+            <a href="@Url.Action("Index", "Jobs")" class="btn-outline">
+                <i class="fas fa-search"></i> Tìm thêm việc làm
+            </a>
+        </div>
+
+        <div class="jobs-grid">
+            @foreach (var job in Model)
+            {
+                <div class="job-card" data-job-id="@job.JobId">
+                    <div class="card-header">
+                        <div class="company-info">
+                            @if (!string.IsNullOrEmpty(job.CompanyLogo))
+                            {
+                                <img src="@job.CompanyLogo" class="company-logo" alt="Logo">
+                            }
+                            else
+                            {
+                                <div class="company-logo">
+                                    <i class="fas fa-building"></i>
+                                </div>
+                            }
+                            <div class="company-details">
+                                <div class="company-name">@job.CompanyName</div>
+                                <div class="saved-date">
+                                    <i class="far fa-calendar-alt"></i>
+                                    <span>Lưu ngày @job.SavedDate.ToString("dd/MM/yyyy")</span>
+                                </div>
+                            </div>
+                        </div>
+                        <button class="btn-icon" onclick="unsaveJob(@job.JobId, this)" title="Bỏ lưu">
+                            <i class="fas fa-trash-alt"></i>
+                        </button>
+                    </div>
+
+                    <div class="card-body">
+                        <h3 class="job-title">@job.JobTitle</h3>
+                        <div class="job-details">
+                            <div class="job-detail-item">
+                                <i class="fas fa-map-marker-alt"></i>
+                                <span>@job.Location</span>
+                            </div>
+                            <div class="job-detail-item">
+                                <i class="fas fa-dollar-sign"></i>
+                                @if (job.SalaryMin.HasValue && job.SalaryMax.HasValue)
+                                {
+                                    <span class="salary">@job.SalaryMin.Value.ToString("N0") - @job.SalaryMax.Value.ToString("N0") VNĐ</span>
+                                }
+                                else
+                                {
+                                    <span>Thương lượng</span>
+                                }
+                            </div>
+                            <div class="job-detail-item">
+                                <i class="fas fa-clock"></i>
+                                <span class="job-type-badge">@job.JobType</span>
+                            </div>
+                            @if (job.Deadline.HasValue)
+                            {
+                                <div class="job-detail-item">
+                                    <i class="fas fa-hourglass-end"></i>
+                                    <span class="deadline">Hạn nộp: @job.Deadline.Value.ToString("dd/MM/yyyy")</span>
+                                </div>
+                            }
+                        </div>
+                    </div>
+
+                    <div class="card-footer">
+                        <a href="@Url.Action("Details", "Jobs", new { id = job.JobId })" class="btn-view">
+                            <i class="fas fa-eye"></i> Xem chi tiết
+                        </a>
+                        <a href="@Url.Action("Apply", "Jobs", new { id = job.JobId })" class="btn-view">
+                            <i class="fas fa-paper-plane"></i> Ứng tuyển ngay
+                        </a>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+    else
+    {
+        <div class="empty-state">
+            <i class="fas fa-bookmark"></i>
+            <h3>Chưa có việc làm nào được lưu</h3>
+            <p>Hãy lưu những tin tuyển dụng bạn quan tâm để xem lại sau</p>
+            <a href="@Url.Action("Index", "Jobs")" class="btn-primary">
+                <i class="fas fa-search"></i> Tìm việc ngay
+            </a>
+        </div>
+    }
+</div>
+
+<form id="__AjaxAntiForgeryForm" style="display:none">
+    @Html.AntiForgeryToken()
+</form>
+
+@section Scripts {
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    
+    <script>
+        function getToken() {
+            return $('#__AjaxAntiForgeryForm input[name="__RequestVerificationToken"]').val();
+        }
+
+        function unsaveJob(jobId, button) {
+            if (!confirm('Bạn có chắc muốn bỏ lưu tin tuyển dụng này?')) return;
+
+            $.ajax({
+                url: '@Url.Action("SaveJob", "Jobs")',
+                type: 'POST',
+                data: {
+                    jobId: jobId,
+                    __RequestVerificationToken: getToken()
+                },
+                success: function(response) {
+                    if (response.success && !response.saved) {
+                        showNotification('✅ Đã bỏ lưu tin tuyển dụng', 'success');
+                        $(button).closest('.job-card').fadeOut(300, function() {
+                            $(this).remove();
+                            if ($('.job-card').length === 0) {
+                                location.reload();
+                            }
+                        });
+                    } else {
+                        showNotification(response.message || 'Có lỗi xảy ra', 'danger');
+                    }
+                },
+                error: function(xhr) {
+                    console.error(xhr.responseText);
+                    showNotification('Lỗi kết nối server', 'danger');
+                }
+            });
+        }
+
+        function showNotification(message, type) {
+            var bgColor = type === 'success' ? '#22c55e' : '#ef4444';
+            var icon = type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle';
+            
+            var notification = $(`
+                <div class="notification notification-${type}" style="background: ${bgColor}">
+                    <i class="fas ${icon}"></i>
+                    <span>${message}</span>
+                    <button class="close-btn" onclick="$(this).parent().remove()">&times;</button>
+                </div>
+            `);
+            
+            $('body').append(notification);
+            setTimeout(function() {
+                notification.fadeOut(500, function() { $(this).remove(); });
+            }, 3000);
+        }
+    </script>
+}

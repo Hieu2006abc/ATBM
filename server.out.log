@@ -1,0 +1,13 @@
+Đang khởi tạo database...
+❌ Database initialization error: Failed to generate SSPI context.
+Khởi tạo database không thành công. Vui lòng kiểm tra SQL Server/connection string.
+Đang kiểm tra file avatar mặc định...
+File default-avatar.png đã tồn tại
+info: Microsoft.Hosting.Lifetime[14]
+      Now listening on: http://localhost:5107
+info: Microsoft.Hosting.Lifetime[0]
+      Application started. Press Ctrl+C to shut down.
+info: Microsoft.Hosting.Lifetime[0]
+      Hosting environment: Production
+info: Microsoft.Hosting.Lifetime[0]
+      Content root path: C:\C#_BaiTap_LyThuyet\ASP_NET\BTL_2\BTL_2

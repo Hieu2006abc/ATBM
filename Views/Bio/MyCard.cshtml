@@ -1,0 +1,25 @@
+﻿@{
+    ViewData["Title"] = "Danh thiếp số";
+    int tuoi = DateTime.Now.Year - ViewBag.NamSinh;
+}
+
+<div class="card">
+    <div class="card-header">
+        DANH THIẾP SỐ
+    </div>
+
+    <div class="card-body">
+        <div class="avatar-box">
+            <img src="@ViewBag.image" alt="Ảnh cá nhân" style="width:150px; height:150px; border-radius:50%; object-fit:cover;" />
+        </div>
+
+        <div class="info mt-3">
+            <p><b>Họ tên:</b> @ViewBag.HoTen</p>
+            <p><b>ID Card:</b> @ViewBag.IdCard</p>
+            <p><b>Nghề nghiệp:</b> @ViewBag.NgheNghiep</p>
+            <p><b>Chuyên ngành:</b> @ViewBag.ChuyenNganh</p>
+            <p><b>Năm sinh:</b> @ViewBag.NamSinh</p>
+            <p><b>Tuổi:</b> @tuoi</p>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,1582 @@
+﻿@{
+    ViewData["Title"] = "Trang chủ";
+    var featuredJobs = ViewBag.FeaturedJobs as List<BTL_2.Models.Job> ?? new List<BTL_2.Models.Job>();
+    var latestJobs = ViewBag.LatestJobs as List<BTL_2.Models.Job> ?? new List<BTL_2.Models.Job>();
+    var featuredCompanies = ViewBag.FeaturedCompanies as List<BTL_2.Models.Company> ?? new List<BTL_2.Models.Company>();
+    var announcements = ViewBag.Announcements as List<BTL_2.Models.Announcement> ?? new List<BTL_2.Models.Announcement>();
+
+    var locations = ViewBag.Locations as List<string> ?? new List<string> {
+        "Hà Nội", "Hồ Chí Minh", "Đà Nẵng", "Hải Phòng", "Cần Thơ", "Remote"
+    };
+
+    var jobTitles = ViewBag.JobTitles as List<string> ?? new List<string> {
+        ".NET Developer", "Java Developer", "Frontend Developer", "Backend Developer",
+        "Fullstack Developer", "Mobile Developer", "DevOps Engineer", "Data Scientist",
+        "QA Tester", "Business Analyst", "Project Manager", "Product Manager",
+        "UI/UX Designer", "Marketing Executive", "Sales Executive", "HR Manager"
+    };
+
+    var displayJobs = featuredJobs.Any() ? featuredJobs : latestJobs;
+    var quickTags = new[] { "Frontend", "Marketing", "Kế toán", "Thực tập sinh", "Remote" };
+    var totalJobs = Math.Max(featuredJobs.Count + latestJobs.Count, 1280);
+    var totalCompanies = Math.Max(featuredCompanies.Count, 320);
+}
+
+<style>
+    :root {
+        --jp-primary: #2563eb;
+        --jp-primary-soft: #60a5fa;
+        --jp-sky: #7dd3fc;
+        --jp-ice: #eef6ff;
+        --jp-page: #f5f9ff;
+        --jp-white: #ffffff;
+        --jp-title: #142033;
+        --jp-muted: #64748b;
+        --jp-border: #e3ebf6;
+        --jp-shadow: 0 18px 50px rgba(37, 99, 235, 0.12);
+        --jp-shadow-hover: 0 24px 60px rgba(37, 99, 235, 0.18);
+        --jp-radius: 18px;
+        --jp-transition: all 0.22s ease;
+    }
+
+    body {
+        background: var(--jp-page);
+    }
+
+    main.py-4 {
+        padding-top: 0 !important;
+        padding-bottom: 0 !important;
+    }
+
+    .home-shell {
+        color: var(--jp-title);
+        background:
+            linear-gradient(180deg, #f5f9ff 0%, #ffffff 34%, #f5f9ff 100%);
+    }
+
+    .home-section {
+        padding: 72px 0;
+    }
+
+    .section-kicker {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px 12px;
+        border-radius: 999px;
+        background: #eaf4ff;
+        color: var(--jp-primary);
+        font-size: 0.85rem;
+        font-weight: 700;
+        margin-bottom: 12px;
+    }
+
+    .section-heading {
+        display: flex;
+        justify-content: space-between;
+        align-items: end;
+        gap: 24px;
+        margin-bottom: 28px;
+    }
+
+    .section-heading h2 {
+        color: var(--jp-title);
+        font-size: clamp(1.7rem, 2.4vw, 2.35rem);
+        font-weight: 800;
+        margin: 0 0 8px;
+        letter-spacing: 0;
+    }
+
+    .section-heading p {
+        color: var(--jp-muted);
+        margin: 0;
+        max-width: 620px;
+        line-height: 1.65;
+    }
+
+    .link-arrow {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        color: var(--jp-primary);
+        font-weight: 700;
+        text-decoration: none;
+        white-space: nowrap;
+    }
+
+    .link-arrow:hover {
+        color: #1d4ed8;
+    }
+
+    .hero-section {
+        position: relative;
+        overflow: hidden;
+        padding: 92px 0 82px;
+        background:
+            radial-gradient(circle at 88% 18%, rgba(125, 211, 252, 0.46), transparent 28%),
+            linear-gradient(135deg, #eef6ff 0%, #dff2ff 48%, #ffffff 100%);
+        border-bottom: 1px solid var(--jp-border);
+    }
+
+    .snow-layer {
+        position: absolute;
+        inset: 0;
+        pointer-events: none;
+        overflow: hidden;
+        z-index: 1;
+    }
+
+    .snowflake {
+        position: absolute;
+        top: -12px;
+        width: var(--size);
+        height: var(--size);
+        left: var(--left);
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.92);
+        box-shadow: 0 0 12px rgba(96, 165, 250, 0.26);
+        opacity: var(--opacity);
+        animation: snowFall var(--duration) linear infinite;
+        animation-delay: var(--delay);
+    }
+
+    @@keyframes snowFall {
+        0% {
+            transform: translate3d(0, -16px, 0);
+        }
+        100% {
+            transform: translate3d(var(--drift), 620px, 0);
+        }
+    }
+
+    .hero-section::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background:
+            linear-gradient(90deg, rgba(255,255,255,0.66), rgba(255,255,255,0.12)),
+            repeating-linear-gradient(135deg, rgba(37, 99, 235, 0.035) 0 1px, transparent 1px 20px);
+        pointer-events: none;
+    }
+
+    .hero-content {
+        position: relative;
+        z-index: 2;
+    }
+
+    .hero-eyebrow {
+        display: inline-flex;
+        align-items: center;
+        gap: 9px;
+        padding: 9px 14px;
+        border: 1px solid rgba(96, 165, 250, 0.34);
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.72);
+        color: var(--jp-primary);
+        font-size: 0.88rem;
+        font-weight: 700;
+        box-shadow: 0 12px 34px rgba(96, 165, 250, 0.14);
+        backdrop-filter: blur(12px);
+    }
+
+    .hero-title {
+        margin: 22px 0 16px;
+        color: var(--jp-title);
+        font-size: clamp(2.35rem, 5vw, 4.6rem);
+        line-height: 1.05;
+        font-weight: 850;
+        letter-spacing: 0;
+    }
+
+    .hero-subtitle {
+        color: var(--jp-muted);
+        font-size: 1.08rem;
+        line-height: 1.75;
+        max-width: 650px;
+        margin-bottom: 28px;
+    }
+
+    .search-panel {
+        padding: 10px;
+        background: rgba(255, 255, 255, 0.86);
+        border: 1px solid rgba(227, 235, 246, 0.92);
+        border-radius: 22px;
+        box-shadow: 0 26px 70px rgba(37, 99, 235, 0.16);
+        backdrop-filter: blur(16px);
+    }
+
+    .search-grid {
+        display: grid;
+        grid-template-columns: minmax(0, 1.8fr) minmax(180px, 0.9fr) auto;
+        gap: 10px;
+        align-items: stretch;
+    }
+
+    .search-field {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        min-height: 64px;
+        padding: 12px 16px;
+        background: #f8fbff;
+        border: 1px solid var(--jp-border);
+        border-radius: 16px;
+        transition: var(--jp-transition);
+    }
+
+    .search-field:focus-within {
+        border-color: var(--jp-primary-soft);
+        box-shadow: 0 0 0 4px rgba(96, 165, 250, 0.15);
+        background: #ffffff;
+    }
+
+    .search-field svg {
+        color: var(--jp-primary);
+        flex: 0 0 auto;
+    }
+
+    .search-field input,
+    .search-field select {
+        width: 100%;
+        border: 0;
+        outline: 0;
+        background: transparent;
+        color: var(--jp-title);
+        font-size: 0.98rem;
+        font-weight: 600;
+    }
+
+    .search-field input::placeholder {
+        color: #94a3b8;
+        font-weight: 500;
+    }
+
+    .search-btn {
+        min-height: 64px;
+        padding: 0 26px;
+        border: 0;
+        border-radius: 16px;
+        background: linear-gradient(135deg, var(--jp-primary), #1d4ed8);
+        color: #ffffff;
+        font-weight: 800;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        box-shadow: 0 16px 34px rgba(37, 99, 235, 0.24);
+        transition: var(--jp-transition);
+        white-space: nowrap;
+    }
+
+    .search-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 20px 42px rgba(37, 99, 235, 0.3);
+    }
+
+    .quick-tags {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 10px;
+        margin-top: 18px;
+        color: var(--jp-muted);
+        font-size: 0.92rem;
+    }
+
+    .quick-tags a {
+        padding: 8px 13px;
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.72);
+        border: 1px solid rgba(227, 235, 246, 0.92);
+        color: var(--jp-primary);
+        text-decoration: none;
+        font-weight: 700;
+        transition: var(--jp-transition);
+    }
+
+    .quick-tags a:hover {
+        background: #ffffff;
+        transform: translateY(-2px);
+        box-shadow: 0 12px 26px rgba(37, 99, 235, 0.12);
+    }
+
+    .trust-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 14px;
+        margin-top: 20px;
+        color: #52647a;
+        font-weight: 800;
+        font-size: 0.93rem;
+    }
+
+    .trust-row span {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .trust-row svg {
+        color: var(--jp-primary);
+    }
+
+    .hero-visual {
+        position: relative;
+        min-height: 530px;
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+    }
+
+    .hero-photo-wrap {
+        position: relative;
+        inset: auto;
+        width: min(560px, 100%);
+        height: 530px;
+        border-radius: 30px;
+        overflow: hidden;
+        border: 10px solid rgba(255, 255, 255, 0.76);
+        box-shadow: 0 34px 90px rgba(20, 32, 51, 0.18);
+        background: #ffffff;
+    }
+
+    .hero-photo-wrap img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        filter: saturate(1.02) contrast(0.98);
+    }
+
+    .hero-photo-wrap::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(180deg, rgba(255,255,255,0.05), rgba(37,99,235,0.16));
+    }
+
+    .floating-card {
+        position: absolute;
+        z-index: 2;
+        background: rgba(255, 255, 255, 0.9);
+        border: 1px solid rgba(227, 235, 246, 0.95);
+        border-radius: 18px;
+        box-shadow: var(--jp-shadow);
+        backdrop-filter: blur(16px);
+    }
+
+    .suggest-head {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 12px;
+    }
+
+    .company-mark {
+        width: 44px;
+        height: 44px;
+        border-radius: 14px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(135deg, #eef6ff, #dbeafe);
+        color: var(--jp-primary);
+        font-weight: 850;
+        border: 1px solid var(--jp-border);
+        flex: 0 0 auto;
+    }
+
+    .stat-card span {
+        color: var(--jp-muted);
+        font-size: 0.84rem;
+    }
+
+    .suggest-meta {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+    }
+
+    .mini-pill {
+        padding: 6px 10px;
+        border-radius: 999px;
+        background: #eef6ff;
+        color: var(--jp-primary);
+        font-size: 0.78rem;
+        font-weight: 700;
+    }
+
+    .stat-card {
+        right: 0;
+        bottom: 26px;
+        width: min(390px, calc(100% - 20px));
+        padding: 16px;
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 10px;
+    }
+
+    .stat-card strong {
+        display: block;
+        color: var(--jp-title);
+        font-size: 1.25rem;
+        font-weight: 850;
+    }
+
+    .stat-card div {
+        padding: 12px;
+        border-radius: 14px;
+        background: #f8fbff;
+        border: 1px solid var(--jp-border);
+    }
+
+    .category-grid {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 18px;
+    }
+
+    .why-grid {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 18px;
+    }
+
+    .why-card {
+        min-height: 190px;
+        padding: 24px;
+        border: 1px solid var(--jp-border);
+        border-radius: 22px;
+        background: rgba(255, 255, 255, 0.94);
+        box-shadow: 0 18px 48px rgba(37, 99, 235, 0.08);
+        transition: var(--jp-transition);
+    }
+
+    .why-card:hover {
+        transform: translateY(-5px);
+        border-color: rgba(96, 165, 250, 0.55);
+        box-shadow: var(--jp-shadow-hover);
+    }
+
+    .why-card h3 {
+        margin: 15px 0 8px;
+        color: var(--jp-title);
+        font-size: 1.03rem;
+        font-weight: 900;
+    }
+
+    .why-card p {
+        margin: 0;
+        color: var(--jp-muted);
+        line-height: 1.65;
+        font-size: 0.92rem;
+    }
+
+    .career-band {
+        display: grid;
+        grid-template-columns: 1.05fr 0.95fr;
+        gap: 34px;
+        align-items: center;
+        padding: 44px;
+        border: 1px solid #dcecff;
+        border-radius: 30px;
+        background:
+            radial-gradient(circle at 90% 12%, rgba(125, 211, 252, 0.24), transparent 30%),
+            linear-gradient(135deg, #ffffff 0%, #eef6ff 100%);
+        box-shadow: 0 24px 70px rgba(37, 99, 235, 0.12);
+    }
+
+    .career-band h2 {
+        margin: 12px 0 16px;
+        color: var(--jp-title);
+        font-size: clamp(1.9rem, 3.2vw, 3rem);
+        line-height: 1.18;
+        font-weight: 900;
+        letter-spacing: 0;
+    }
+
+    .career-band p {
+        margin: 0 0 24px;
+        color: var(--jp-muted);
+        line-height: 1.75;
+        max-width: 620px;
+    }
+
+    .career-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+    }
+
+    .career-stats {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 16px;
+    }
+
+    .career-stat {
+        min-height: 118px;
+        display: grid;
+        place-items: center;
+        text-align: center;
+        padding: 20px;
+        border: 1px solid #dcecff;
+        border-radius: 18px;
+        background: rgba(255, 255, 255, 0.62);
+    }
+
+    .career-stat strong {
+        display: block;
+        color: var(--jp-primary);
+        font-size: 1.55rem;
+        font-weight: 900;
+    }
+
+    .career-stat span {
+        display: block;
+        margin-top: 6px;
+        color: #53657e;
+        font-weight: 850;
+        line-height: 1.35;
+    }
+
+    .category-card,
+    .job-card,
+    .company-card,
+    .news-card {
+        background: var(--jp-white);
+        border: 1px solid var(--jp-border);
+        border-radius: var(--jp-radius);
+        box-shadow: 0 12px 34px rgba(37, 99, 235, 0.07);
+        transition: var(--jp-transition);
+    }
+
+    .category-card:hover,
+    .job-card:hover,
+    .company-card:hover,
+    .news-card:hover {
+        transform: translateY(-6px);
+        box-shadow: var(--jp-shadow-hover);
+        border-color: rgba(96, 165, 250, 0.55);
+    }
+
+    .category-card {
+        padding: 22px;
+        text-decoration: none;
+        color: inherit;
+        display: block;
+    }
+
+    .category-icon {
+        width: 52px;
+        height: 52px;
+        border-radius: 16px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        background: #eef6ff;
+        color: var(--jp-primary);
+        margin-bottom: 18px;
+    }
+
+    .category-card h3 {
+        font-size: 1rem;
+        font-weight: 800;
+        margin: 0 0 8px;
+        color: var(--jp-title);
+    }
+
+    .category-card p {
+        margin: 0;
+        color: var(--jp-muted);
+        font-size: 0.9rem;
+    }
+
+    .jobs-grid,
+    .companies-grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 18px;
+    }
+
+    .job-card {
+        padding: 20px;
+        height: 100%;
+    }
+
+    .job-company-row,
+    .company-row {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 16px;
+    }
+
+    .company-logo-img {
+        width: 52px;
+        height: 52px;
+        object-fit: cover;
+        border-radius: 15px;
+        border: 1px solid var(--jp-border);
+        background: #ffffff;
+        flex: 0 0 auto;
+    }
+
+    .verified {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        color: #0f8f5f;
+        font-size: 0.78rem;
+        font-weight: 700;
+    }
+
+    .company-name {
+        display: block;
+        color: var(--jp-muted);
+        font-size: 0.88rem;
+        font-weight: 600;
+    }
+
+    .job-title {
+        display: block;
+        min-height: 56px;
+        color: var(--jp-title);
+        text-decoration: none;
+        font-size: 1.08rem;
+        font-weight: 850;
+        line-height: 1.45;
+        margin-bottom: 14px;
+    }
+
+    .job-title:hover {
+        color: var(--jp-primary);
+    }
+
+    .job-meta {
+        display: grid;
+        gap: 10px;
+        color: var(--jp-muted);
+        font-size: 0.9rem;
+        margin-bottom: 16px;
+    }
+
+    .job-meta span {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .salary {
+        color: var(--jp-primary);
+        font-weight: 800;
+    }
+
+    .tag-list {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-bottom: 18px;
+    }
+
+    .tag {
+        padding: 6px 10px;
+        border-radius: 999px;
+        background: #f5f9ff;
+        color: #35618d;
+        border: 1px solid var(--jp-border);
+        font-size: 0.78rem;
+        font-weight: 700;
+    }
+
+    .job-footer {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 12px;
+        padding-top: 14px;
+        border-top: 1px solid var(--jp-border);
+    }
+
+    .deadline {
+        color: var(--jp-muted);
+        font-size: 0.84rem;
+    }
+
+    .detail-btn {
+        padding: 9px 12px;
+        border-radius: 12px;
+        background: #eef6ff;
+        color: var(--jp-primary);
+        text-decoration: none;
+        font-weight: 800;
+        font-size: 0.86rem;
+        transition: var(--jp-transition);
+    }
+
+    .detail-btn:hover {
+        background: var(--jp-primary);
+        color: #ffffff;
+    }
+
+    .empty-state {
+        grid-column: 1 / -1;
+        padding: 48px;
+        text-align: center;
+        color: var(--jp-muted);
+        background: #ffffff;
+        border: 1px dashed var(--jp-border);
+        border-radius: var(--jp-radius);
+    }
+
+    .companies-section {
+        background: linear-gradient(180deg, #ffffff 0%, #eef6ff 100%);
+        border-top: 1px solid var(--jp-border);
+        border-bottom: 1px solid var(--jp-border);
+    }
+
+    .company-card {
+        padding: 22px;
+    }
+
+    .company-card h3 {
+        color: var(--jp-title);
+        font-size: 1.05rem;
+        font-weight: 850;
+        margin: 0 0 4px;
+    }
+
+    .company-card p {
+        color: var(--jp-muted);
+        margin-bottom: 14px;
+        line-height: 1.55;
+        min-height: 44px;
+    }
+
+    .company-meta {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-bottom: 16px;
+    }
+
+    .company-status {
+        padding: 7px 10px;
+        border-radius: 999px;
+        background: #eef6ff;
+        color: var(--jp-primary);
+        font-size: 0.78rem;
+        font-weight: 800;
+    }
+
+    .company-footer {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding-top: 14px;
+        border-top: 1px solid var(--jp-border);
+        color: var(--jp-muted);
+        font-size: 0.88rem;
+        font-weight: 700;
+    }
+
+    .news-layout {
+        display: grid;
+        grid-template-columns: 1.2fr 1fr;
+        gap: 18px;
+    }
+
+    .news-side {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 18px;
+    }
+
+    .news-card {
+        overflow: hidden;
+        text-decoration: none;
+        color: inherit;
+        display: block;
+        height: 100%;
+    }
+
+    .news-card.featured {
+        min-height: 100%;
+    }
+
+    .news-image {
+        height: 185px;
+        position: relative;
+        overflow: hidden;
+        background: #eef6ff;
+    }
+
+    .news-card.featured .news-image {
+        height: 320px;
+    }
+
+    .news-image img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.35s ease;
+    }
+
+    .news-card:hover .news-image img {
+        transform: scale(1.04);
+    }
+
+    .news-label {
+        position: absolute;
+        left: 14px;
+        top: 14px;
+        padding: 7px 10px;
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.9);
+        color: var(--jp-primary);
+        font-size: 0.78rem;
+        font-weight: 850;
+        backdrop-filter: blur(12px);
+    }
+
+    .news-body {
+        padding: 18px;
+    }
+
+    .news-body h3 {
+        color: var(--jp-title);
+        font-size: 1.03rem;
+        font-weight: 850;
+        line-height: 1.45;
+        margin-bottom: 8px;
+    }
+
+    .news-card.featured .news-body h3 {
+        font-size: 1.45rem;
+    }
+
+    .news-body p {
+        color: var(--jp-muted);
+        line-height: 1.6;
+        margin: 0;
+    }
+
+    .alert-home {
+        position: relative;
+        z-index: 2;
+        margin-bottom: 18px;
+        border-radius: 16px;
+        border: 1px solid var(--jp-border);
+        box-shadow: 0 12px 26px rgba(37, 99, 235, 0.08);
+    }
+
+    body.dark-mode .home-shell {
+        color: #9fb0c8;
+        background:
+            radial-gradient(circle at 82% 4%, rgba(96, 165, 250, 0.12), transparent 34%),
+            linear-gradient(180deg, #0b1220 0%, #0f172a 48%, #111827 100%);
+    }
+
+    body.dark-mode .hero-section {
+        background:
+            radial-gradient(circle at 88% 12%, rgba(96, 165, 250, 0.20), transparent 30%),
+            linear-gradient(135deg, #0b1220 0%, #0f172a 52%, #111827 100%);
+        border-color: rgba(147, 197, 253, 0.16);
+    }
+
+    body.dark-mode .hero-section::before {
+        background:
+            linear-gradient(90deg, rgba(11, 18, 32, 0.72), rgba(15, 23, 42, 0.20)),
+            linear-gradient(rgba(96, 165, 250, 0.045) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(96, 165, 250, 0.045) 1px, transparent 1px);
+        background-size: auto, 72px 72px, 72px 72px;
+    }
+
+    body.dark-mode .hero-eyebrow,
+    body.dark-mode .section-kicker,
+    body.dark-mode .quick-tags a,
+    body.dark-mode .mini-pill,
+    body.dark-mode .tag,
+    body.dark-mode .company-status {
+        color: #bfdbfe;
+        background: rgba(96, 165, 250, 0.13);
+        border-color: rgba(147, 197, 253, 0.18);
+    }
+
+    body.dark-mode .hero-title,
+    body.dark-mode .section-heading h2,
+    body.dark-mode .category-card h3,
+    body.dark-mode .job-title,
+    body.dark-mode .company-card h3,
+    body.dark-mode .news-body h3,
+    body.dark-mode .why-card h3,
+    body.dark-mode .career-band h2,
+    body.dark-mode .stat-card strong {
+        color: #eaf2ff;
+    }
+
+    body.dark-mode .hero-subtitle,
+    body.dark-mode .section-heading p,
+    body.dark-mode .category-card p,
+    body.dark-mode .job-meta,
+    body.dark-mode .company-name,
+    body.dark-mode .company-card p,
+    body.dark-mode .company-footer,
+    body.dark-mode .news-body p,
+    body.dark-mode .why-card p,
+    body.dark-mode .career-band p,
+    body.dark-mode .trust-row,
+    body.dark-mode .deadline {
+        color: #9fb0c8;
+    }
+
+    body.dark-mode .search-panel,
+    body.dark-mode .search-field,
+    body.dark-mode .hero-photo-wrap,
+    body.dark-mode .floating-card,
+    body.dark-mode .category-card,
+    body.dark-mode .job-card,
+    body.dark-mode .company-card,
+    body.dark-mode .news-card,
+    body.dark-mode .why-card,
+    body.dark-mode .career-band,
+    body.dark-mode .career-stat,
+    body.dark-mode .stat-card div,
+    body.dark-mode .side-card {
+        color: #9fb0c8;
+        background: #101a2c;
+        border-color: rgba(147, 197, 253, 0.18);
+        box-shadow: 0 22px 60px rgba(2, 6, 23, 0.28);
+    }
+
+    body.dark-mode .search-field input,
+    body.dark-mode .search-field select {
+        color: #eaf2ff;
+    }
+
+    body.dark-mode .search-field input::placeholder {
+        color: #6f819c;
+    }
+
+    body.dark-mode .search-btn,
+    body.dark-mode .detail-btn {
+        color: #eaf2ff;
+        background: linear-gradient(135deg, #2563eb, #1d4ed8);
+        box-shadow: 0 18px 38px rgba(37, 99, 235, 0.22);
+    }
+
+    body.dark-mode .companies-section {
+        background: linear-gradient(180deg, #0f172a 0%, #0b1220 100%);
+        border-color: rgba(147, 197, 253, 0.16);
+    }
+
+    body.dark-mode .category-icon,
+    body.dark-mode .icon-box,
+    body.dark-mode .company-mark {
+        color: #93c5fd;
+        background: rgba(96, 165, 250, 0.12);
+        border-color: rgba(147, 197, 253, 0.20);
+    }
+
+    body.dark-mode .career-stat strong,
+    body.dark-mode .salary,
+    body.dark-mode .link-arrow,
+    body.dark-mode .verified {
+        color: #93c5fd;
+    }
+
+    @@keyframes revealUp {
+        from {
+            opacity: 0;
+            transform: translateY(16px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .reveal {
+        animation: revealUp 0.55s ease both;
+    }
+
+    @@media (max-width: 1199px) {
+        .hero-photo-wrap {
+            left: 18px;
+        }
+
+        .category-grid,
+        .why-grid,
+        .jobs-grid,
+        .companies-grid {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+
+        .news-layout {
+            grid-template-columns: 1fr;
+        }
+
+        .career-band {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    @@media (max-width: 991px) {
+        .hero-section {
+            padding: 72px 0 60px;
+        }
+
+        .hero-visual {
+            min-height: 420px;
+            margin-top: 34px;
+        }
+
+        .hero-photo-wrap {
+            width: 100%;
+            height: 100%;
+        }
+
+        .search-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .search-btn {
+            width: 100%;
+        }
+    }
+
+    @@media (max-width: 767px) {
+        .home-section {
+            padding: 52px 0;
+        }
+
+        .section-heading {
+            display: block;
+        }
+
+        .section-heading .link-arrow {
+            margin-top: 16px;
+        }
+
+            .category-grid,
+            .why-grid,
+            .jobs-grid,
+            .companies-grid,
+            .news-side,
+            .career-stats {
+                grid-template-columns: 1fr;
+            }
+
+        .hero-visual {
+            min-height: 380px;
+        }
+
+        .hero-photo-wrap {
+            inset: 0;
+            border-width: 7px;
+            border-radius: 24px;
+        }
+
+        .stat-card {
+            grid-template-columns: 1fr 1fr 1fr;
+            right: 14px;
+            left: 14px;
+            width: auto;
+            bottom: 14px;
+            padding: 10px;
+        }
+
+        .stat-card div {
+            padding: 10px 8px;
+        }
+
+        .stat-card strong {
+            font-size: 1rem;
+        }
+
+        .search-panel {
+            border-radius: 18px;
+        }
+
+        .job-footer,
+        .company-footer {
+            align-items: flex-start;
+            flex-direction: column;
+        }
+    }
+</style>
+
+<div class="home-shell">
+    <section class="hero-section">
+        <div class="snow-layer" aria-hidden="true">
+            @for (var i = 0; i < 34; i++)
+            {
+                var left = (i * 13) % 100;
+                var size = 4 + (i % 5);
+                var duration = 8 + (i % 8);
+                var delay = -(i % 9);
+                var drift = (i % 2 == 0 ? 28 : -24) + (i % 7);
+                var opacity = 0.35 + ((i % 6) * 0.08);
+                <span class="snowflake" style="--left:@(left)%;--size:@(size)px;--duration:@(duration)s;--delay:@(delay)s;--drift:@(drift)px;--opacity:@opacity;"></span>
+            }
+        </div>
+        <div class="container hero-content">
+            @if (ViewBag.ErrorMessage != null)
+            {
+                <div class="alert alert-danger alert-home">@ViewBag.ErrorMessage</div>
+            }
+
+            <div class="row align-items-center g-5">
+                <div class="col-lg-7 reveal">
+                    <div class="hero-eyebrow">
+                        @Icon("spark")
+                        Nền tảng tuyển dụng tin cậy cho ứng viên Việt Nam
+                    </div>
+                    <h1 class="hero-title">Tìm việc làm phù hợp với bạn</h1>
+                    <p class="hero-subtitle">
+                        Khám phá việc làm chất lượng, công ty uy tín và cẩm nang nghề nghiệp giúp bạn ứng tuyển tự tin hơn mỗi ngày.
+                    </p>
+
+                    <form action="@Url.Action("Index", "Jobs")" method="get" class="search-panel">
+                        <div class="search-grid">
+                            <label class="search-field">
+                                @Icon("search")
+                                <input name="keyword" list="jobTitleOptions" placeholder="Tên công việc, kỹ năng hoặc công ty" autocomplete="off" />
+                                <datalist id="jobTitleOptions">
+                                    @foreach (var title in jobTitles.Take(20))
+                                    {
+                                        <option value="@title"></option>
+                                    }
+                                </datalist>
+                            </label>
+
+                            <label class="search-field">
+                                @Icon("pin")
+                                <select name="location" aria-label="Chọn địa điểm">
+                                    <option value="">Tất cả địa điểm</option>
+                                    @foreach (var location in locations)
+                                    {
+                                        <option value="@location">@location</option>
+                                    }
+                                </select>
+                            </label>
+
+                            <button type="submit" class="search-btn">
+                                @Icon("search")
+                                Tìm kiếm
+                            </button>
+                        </div>
+                    </form>
+
+                    <div class="quick-tags">
+                        <strong>Từ khóa phổ biến:</strong>
+                        @foreach (var tag in quickTags)
+                        {
+                            <a href="@Url.Action("Index", "Jobs", new { keyword = tag })">@tag</a>
+                        }
+                    </div>
+
+                    <div class="trust-row">
+                        <span>@Icon("check") Công ty xác thực</span>
+                        <span>@Icon("check") Bảo mật CV</span>
+                        <span>@Icon("check") Theo dõi ứng tuyển</span>
+                    </div>
+                </div>
+
+                <div class="col-lg-5">
+                    <div class="hero-visual reveal" style="animation-delay: .12s">
+                        <div class="hero-photo-wrap">
+                            <img src="https://images.unsplash.com/photo-1556761175-5973dc0f32e7?auto=format&fit=crop&w=1000&q=85" alt="Nhân viên văn phòng đang làm việc nhóm" />
+                        </div>
+
+                        <div class="floating-card stat-card">
+                            <div>
+                                <strong>@totalJobs.ToString("N0")+</strong>
+                                <span>việc mới</span>
+                            </div>
+                            <div>
+                                <strong>@totalCompanies.ToString("N0")+</strong>
+                                <span>công ty</span>
+                            </div>
+                            <div>
+                                <strong>24h</strong>
+                                <span>phản hồi</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="home-section">
+        <div class="container">
+            <div class="section-heading">
+                <div>
+                    <span class="section-kicker">@Icon("grid") Danh mục được quan tâm</span>
+                    <h2>Khám phá việc làm theo ngành nghề</h2>
+                    <p>Các lĩnh vực tuyển dụng phổ biến được trình bày rõ ràng để ứng viên tìm kiếm nhanh hơn.</p>
+                </div>
+            </div>
+
+            <div class="category-grid">
+                <a class="category-card" href="@Url.Action("Index", "Jobs", new { keyword = "Công nghệ thông tin" })">
+                    <span class="category-icon">@Icon("code")</span>
+                    <h3>Công nghệ thông tin</h3>
+                    <p>248 việc làm đang mở</p>
+                </a>
+                <a class="category-card" href="@Url.Action("Index", "Jobs", new { keyword = "Kinh doanh" })">
+                    <span class="category-icon">@Icon("briefcase")</span>
+                    <h3>Kinh doanh</h3>
+                    <p>186 việc làm đang mở</p>
+                </a>
+                <a class="category-card" href="@Url.Action("Index", "Jobs", new { keyword = "Kế toán" })">
+                    <span class="category-icon">@Icon("chart")</span>
+                    <h3>Kế toán - Tài chính</h3>
+                    <p>112 việc làm đang mở</p>
+                </a>
+                <a class="category-card" href="@Url.Action("Index", "Jobs", new { keyword = "Marketing" })">
+                    <span class="category-icon">@Icon("megaphone")</span>
+                    <h3>Marketing</h3>
+                    <p>95 việc làm đang mở</p>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <section class="home-section pt-0">
+        <div class="container">
+            <div class="section-heading">
+                <div>
+                    <span class="section-kicker">@Icon("star") Việc làm nổi bật</span>
+                    <h2>Cơ hội tốt từ các công ty uy tín</h2>
+                    <p>Danh sách vị trí nổi bật được cập nhật từ dữ liệu tuyển dụng hiện có của JobPortal.</p>
+                </div>
+                <a class="link-arrow" href="@Url.Action("Index", "Jobs")">Xem tất cả @Icon("arrow")</a>
+            </div>
+
+            <div class="jobs-grid">
+                @if (displayJobs.Any())
+                {
+                    foreach (var job in displayJobs.Take(6))
+                    {
+                        var tags = BuildTags(job);
+                        <article class="job-card">
+                            <div class="job-company-row">
+                                @if (!string.IsNullOrWhiteSpace(job.Company?.Logo))
+                                {
+                                    <img class="company-logo-img" src="@job.Company.Logo" alt="@job.Company?.CompanyName" />
+                                }
+                                else
+                                {
+                                    <span class="company-mark">@Initials(job.Company?.CompanyName)</span>
+                                }
+                                <div>
+                                    <span class="company-name">@(job.Company?.CompanyName ?? "Đang cập nhật")</span>
+                                    <span class="verified">@Icon("check") Đã xác thực</span>
+                                </div>
+                            </div>
+
+                            <a class="job-title" href="@Url.Action("Details", "Jobs", new { id = job.JobId })">@job.Title</a>
+
+                            <div class="job-meta">
+                                <span class="salary">@Icon("wallet") @FormatSalary(job)</span>
+                                <span>@Icon("pin") @(string.IsNullOrWhiteSpace(job.Location) ? "Linh hoạt" : job.Location)</span>
+                                <span>@Icon("calendar") Hạn ứng tuyển: @(job.Deadline?.ToString("dd/MM/yyyy") ?? "30 ngày tới")</span>
+                            </div>
+
+                            <div class="tag-list">
+                                @foreach (var tag in tags)
+                                {
+                                    <span class="tag">@tag</span>
+                                }
+                            </div>
+
+                            <div class="job-footer">
+                                <span class="deadline">Đăng ngày @(job.CreatedDate?.ToString("dd/MM/yyyy") ?? DateTime.Now.ToString("dd/MM/yyyy"))</span>
+                                <a class="detail-btn" href="@Url.Action("Details", "Jobs", new { id = job.JobId })">Chi tiết</a>
+                            </div>
+                        </article>
+                    }
+                }
+                else
+                {
+                    <div class="empty-state">Chưa có việc làm nổi bật để hiển thị.</div>
+                }
+            </div>
+        </div>
+    </section>
+
+    <section class="home-section companies-section">
+        <div class="container">
+            <div class="section-heading">
+                <div>
+                    <span class="section-kicker">@Icon("building") Công ty đang tuyển dụng</span>
+                    <h2>Nhà tuyển dụng nổi bật trên JobPortal</h2>
+                    <p>Các doanh nghiệp có nhu cầu tuyển dụng cao, hồ sơ rõ ràng và thông tin minh bạch.</p>
+                </div>
+                <a class="link-arrow" href="@Url.Action("Index", "Companies")">Xem công ty @Icon("arrow")</a>
+            </div>
+
+            <div class="companies-grid">
+                @if (featuredCompanies.Any())
+                {
+                    foreach (var company in featuredCompanies.Take(6))
+                    {
+                        <article class="company-card">
+                            <div class="company-row">
+                                @if (!string.IsNullOrWhiteSpace(company.Logo))
+                                {
+                                    <img class="company-logo-img" src="@company.Logo" alt="@company.CompanyName" />
+                                }
+                                else
+                                {
+                                    <span class="company-mark">@Initials(company.CompanyName)</span>
+                                }
+                                <div>
+                                    <h3>@company.CompanyName</h3>
+                                    <span class="verified">@Icon("check") Đã xác thực</span>
+                                </div>
+                            </div>
+                            <p>@ShortText(company.Description, "Doanh nghiệp đang tìm kiếm ứng viên phù hợp cho nhiều vị trí tiềm năng.", 96)</p>
+                            <div class="company-meta">
+                                <span class="company-status">@(company.JobCount > 3 ? "Tuyển gấp" : "Đã xác thực")</span>
+                                <span class="company-status">@(IsRemoteCompany(company) ? "Remote" : "On-site")</span>
+                                <span class="company-status">@ShortText(company.Address, "Việt Nam", 24)</span>
+                            </div>
+                            <div class="company-footer">
+                                <span>@company.JobCount việc làm</span>
+                                <a class="detail-btn" href="@Url.Action("Details", "Companies", new { id = company.CompanyId })">Xem công ty</a>
+                            </div>
+                        </article>
+                    }
+                }
+                else
+                {
+                    <div class="empty-state">Chưa có công ty nổi bật để hiển thị.</div>
+                }
+            </div>
+        </div>
+    </section>
+
+    <section class="home-section pt-0">
+        <div class="container">
+            <div class="why-grid">
+                <article class="why-card">
+                    <span class="category-icon">@Icon("spark")</span>
+                    <h3>CV nổi bật hơn</h3>
+                    <p>Nhà tuyển dụng ưu tiên hồ sơ đầy đủ kỹ năng, kinh nghiệm và thông tin liên hệ rõ ràng.</p>
+                </article>
+                <article class="why-card">
+                    <span class="category-icon">@Icon("chart")</span>
+                    <h3>Xu hướng tuyển dụng</h3>
+                    <p>Các ngành AI, Data, Product và Marketing đang tăng mạnh nhu cầu tuyển dụng.</p>
+                </article>
+                <article class="why-card">
+                    <span class="category-icon">@Icon("building")</span>
+                    <h3>Doanh nghiệp uy tín</h3>
+                    <p>Hơn 4.500 công ty xác thực đang tuyển dụng mỗi ngày trên nền tảng.</p>
+                </article>
+                <article class="why-card">
+                    <span class="category-icon">@Icon("calendar")</span>
+                    <h3>Phản hồi nhanh</h3>
+                    <p>Theo dõi trạng thái hồ sơ và phản hồi từ nhà tuyển dụng trong thời gian thực.</p>
+                </article>
+            </div>
+        </div>
+    </section>
+
+    <section class="home-section pt-0">
+        <div class="container">
+            <div class="career-band">
+                <div>
+                    <span class="section-kicker">Career Insight</span>
+                    <h2>Tăng cơ hội được tuyển dụng với hồ sơ chuyên nghiệp</h2>
+                    <p>Tạo CV hiện đại, theo dõi trạng thái ứng tuyển và kết nối trực tiếp với các công ty đang tuyển dụng phù hợp với kỹ năng của bạn.</p>
+                    <div class="career-actions">
+                        <a class="search-btn" href="@Url.Action("Upload", "CV")">Tạo CV ngay</a>
+                        <a class="btn btn-outline-primary" href="@Url.Action("Index", "Jobs")">Khám phá việc làm</a>
+                    </div>
+                </div>
+                <div class="career-stats">
+                    <div class="career-stat"><div><strong>18.000+</strong><span>Việc làm mới mỗi tháng</span></div></div>
+                    <div class="career-stat"><div><strong>4.500+</strong><span>Doanh nghiệp xác thực</span></div></div>
+                    <div class="career-stat"><div><strong>85%</strong><span>Ứng viên có phản hồi</span></div></div>
+                    <div class="career-stat"><div><strong>24h</strong><span>Thời gian phản hồi trung bình</span></div></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="home-section" id="tin-noi-bat">
+        <div class="container">
+            <div class="section-heading">
+                <div>
+                    <span class="section-kicker">@Icon("newspaper") Tin nổi bật</span>
+                    <h2>Cẩm nang nghề nghiệp và xu hướng tuyển dụng</h2>
+                    <p>Nội dung chọn lọc giúp ứng viên chuẩn bị CV, phỏng vấn và định hướng nghề nghiệp thực tế hơn.</p>
+                </div>
+            </div>
+
+            <div class="news-layout">
+                <a class="news-card featured" href="#">
+                    <div class="news-image">
+                        <img src="https://images.unsplash.com/photo-1552664730-d307ca884978?auto=format&fit=crop&w=1200&q=85" alt="Buổi trao đổi nghề nghiệp trong văn phòng" />
+                        <span class="news-label">Cẩm nang</span>
+                    </div>
+                    <div class="news-body">
+                        <h3>Cách xây dựng hồ sơ ứng tuyển nổi bật trong thị trường cạnh tranh</h3>
+                        <p>Tối ưu CV, kinh nghiệm và kỹ năng để nhà tuyển dụng hiểu đúng giá trị của bạn ngay từ vòng sàng lọc.</p>
+                    </div>
+                </a>
+
+                <div class="news-side">
+                    <a class="news-card" href="#">
+                        <div class="news-image">
+                            <img src="https://images.unsplash.com/photo-1521737711867-e3b97375f902?auto=format&fit=crop&w=800&q=85" alt="Nhóm nhân sự trao đổi tại văn phòng" />
+                            <span class="news-label">Xu hướng</span>
+                        </div>
+                        <div class="news-body">
+                            <h3>Những kỹ năng được doanh nghiệp ưu tiên trong năm 2026</h3>
+                            <p>Khả năng thích nghi, dữ liệu và giao tiếp liên phòng ban đang trở thành lợi thế rõ rệt.</p>
+                        </div>
+                    </a>
+
+                    <a class="news-card" href="#">
+                        <div class="news-image">
+                            <img src="https://images.unsplash.com/photo-1573497491208-6b1acb260507?auto=format&fit=crop&w=800&q=85" alt="Ứng viên tham gia phỏng vấn" />
+                            <span class="news-label">Phỏng vấn</span>
+                        </div>
+                        <div class="news-body">
+                            <h3>Chuẩn bị phỏng vấn theo từng vòng tuyển dụng</h3>
+                            <p>Cách trả lời mạch lạc, đặt câu hỏi đúng trọng tâm và theo dõi phản hồi sau phỏng vấn.</p>
+                        </div>
+                    </a>
+
+                    <a class="news-card" href="#">
+                        <div class="news-image">
+                            <img src="https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=800&q=85" alt="Người làm việc với hồ sơ trên máy tính" />
+                            <span class="news-label">Hồ sơ</span>
+                        </div>
+                        <div class="news-body">
+                            <h3>Những lỗi thường gặp khiến CV bị bỏ qua</h3>
+                            <p>Tránh mô tả chung chung, thiếu số liệu và bố cục khó đọc khi nộp hồ sơ trực tuyến.</p>
+                        </div>
+                    </a>
+
+                    <a class="news-card" href="#">
+                        <div class="news-image">
+                            <img src="https://images.unsplash.com/photo-1553877522-43269d4ea984?auto=format&fit=crop&w=800&q=85" alt="Nhóm dự án làm việc cùng nhau" />
+                            <span class="news-label">Remote</span>
+                        </div>
+                        <div class="news-body">
+                            <h3>Cách đánh giá môi trường làm việc hybrid phù hợp</h3>
+                            <p>Nhìn vào quy trình phối hợp, tiêu chí đánh giá và mức độ hỗ trợ trước khi nhận offer.</p>
+                        </div>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
+
+@functions {
+    private string FormatSalary(BTL_2.Models.Job job)
+    {
+        if (job.SalaryMin.HasValue && job.SalaryMax.HasValue)
+        {
+            return $"{job.SalaryMin.Value:N0} - {job.SalaryMax.Value:N0}";
+        }
+
+        if (job.SalaryMin.HasValue)
+        {
+            return $"Từ {job.SalaryMin.Value:N0}";
+        }
+
+        return "Lương thỏa thuận";
+    }
+
+    private string Initials(string value)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+        {
+            return "JP";
+        }
+
+        var words = value.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+        if (words.Length == 1)
+        {
+            return words[0].Substring(0, Math.Min(2, words[0].Length)).ToUpper();
+        }
+
+        return (words[0][0].ToString() + words[words.Length - 1][0].ToString()).ToUpper();
+    }
+
+    private string ShortText(string value, string fallback, int maxLength)
+    {
+        var text = string.IsNullOrWhiteSpace(value) ? fallback : value.Trim();
+        return text.Length > maxLength ? text.Substring(0, maxLength).Trim() + "..." : text;
+    }
+
+    private bool IsRemoteCompany(BTL_2.Models.Company company)
+    {
+        return (company.Address ?? "").Contains("Remote", StringComparison.OrdinalIgnoreCase)
+            || (company.Description ?? "").Contains("remote", StringComparison.OrdinalIgnoreCase);
+    }
+
+    private string[] BuildTags(BTL_2.Models.Job job)
+    {
+        var tags = new List<string>();
+
+        if (!string.IsNullOrWhiteSpace(job.Tags))
+        {
+            tags.AddRange(job.Tags.Split(',', StringSplitOptions.RemoveEmptyEntries).Select(t => t.Trim()).Where(t => t.Length > 0).Take(3));
+        }
+
+        if (!string.IsNullOrWhiteSpace(job.JobType))
+        {
+            tags.Add(job.JobType);
+        }
+
+        if (job.IsRemote || (job.Location ?? "").Contains("Remote", StringComparison.OrdinalIgnoreCase))
+        {
+            tags.Add("Remote");
+        }
+        else
+        {
+            tags.Add("Hybrid");
+        }
+
+        if (!tags.Any(t => t.Contains("Full", StringComparison.OrdinalIgnoreCase) || t.Contains("Toàn", StringComparison.OrdinalIgnoreCase)))
+        {
+            tags.Add("Full-time");
+        }
+
+        return tags.Distinct().Take(4).ToArray();
+    }
+
+    private Microsoft.AspNetCore.Html.IHtmlContent Icon(string name)
+    {
+        var svg = name switch
+        {
+            "search" => "<svg width=\"20\" height=\"20\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><circle cx=\"11\" cy=\"11\" r=\"8\"></circle><path d=\"m21 21-4.3-4.3\"></path></svg>",
+            "pin" => "<svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M20 10c0 6-8 12-8 12S4 16 4 10a8 8 0 1 1 16 0Z\"></path><circle cx=\"12\" cy=\"10\" r=\"3\"></circle></svg>",
+            "spark" => "<svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M13 2 3 14h8l-1 8 11-14h-8l1-6Z\"></path></svg>",
+            "grid" => "<svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><rect width=\"7\" height=\"7\" x=\"3\" y=\"3\" rx=\"1\"></rect><rect width=\"7\" height=\"7\" x=\"14\" y=\"3\" rx=\"1\"></rect><rect width=\"7\" height=\"7\" x=\"14\" y=\"14\" rx=\"1\"></rect><rect width=\"7\" height=\"7\" x=\"3\" y=\"14\" rx=\"1\"></rect></svg>",
+            "code" => "<svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"m16 18 6-6-6-6\"></path><path d=\"m8 6-6 6 6 6\"></path></svg>",
+            "briefcase" => "<svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><rect width=\"20\" height=\"14\" x=\"2\" y=\"7\" rx=\"2\"></rect><path d=\"M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16\"></path></svg>",
+            "chart" => "<svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M3 3v18h18\"></path><path d=\"m19 9-5 5-4-4-3 3\"></path></svg>",
+            "megaphone" => "<svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"m3 11 18-5v12L3 14v-3Z\"></path><path d=\"M11.6 16.8a3 3 0 1 1-5.8-1.6\"></path></svg>",
+            "star" => "<svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"m12 3 2.7 5.5 6.1.9-4.4 4.3 1 6.1-5.4-2.9-5.4 2.9 1-6.1-4.4-4.3 6.1-.9L12 3Z\"></path></svg>",
+            "building" => "<svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M3 21h18\"></path><path d=\"M5 21V7l8-4v18\"></path><path d=\"M19 21V11l-6-4\"></path><path d=\"M9 9v.01\"></path><path d=\"M9 12v.01\"></path><path d=\"M9 15v.01\"></path></svg>",
+            "newspaper" => "<svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M4 22h16a2 2 0 0 0 2-2V4H6a2 2 0 0 0-2 2v16Z\"></path><path d=\"M4 8H2\"></path><path d=\"M4 14H2\"></path><path d=\"M9 9h8\"></path><path d=\"M9 13h8\"></path><path d=\"M9 17h5\"></path></svg>",
+            "check" => "<svg width=\"14\" height=\"14\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2.5\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M20 6 9 17l-5-5\"></path></svg>",
+            "wallet" => "<svg width=\"17\" height=\"17\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M19 7V4a1 1 0 0 0-1-1H5a2 2 0 0 0 0 4h15a1 1 0 0 1 1 1v4h-3a2 2 0 0 0 0 4h3v4a1 1 0 0 1-1 1H5a2 2 0 0 1-2-2V5\"></path><path d=\"M18 12h.01\"></path></svg>",
+            "calendar" => "<svg width=\"17\" height=\"17\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M8 2v4\"></path><path d=\"M16 2v4\"></path><rect width=\"18\" height=\"18\" x=\"3\" y=\"4\" rx=\"2\"></rect><path d=\"M3 10h18\"></path></svg>",
+            "arrow" => "<svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M5 12h14\"></path><path d=\"m12 5 7 7-7 7\"></path></svg>",
+            _ => ""
+        };
+
+        return new Microsoft.AspNetCore.Html.HtmlString(svg);
+    }
+}
+

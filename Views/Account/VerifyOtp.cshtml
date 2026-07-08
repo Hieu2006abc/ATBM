@@ -1,0 +1,782 @@
+﻿@{
+    ViewData["Title"] = "Xác thực OTP";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var email = ViewBag.Email as string;
+}
+
+<form id="antiForgeryForm" style="display: none;">
+    @Html.AntiForgeryToken()
+</form>
+
+<style>
+    .otp-wrapper {
+        min-height: calc(100vh - 200px);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 2rem 1rem;
+        background:
+            radial-gradient(circle at 18% 10%, rgba(125, 211, 252, .28), transparent 30%),
+            linear-gradient(135deg, #f8fcff 0%, #eef6ff 50%, #e7f2ff 100%);
+        transition: background .25s ease, color .25s ease;
+    }
+
+    .otp-container {
+        max-width: 500px;
+        width: 100%;
+        background: rgba(255, 255, 255, .96);
+        border: 1px solid #dce8f7;
+        border-radius: 24px;
+        box-shadow: 0 24px 70px rgba(37, 99, 235, .12);
+        overflow: hidden;
+        animation: slideUp 0.5s ease;
+        transition: background .25s ease, border-color .25s ease, box-shadow .25s ease;
+    }
+
+    @@keyframes slideUp {
+        from { opacity: 0; transform: translateY(30px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    .otp-header {
+        background: linear-gradient(135deg, #60a5fa 0%, #2563eb 100%);
+        padding: 2rem;
+        text-align: center;
+        color: white;
+    }
+
+    .otp-header h1 {
+        font-size: 1.8rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .otp-header p {
+        opacity: 0.9;
+    }
+
+    .otp-body {
+        padding: 2rem;
+    }
+
+    .email-info {
+        background: #eef6ff;
+        padding: 1rem;
+        border-radius: 12px;
+        margin-bottom: 1.5rem;
+        text-align: center;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+    }
+
+    .email-info i {
+        color: #2563eb;
+        font-size: 1.2rem;
+    }
+
+    .email-info span {
+        color: #1e293b;
+        font-weight: 600;
+        font-size: 1rem;
+    }
+
+    .attempts-info {
+        background: #eff6ff;
+        color: #1d4ed8;
+        padding: 0.75rem;
+        border-radius: 12px;
+        margin-bottom: 1rem;
+        text-align: center;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        border: 1px solid #bfdbfe;
+        font-weight: 500;
+    }
+
+    .attempts-info.warning {
+        background: #f8d7da;
+        color: #721c24;
+        border-color: #f5c6cb;
+    }
+
+    .otp-inputs {
+        display: flex;
+        gap: 12px;
+        justify-content: center;
+        margin: 2rem 0;
+    }
+
+    .otp-input {
+        width: 55px;
+        height: 65px;
+        border: 2px solid #e2e8f0;
+        border-radius: 12px;
+        font-size: 1.8rem;
+        text-align: center;
+        font-weight: 600;
+        transition: all 0.3s;
+        background: #f8fafc;
+    }
+
+    .otp-input:focus {
+        border-color: #60a5fa;
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.16);
+        background: white;
+    }
+
+    .otp-input.error {
+        border-color: #ef4444;
+        animation: shake 0.5s ease;
+    }
+
+    @@keyframes shake {
+        0%, 100% { transform: translateX(0); }
+        10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+        20%, 40%, 60%, 80% { transform: translateX(5px); }
+    }
+
+    .btn-verify {
+        width: 100%;
+        padding: 1rem;
+        background: linear-gradient(135deg, #60a5fa 0%, #2563eb 100%);
+        color: white;
+        border: none;
+        border-radius: 12px;
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s;
+    }
+
+    .btn-verify:hover:not(:disabled) {
+        transform: translateY(-2px);
+        box-shadow: 0 14px 30px rgba(37, 99, 235, 0.28);
+    }
+
+    .btn-verify:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+    }
+
+    .resend-link {
+        text-align: center;
+        margin-top: 1.5rem;
+    }
+
+    .resend-link a {
+        color: #2563eb;
+        text-decoration: none;
+        cursor: pointer;
+    }
+
+    .resend-link a.disabled {
+        color: #999;
+        cursor: not-allowed;
+        pointer-events: none;
+    }
+
+    .timer {
+        text-align: center;
+        margin: 1rem 0;
+        color: #666;
+        font-size: 0.9rem;
+    }
+
+    .timer.warning {
+        color: #ef4444;
+        font-weight: bold;
+    }
+
+    .alert {
+        padding: 0.75rem;
+        border-radius: 8px;
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        animation: slideIn 0.3s ease;
+    }
+
+    @@keyframes slideIn {
+        from { opacity: 0; transform: translateY(-10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    .alert-danger {
+        background: #fee2e2;
+        color: #991b1b;
+        border: 1px solid #fecaca;
+    }
+
+    .alert-success {
+        background: #d1fae5;
+        color: #065f46;
+        border: 1px solid #a7f3d0;
+    }
+
+    .spinner-border {
+        display: inline-block;
+        width: 1rem;
+        height: 1rem;
+        border: 2px solid currentColor;
+        border-right-color: transparent;
+        border-radius: 50%;
+        animation: spin 0.75s linear infinite;
+        margin-right: 0.5rem;
+        vertical-align: middle;
+    }
+
+    @@keyframes spin {
+        to { transform: rotate(360deg); }
+    }
+
+    .success-animation, .lock-message {
+        text-align: center;
+        padding: 2rem;
+    }
+
+    .success-animation i, .lock-message i {
+        font-size: 4rem;
+        margin-bottom: 1rem;
+    }
+
+    .success-animation i { color: #10b981; }
+    .lock-message i { color: #ef4444; }
+
+    .success-animation {
+        border: 1px solid #bbf7d0;
+        border-radius: 22px;
+        background:
+            radial-gradient(circle at 50% 0%, rgba(34, 197, 94, .16), transparent 42%),
+            linear-gradient(180deg, #f0fdf4 0%, #ffffff 100%);
+    }
+
+    .success-animation i {
+        width: 78px;
+        height: 78px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        color: #16a34a;
+        background: #dcfce7;
+        border: 1px solid #bbf7d0;
+        border-radius: 22px;
+        font-size: 2.7rem;
+        box-shadow: 0 16px 34px rgba(22, 163, 74, .16);
+    }
+
+    .success-animation h3 {
+        color: #14532d;
+        font-weight: 800;
+        margin-bottom: .5rem;
+    }
+
+    .success-animation p {
+        color: #64748b;
+        margin-bottom: 0;
+    }
+
+    .success-animation .spinner-border {
+        color: #16a34a;
+    }
+
+    body.dark-mode .otp-wrapper {
+        background:
+            radial-gradient(circle at 80% 8%, rgba(96, 165, 250, .14), transparent 34%),
+            linear-gradient(135deg, #0b1220 0%, #0f172a 50%, #111827 100%);
+    }
+
+    body.dark-mode .otp-container {
+        background: #101a2c;
+        border-color: rgba(147, 197, 253, .18);
+        box-shadow: 0 28px 80px rgba(2, 6, 23, .36);
+    }
+
+    body.dark-mode .otp-header {
+        background: linear-gradient(135deg, #2563eb 0%, #1e3a8a 100%);
+    }
+
+    body.dark-mode .otp-body,
+    body.dark-mode .email-info {
+        background: #101a2c;
+    }
+
+    body.dark-mode .email-info,
+    body.dark-mode .attempts-info,
+    body.dark-mode .otp-input {
+        border-color: rgba(147, 197, 253, .22);
+    }
+
+    body.dark-mode .email-info {
+        background: rgba(15, 23, 42, .78);
+    }
+
+    body.dark-mode .email-info span,
+    body.dark-mode .timer,
+    body.dark-mode .resend-link a {
+        color: #c7d6ec;
+    }
+
+    body.dark-mode .otp-input {
+        background: #0f172a;
+        color: #eaf2ff;
+    }
+
+    body.dark-mode .otp-input:focus {
+        background: #111827;
+        border-color: #60a5fa;
+    }
+
+    body.dark-mode .success-animation {
+        background:
+            radial-gradient(circle at 50% 0%, rgba(34, 197, 94, .18), transparent 44%),
+            linear-gradient(180deg, #10231d 0%, #101a2c 100%);
+        border-color: rgba(134, 239, 172, .22);
+    }
+
+    body.dark-mode .success-animation i {
+        color: #86efac;
+        background: rgba(34, 197, 94, .14);
+        border-color: rgba(134, 239, 172, .24);
+        box-shadow: 0 18px 38px rgba(2, 6, 23, .24);
+    }
+
+    body.dark-mode .success-animation h3 {
+        color: #dcfce7;
+    }
+
+    body.dark-mode .success-animation p {
+        color: #9fb0c8;
+    }
+</style>
+
+<div class="otp-wrapper">
+    <div class="otp-container">
+        <div class="otp-header">
+            <h1><i class="fas fa-shield-alt me-2"></i>Xác thực OTP</h1>
+            <p>Vui lòng nhập mã xác thực được gửi đến email của bạn</p>
+        </div>
+
+        <div class="otp-body">
+            <div class="email-info">
+                <i class="fas fa-envelope"></i>
+                <span id="emailDisplay">@email</span>
+            </div>
+
+            <div id="message" class="alert" style="display: none;"></div>
+
+            <div id="attemptsInfo" class="attempts-info">
+                <i class="fas fa-shield-alt"></i>
+                <span id="attemptsLeft">3</span>/3 lần thử còn lại
+            </div>
+
+            <div class="timer" id="timer">
+                <i class="fas fa-hourglass-half"></i> Mã có hiệu lực: <span id="timerDisplay">15:00</span>
+            </div>
+
+            <div id="otpForm">
+                <div class="otp-inputs">
+                    <input type="text" class="otp-input" id="otp1" maxlength="1" autofocus>
+                    <input type="text" class="otp-input" id="otp2" maxlength="1">
+                    <input type="text" class="otp-input" id="otp3" maxlength="1">
+                    <input type="text" class="otp-input" id="otp4" maxlength="1">
+                    <input type="text" class="otp-input" id="otp5" maxlength="1">
+                    <input type="text" class="otp-input" id="otp6" maxlength="1">
+                </div>
+
+                <button class="btn-verify" id="verifyBtn" disabled>
+                    <i class="fas fa-check-circle me-2"></i> Xác thực
+                </button>
+
+                <div class="resend-link">
+                    <a href="#" id="resendLink">Gửi lại mã</a>
+                </div>
+            </div>
+
+            <div id="successAnimation" style="display: none;">
+                <div class="success-animation">
+                    <i class="fas fa-check-circle"></i>
+                    <h3>Xác thực thành công!</h3>
+                    <p>OTP hợp lệ. Đang chuyển đến trang đặt mật khẩu mới...</p>
+                    <div class="spinner-border"></div>
+                </div>
+            </div>
+
+            <div id="lockMessage" style="display: none;">
+                <div class="lock-message">
+                    <i class="fas fa-lock"></i>
+                    <h3>Tài khoản đã bị khóa</h3>
+                    <p>Bạn đã nhập sai OTP quá 3 lần.</p>
+                    <p>Vui lòng liên hệ Admin để được hỗ trợ.</p>
+                    <a href="/Home/Index" style="display: inline-block; margin-top: 1rem; padding: 0.75rem 2rem; background: #667eea; color: white; text-decoration: none; border-radius: 12px;">Về trang chủ</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        let email = '@email';
+        let timeLeft = 900;
+        let timerInterval;
+        let canResend = true;
+        let resendCooldown = 60;
+        let attemptsLeft = 3;
+        let isLocked = false;
+        let isVerifying = false;
+        
+        const otpInputs = ['otp1', 'otp2', 'otp3', 'otp4', 'otp5', 'otp6'];
+        
+        let antiForgeryToken = '';
+        const tokenInput = document.querySelector('input[name="__RequestVerificationToken"]');
+        if (tokenInput) antiForgeryToken = tokenInput.value;
+        
+        function init() {
+            startTimer();
+            updateAttempts();
+            
+            otpInputs.forEach((id, index) => {
+                const input = document.getElementById(id);
+                if (input) {
+                    input.addEventListener('input', (e) => handleOtpInput(e, index));
+                    input.addEventListener('keydown', (e) => handleOtpKeydown(e, index));
+                }
+            });
+            
+            document.getElementById('verifyBtn').addEventListener('click', verifyOtp);
+            document.getElementById('resendLink').addEventListener('click', resendOtp);
+            document.getElementById('otp1').focus();
+        }
+        
+        function handleOtpInput(e, index) {
+            e.target.value = e.target.value.replace(/[^0-9]/g, '');
+            if (e.target.value.length === 1 && index < otpInputs.length - 1) {
+                document.getElementById(otpInputs[index + 1]).focus();
+            }
+            checkOtpComplete();
+        }
+        
+        function handleOtpKeydown(e, index) {
+            if (e.key === 'Backspace' && !e.target.value && index > 0) {
+                document.getElementById(otpInputs[index - 1]).focus();
+            }
+            if (e.key === 'Enter') verifyOtp();
+        }
+        
+        function checkOtpComplete() {
+            let isComplete = true;
+            for (let i = 0; i < 6; i++) {
+                const input = document.getElementById(otpInputs[i]);
+                if (!input || !input.value || input.value.length === 0) {
+                    isComplete = false;
+                    break;
+                }
+            }
+            const verifyBtn = document.getElementById('verifyBtn');
+            if (verifyBtn) verifyBtn.disabled = !isComplete;
+        }
+        
+        function getOtpCode() {
+            let otpCode = '';
+            for (let i = 0; i < 6; i++) {
+                const input = document.getElementById(otpInputs[i]);
+                if (!input || !input.value) return null;
+                otpCode += input.value;
+            }
+            return otpCode;
+        }
+        
+        function startTimer() {
+            if (timerInterval) clearInterval(timerInterval);
+            timerInterval = setInterval(() => {
+                if (timeLeft <= 0) {
+                    clearInterval(timerInterval);
+                    document.getElementById('timerDisplay').innerText = '00:00';
+                    document.getElementById('timer').classList.add('warning');
+                    showMessage('Mã OTP đã hết hạn. Vui lòng gửi lại.', 'danger');
+                    disableAllInputs(true);
+                    document.getElementById('verifyBtn').disabled = true;
+                } else {
+                    timeLeft--;
+                    let minutes = Math.floor(timeLeft / 60);
+                    let seconds = timeLeft % 60;
+                    document.getElementById('timerDisplay').innerText = 
+                        `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+                }
+            }, 1000);
+        }
+        
+        function updateAttempts() {
+            const attemptsSpan = document.getElementById('attemptsLeft');
+            const attemptsInfo = document.getElementById('attemptsInfo');
+            if (attemptsSpan) attemptsSpan.innerText = attemptsLeft;
+            if (attemptsInfo && attemptsLeft <= 2) {
+                attemptsInfo.classList.add('warning');
+            } else if (attemptsInfo) {
+                attemptsInfo.classList.remove('warning');
+            }
+        }
+        
+        function lockAccount() {
+            isLocked = true;
+            document.getElementById('otpForm').style.display = 'none';
+            document.getElementById('timer').style.display = 'none';
+            document.getElementById('attemptsInfo').style.display = 'none';
+            document.getElementById('lockMessage').style.display = 'block';
+        }
+        
+        function showMessage(message, type) {
+            const messageDiv = document.getElementById('message');
+            messageDiv.style.display = 'flex';
+            messageDiv.className = `alert alert-${type}`;
+            const icon = type === 'success' ? 'fas fa-check-circle' : 'fas fa-exclamation-circle';
+            messageDiv.innerHTML = `<i class="${icon}"></i> ${message}`;
+            setTimeout(() => {
+                if (messageDiv.style.display !== 'none') {
+                    messageDiv.style.display = 'none';
+                }
+            }, 5000);
+        }
+        
+        function disableAllInputs(disabled) {
+            for (let i = 0; i < 6; i++) {
+                const input = document.getElementById(otpInputs[i]);
+                if (input) input.disabled = disabled;
+            }
+        }
+        
+        function clearAllInputs() {
+            for (let i = 0; i < 6; i++) {
+                const input = document.getElementById(otpInputs[i]);
+                if (input) {
+                    input.value = '';
+                    input.classList.remove('error');
+                }
+            }
+        }
+        
+        function showErrorAnimation() {
+            for (let i = 0; i < 6; i++) {
+                const input = document.getElementById(otpInputs[i]);
+                if (input) input.classList.add('error');
+            }
+            setTimeout(() => {
+                for (let i = 0; i < 6; i++) {
+                    const input = document.getElementById(otpInputs[i]);
+                    if (input) input.classList.remove('error');
+                }
+            }, 1000);
+        }
+        
+        async function verifyOtp() {
+            if (isVerifying) return;
+            
+            if (isLocked) {
+                showMessage('Tài khoản đã bị khóa', 'danger');
+                return;
+            }
+            
+            if (attemptsLeft <= 0) {
+                lockAccount();
+                return;
+            }
+            
+            if (timeLeft <= 0) {
+                showMessage('Mã OTP đã hết hạn. Vui lòng gửi lại.', 'danger');
+                return;
+            }
+            
+            const otpCode = getOtpCode();
+            if (!otpCode) {
+                showMessage('Vui lòng nhập đầy đủ mã OTP 6 số', 'danger');
+                return;
+            }
+            
+            const verifyBtn = document.getElementById('verifyBtn');
+            const originalText = verifyBtn.innerHTML;
+            let shouldRestoreVerifyUi = true;
+            
+            isVerifying = true;
+            verifyBtn.innerHTML = '<span class="spinner-border"></span> Đang xác thực...';
+            verifyBtn.disabled = true;
+            disableAllInputs(true);
+            
+            console.log('Verifying OTP:', otpCode);
+            console.log('Email:', email);
+            
+            const formData = new URLSearchParams();
+            formData.append('email', email);
+            formData.append('otpCode', otpCode);
+            formData.append('__RequestVerificationToken', antiForgeryToken);
+            
+            try {
+                const response = await fetch('/Account/VerifyOtp', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                        'RequestVerificationToken': antiForgeryToken
+                    },
+                    body: formData.toString()
+                });
+
+                if (!response.ok) {
+                    throw new Error('Máy chủ đang bận, vui lòng thử lại.');
+                }
+
+                const contentType = response.headers.get('content-type') || '';
+                if (!contentType.includes('application/json')) {
+                    throw new Error('Phiên xác thực không hợp lệ, vui lòng tải lại trang.');
+                }
+                
+                const data = await response.json();
+                console.log('Verify response:', data);
+                
+                if (data.success && data.isValid) {
+                    shouldRestoreVerifyUi = false;
+                    // ✅ OTP ĐÚNG - Chuyển đến trang đặt mật khẩu mới
+                    clearInterval(timerInterval);
+                    
+                    document.getElementById('otpForm').style.display = 'none';
+                    document.getElementById('timer').style.display = 'none';
+                    document.getElementById('attemptsInfo').style.display = 'none';
+                    document.getElementById('successAnimation').style.display = 'block';
+                    
+                    // ✅ SỬ DỤNG redirectUrl từ server
+                    setTimeout(() => {
+                        if (data.redirectUrl) {
+                            window.location.href = data.redirectUrl;
+                        } else {
+                            window.location.href = '/Account/ResetPassword?email=' + encodeURIComponent(email) + '&otpCode=' + encodeURIComponent(otpCode);
+                        }
+                    }, 1500);
+                } else {
+                    if (data.isLocked) {
+                        shouldRestoreVerifyUi = false;
+                        attemptsLeft = 0;
+                        updateAttempts();
+                        showMessage(data.message || 'Tài khoản đã bị khóa. Vui lòng liên hệ Admin để mở khóa.', 'danger');
+                        lockAccount();
+                        return;
+                    }
+
+                    attemptsLeft = typeof data.attemptsLeft === 'number' ? data.attemptsLeft : attemptsLeft - 1;
+                    updateAttempts();
+                    
+                    const errorMessage = data.message || 'Mã OTP không đúng';
+                    showMessage(`${errorMessage} (Còn ${attemptsLeft} lần thử)`, 'danger');
+                    
+                    showErrorAnimation();
+                    clearAllInputs();
+                    document.getElementById('otp1').focus();
+                    
+                    if (attemptsLeft <= 0) {
+                        shouldRestoreVerifyUi = false;
+                        lockAccount();
+                    }
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showMessage('Có lỗi xảy ra: ' + error.message, 'danger');
+                clearAllInputs();
+                document.getElementById('otp1').focus();
+            } finally {
+                if (shouldRestoreVerifyUi) {
+                    verifyBtn.innerHTML = originalText;
+                    verifyBtn.disabled = true;
+                    disableAllInputs(false);
+                    checkOtpComplete();
+                    document.getElementById('otp1').focus();
+                    isVerifying = false;
+                }
+            }
+        }
+        
+        async function resendOtp(event) {
+            event.preventDefault();
+            if (!canResend) {
+                showMessage(`Vui lòng đợi ${resendCooldown} giây`, 'danger');
+                return;
+            }
+            
+            const resendLink = document.getElementById('resendLink');
+            const originalText = resendLink.innerHTML;
+            
+            resendLink.classList.add('disabled');
+            resendLink.innerHTML = '<span class="spinner-border"></span> Đang gửi...';
+            
+            const formData = new URLSearchParams();
+            formData.append('email', email);
+            formData.append('__RequestVerificationToken', antiForgeryToken);
+            
+            try {
+                const response = await fetch('/Account/ForgotPassword', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                        'RequestVerificationToken': antiForgeryToken
+                    },
+                    body: formData.toString()
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    timeLeft = 900;
+                    attemptsLeft = 3;
+                    isLocked = false;
+                    isVerifying = false;
+                    
+                    document.getElementById('timerDisplay').innerText = '15:00';
+                    document.getElementById('timer').classList.remove('warning');
+                    document.getElementById('otpForm').style.display = 'block';
+                    document.getElementById('timer').style.display = 'block';
+                    document.getElementById('attemptsInfo').style.display = 'flex';
+                    document.getElementById('lockMessage').style.display = 'none';
+                    
+                    updateAttempts();
+                    clearAllInputs();
+                    disableAllInputs(false);
+                    document.getElementById('otp1').focus();
+                    document.getElementById('verifyBtn').disabled = true;
+                    
+                    showMessage(data.message, 'success');
+                    
+                    if (timerInterval) clearInterval(timerInterval);
+                    startTimer();
+                    
+                    canResend = false;
+                    let cooldown = resendCooldown;
+                    const cooldownInterval = setInterval(() => {
+                        cooldown--;
+                        if (resendLink) {
+                            resendLink.innerHTML = `Gửi lại (${cooldown}s)`;
+                        }
+                        if (cooldown <= 0) {
+                            clearInterval(cooldownInterval);
+                            canResend = true;
+                            resendLink.classList.remove('disabled');
+                            resendLink.innerHTML = 'Gửi lại mã';
+                        }
+                    }, 1000);
+                } else {
+                    showMessage('❌ ' + data.message, 'danger');
+                    resendLink.classList.remove('disabled');
+                    resendLink.innerHTML = originalText;
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showMessage('❌ Có lỗi xảy ra', 'danger');
+                resendLink.classList.remove('disabled');
+                resendLink.innerHTML = originalText;
+            }
+        }
+        
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+}
+        border: 1px solid #dcecff;

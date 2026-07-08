@@ -1,0 +1,114 @@
+@{
+    ViewData["Title"] = "Quét bảo mật CV thật";
+}
+
+<style>
+    body {
+        background: linear-gradient(180deg, #0f172a 0%, #111827 100%);
+        color: #e5e7eb;
+    }
+
+    .security-test-shell {
+        max-width: 1180px;
+        margin: 0 auto;
+        padding: 2rem 1rem;
+    }
+
+    .security-test-card {
+        background: rgba(15, 23, 42, 0.86);
+        border: 1px solid rgba(148, 163, 184, 0.24);
+        border-radius: 12px;
+        padding: 1.25rem;
+        box-shadow: 0 22px 60px rgba(0, 0, 0, 0.22);
+    }
+
+    .security-test-card h1 {
+        color: #f8fafc;
+        font-size: 1.55rem;
+        font-weight: 800;
+        margin-bottom: 0.75rem;
+    }
+
+    .security-test-card p {
+        color: #b6c2d2;
+    }
+
+    .test-grid {
+        display: grid;
+        grid-template-columns: repeat(6, minmax(0, 1fr));
+        gap: 0.75rem;
+        margin: 1rem 0;
+    }
+
+    .test-item,
+    .data-state {
+        background: rgba(30, 41, 59, 0.72);
+        border: 1px solid rgba(148, 163, 184, 0.24);
+        border-radius: 8px;
+        color: #dbeafe;
+    }
+
+    .test-item {
+        padding: 0.85rem;
+        font-weight: 700;
+        font-size: 0.88rem;
+    }
+
+    .data-state {
+        padding: 0.85rem;
+        margin-bottom: 1rem;
+    }
+
+    .data-state strong {
+        color: #f8fafc;
+    }
+
+    .data-state span,
+    .data-state div {
+        color: #cbd5e1;
+    }
+
+    @@media (max-width: 1000px) {
+        .test-grid {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+    }
+
+    @@media (max-width: 640px) {
+        .test-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+
+<div class="security-test-shell">
+    <div class="security-test-card">
+        <h1><i class="fas fa-shield-alt me-2"></i>Quét bảo mật CV thật</h1>
+        <p>Trang này chỉ đọc trực tiếp các file CV thật đang lưu trong database và thư mục upload. Không tạo file tạm, không tạo metadata test.</p>
+
+        <div class="test-grid">
+            <div class="test-item"><i class="fas fa-database me-1"></i> Lấy CVMetadata thật</div>
+            <div class="test-item"><i class="fas fa-file-shield me-1"></i> Đọc file .enc trên server</div>
+            <div class="test-item"><i class="fas fa-lock-open me-1"></i> Giải mã AES</div>
+            <div class="test-item"><i class="fas fa-fingerprint me-1"></i> Đối chiếu SHA-256</div>
+            <div class="test-item"><i class="fas fa-tags me-1"></i> Đối chiếu envelope</div>
+            <div class="test-item"><i class="fas fa-list-check me-1"></i> Báo file bị sửa</div>
+        </div>
+
+        <div class="data-state">
+            <div><strong>Metadata hiện có:</strong> @((bool)ViewBag.HasMetadata ? "Có" : "Chưa có")</div>
+            <div><strong>Log truy cập hiện có:</strong> @((bool)ViewBag.HasLogs ? "Có" : "Chưa có")</div>
+            <div><strong>CV thật có thể quét:</strong> @ViewBag.AccessibleCvCount</div>
+        </div>
+
+        <form asp-action="RunRequiredTests" asp-controller="TestSecurity" method="post">
+            @Html.AntiForgeryToken()
+            <button type="submit" class="btn btn-primary">
+                <i class="fas fa-play me-2"></i>Quét CV thật
+            </button>
+            <a class="btn btn-outline-light ms-2" href="@Url.Action("ManageApplications", "Jobs")">
+                Quay lại quản lý CV
+            </a>
+        </form>
+    </div>
+</div>

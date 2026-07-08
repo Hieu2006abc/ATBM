@@ -1,0 +1,242 @@
+﻿<!-- Views/Shared/_RecentActivities.cshtml -->
+@model List<BTL_2.Models.ActivityLog>
+
+@{
+    var activities = Model ?? new List<BTL_2.Models.ActivityLog>();
+}
+
+<style>
+    .activities-container {
+        background: white;
+        border-radius: 16px;
+        padding: 1.5rem;
+        box-shadow: var(--shadow-sm);
+        border: 1px solid var(--gray-200);
+    }
+
+    .activities-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 1.5rem;
+    }
+
+        .activities-header h5 {
+            font-weight: 600;
+            color: var(--gray-800);
+            margin: 0;
+        }
+
+        .activities-header i {
+            color: var(--primary);
+            margin-right: 0.5rem;
+        }
+
+        .activities-header a {
+            color: var(--primary);
+            text-decoration: none;
+            font-size: 0.9rem;
+        }
+
+            .activities-header a:hover {
+                text-decoration: underline;
+            }
+
+    .activity-item {
+        display: flex;
+        align-items: flex-start;
+        gap: 1rem;
+        padding: 1rem 0;
+        border-bottom: 1px solid var(--gray-200);
+    }
+
+        .activity-item:last-child {
+            border-bottom: none;
+        }
+
+    .activity-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+    }
+
+        .activity-icon.success {
+            background: rgba(16, 185, 129, 0.1);
+            color: #10b981;
+        }
+
+        .activity-icon.warning {
+            background: rgba(245, 158, 11, 0.1);
+            color: #f59e0b;
+        }
+
+        .activity-icon.danger {
+            background: rgba(239, 68, 68, 0.1);
+            color: #ef4444;
+        }
+
+        .activity-icon.info {
+            background: rgba(37, 99, 235, 0.1);
+            color: #2563eb;
+        }
+
+        .activity-icon.primary {
+            background: rgba(102, 126, 234, 0.1);
+            color: #667eea;
+        }
+
+    .activity-content {
+        flex: 1;
+    }
+
+    .activity-title {
+        font-weight: 600;
+        color: var(--gray-800);
+        margin-bottom: 0.25rem;
+    }
+
+    .activity-details {
+        color: var(--gray-600);
+        font-size: 0.9rem;
+        margin-bottom: 0.25rem;
+    }
+
+    .activity-meta {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        color: var(--gray-500);
+        font-size: 0.8rem;
+    }
+
+        .activity-meta i {
+            margin-right: 0.25rem;
+        }
+
+    .activity-badge {
+        padding: 0.25rem 0.5rem;
+        border-radius: 20px;
+        font-size: 0.7rem;
+        font-weight: 500;
+        background: var(--gray-100);
+        color: var(--gray-600);
+    }
+
+        .activity-badge.admin {
+            background: rgba(37, 99, 235, 0.1);
+            color: #2563eb;
+        }
+
+        .activity-badge.employer {
+            background: rgba(16, 185, 129, 0.1);
+            color: #10b981;
+        }
+
+        .activity-badge.candidate {
+            background: rgba(245, 158, 11, 0.1);
+            color: #f59e0b;
+        }
+
+    .empty-state {
+        text-align: center;
+        padding: 3rem;
+        color: var(--gray-500);
+    }
+
+        .empty-state i {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            color: var(--gray-300);
+        }
+</style>
+
+<div class="activities-container">
+    <div class="activities-header">
+        <h5>
+            <i class="fas fa-history"></i>
+            Hoạt động gần đây
+        </h5>
+        <a href="@Url.Action("Activities", "Admin")">
+            Xem tất cả <i class="fas fa-arrow-right ms-1"></i>
+        </a>
+    </div>
+
+    @if (!activities.Any())
+    {
+        <div class="empty-state">
+            <i class="fas fa-history"></i>
+            <p>Chưa có hoạt động nào</p>
+        </div>
+    }
+    else
+    {
+        @foreach (var activity in activities)
+        {
+            <div class="activity-item">
+                @{
+                    string iconClass = "info";
+                    string icon = "fas fa-circle";
+                    
+                    if (activity.Action.Contains("Duyệt") || activity.Action.Contains("Approve"))
+                    {
+                        iconClass = "success";
+                        icon = "fas fa-check-circle";
+                    }
+                    else if (activity.Action.Contains("Từ chối") || activity.Action.Contains("Reject") || activity.Action.Contains("Khóa"))
+                    {
+                        iconClass = "danger";
+                        icon = "fas fa-times-circle";
+                    }
+                    else if (activity.Action.Contains("Tạo") || activity.Action.Contains("Create") || activity.Action.Contains("Đăng"))
+                    {
+                        iconClass = "primary";
+                        icon = "fas fa-plus-circle";
+                    }
+                    else if (activity.Action.Contains("Cập nhật") || activity.Action.Contains("Update"))
+                    {
+                        iconClass = "warning";
+                        icon = "fas fa-edit";
+                    }
+                    else if (activity.Action.Contains("Đăng nhập"))
+                    {
+                        iconClass = "success";
+                        icon = "fas fa-sign-in-alt";
+                    }
+                    else if (activity.Action.Contains("Đăng xuất"))
+                    {
+                        iconClass = "warning";
+                        icon = "fas fa-sign-out-alt";
+                    }
+                }
+                
+                <div class="activity-icon @iconClass">
+                    <i class="@icon"></i>
+                </div>
+                
+                <div class="activity-content">
+                    <div class="activity-title">
+                        @activity.Action
+                        <span class="activity-badge @(activity.UserRole?.ToLower())">@activity.UserRole</span>
+                    </div>
+                    <div class="activity-details">@activity.Details</div>
+                    <div class="activity-meta">
+                        <span><i class="fas fa-user"></i> @activity.Username</span>
+                        <span><i class="fas fa-clock"></i> @activity.CreatedAt.ToString("HH:mm dd/MM/yyyy")</span>
+                        @if (!string.IsNullOrEmpty(activity.TargetUser))
+                        {
+                            <span><i class="fas fa-user-tag"></i> @activity.TargetUser</span>
+                        }
+                        @if (!string.IsNullOrEmpty(activity.IpAddress))
+                        {
+                            <span><i class="fas fa-network-wired"></i> @activity.IpAddress</span>
+                        }
+                    </div>
+                </div>
+            </div>
+        }
+    }
+</div>

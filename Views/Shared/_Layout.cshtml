@@ -1,0 +1,1361 @@
+<!DOCTYPE html>
+@{
+    var requestPath = Context.Request.Path.Value ?? string.Empty;
+    var isSecurityDarkPage =
+        requestPath.Contains("/Jobs/ManageApplications", StringComparison.OrdinalIgnoreCase) ||
+        requestPath.Contains("/Jobs/CVAccessLogs", StringComparison.OrdinalIgnoreCase) ||
+        requestPath.Contains("/Admin/CVAccessLogs", StringComparison.OrdinalIgnoreCase) ||
+        requestPath.Contains("/TestSecurity", StringComparison.OrdinalIgnoreCase);
+}
+<html lang="vi" class="@(isSecurityDarkPage ? "security-dark-page" : "")">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+    <title>@ViewData["Title"] - JobPortal</title>
+    <script>
+        (function () {
+            try {
+                if (localStorage.getItem('darkMode') === 'enabled') {
+                    document.documentElement.classList.add('dark-mode-preload', 'theme-no-transition');
+                    document.documentElement.style.colorScheme = 'dark';
+                }
+            } catch (e) { }
+        })();
+    </script>
+    
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" />
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+    
+    <!-- Animate.css -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" />
+    
+    <style>
+            :root {
+                --primary-color: #2563eb;
+                --primary-dark: #1d4ed8;
+                --primary-light: #60a5fa;
+                --secondary-color: #10b981;
+                --danger-color: #ef4444;
+                --warning-color: #f59e0b;
+                --dark-color: #1f2937;
+                --gray-color: #6b7280;
+                --light-color: #f3f4f6;
+                --white: #ffffff;
+                --shadow-sm: 0 1px 2px 0 rgba(0,0,0,0.05);
+                --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.1);
+                --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.1);
+                --shadow-xl: 0 20px 25px -5px rgba(0,0,0,0.1);
+                --border-radius: 0.5rem;
+            }
+
+            /* Base styles */
+            * {
+                margin: 0;
+                padding: 0;
+                box-sizing: border-box;
+            }
+
+            body {
+                font-family: 'Inter', sans-serif;
+                background-color: #f8fafc;
+                color: #1e293b;
+                transition: background-color 0.3s, color 0.3s;
+                overflow-x: hidden;
+            }
+
+            html.security-dark-page,
+            html.dark-mode-preload,
+            html.dark-mode-preload body,
+            html.security-dark-page body {
+                background: #0f172a !important;
+                color: #e5e7eb !important;
+            }
+
+            body.security-dark-page {
+                transition: none !important;
+            }
+
+            body.security-dark-page *,
+            body.security-dark-page *::before,
+            body.security-dark-page *::after {
+                transition-property: transform, opacity, border-color, box-shadow, color !important;
+            }
+
+                /* Dark mode */
+                body.dark-mode {
+                    background-color: #1a1a1a;
+                    color: #f0f0f0;
+                }
+
+                    body.dark-mode .table,
+                    body.dark-mode .modal-content,
+                    body.dark-mode .card-body,
+                    body.dark-mode .form-control,
+                    body.dark-mode .form-select,
+                    body.dark-mode .list-group-item {
+                        background-color: #2d2d2d;
+                        color: #f0f0f0;
+                    }
+
+                    body.dark-mode .table-light,
+                    body.dark-mode .card-header:not(.bg-primary):not(.bg-success):not(.bg-info):not(.bg-danger):not(.bg-warning),
+                    body.dark-mode .modal-header,
+                    body.dark-mode .modal-footer {
+                        background-color: #242424 !important;
+                        color: #f0f0f0;
+                    }
+
+                    body.dark-mode .table > :not(caption) > * > * {
+                        background-color: transparent;
+                        color: #f0f0f0;
+                        border-color: #404040;
+                    }
+
+                    body.dark-mode .form-control,
+                    body.dark-mode .form-select {
+                        border-color: #4b5563;
+                    }
+
+                    body.dark-mode .form-control:focus,
+                    body.dark-mode .form-select:focus {
+                        border-color: var(--primary-light);
+                        box-shadow: 0 0 0 0.2rem rgba(96, 165, 250, 0.2);
+                    }
+
+                    body.dark-mode .modal-body .bg-light,
+                    body.dark-mode .company-info-card,
+                    body.dark-mode input[type="file"] {
+                        background-color: #242424 !important;
+                    }
+
+                    body.dark-mode .navbar {
+                        background-color: #2d2d2d !important;
+                        border-bottom: 1px solid #404040;
+                    }
+
+                    body.dark-mode .navbar-brand {
+                        color: #f0f0f0 !important;
+                    }
+
+                    body.dark-mode .nav-link {
+                        color: #b0b0b0 !important;
+                    }
+
+                        body.dark-mode .nav-link:hover {
+                            color: #2563eb !important;
+                        }
+
+                    body.dark-mode .dropdown-menu {
+                        background-color: #2d2d2d;
+                        border-color: #404040;
+                    }
+
+                    body.dark-mode .dropdown-item {
+                        color: #f0f0f0;
+                    }
+
+                        body.dark-mode .dropdown-item:hover {
+                            background-color: #404040;
+                            color: #2563eb;
+                        }
+
+                    body.dark-mode .card {
+                        background-color: #2d2d2d;
+                        border-color: #404040;
+                    }
+
+                    body.dark-mode .bg-light {
+                        background-color: #2d2d2d !important;
+                    }
+
+                    body.dark-mode .text-muted {
+                        color: #b0b0b0 !important;
+                    }
+
+                    body.dark-mode footer {
+                        background-color: #2d2d2d !important;
+                    }
+
+            /* Navbar */
+            .navbar {
+                background: rgba(255, 255, 255, 0.82);
+                backdrop-filter: blur(18px);
+                -webkit-backdrop-filter: blur(18px);
+                border-bottom: 1px solid rgba(227, 235, 246, 0.9);
+                box-shadow: 0 10px 32px rgba(37, 99, 235, 0.08);
+                padding: 0.8rem 0;
+            }
+
+            .navbar-brand {
+                display: inline-flex;
+                align-items: center;
+                gap: 0.6rem;
+                font-size: 1.45rem;
+                font-weight: 800;
+                color: #2563eb !important;
+                letter-spacing: 0;
+                transition: all 0.22s ease;
+                -webkit-text-fill-color: currentColor;
+            }
+
+                .navbar-brand:hover {
+                    transform: translateY(-1px);
+                }
+
+                .navbar-brand .brand-icon {
+                    width: 38px;
+                    height: 38px;
+                    border-radius: 12px;
+                    display: inline-flex;
+                    align-items: center;
+                    justify-content: center;
+                    background: linear-gradient(135deg, #eef6ff, #dbeafe);
+                    border: 1px solid #e3ebf6;
+                    box-shadow: 0 10px 22px rgba(37, 99, 235, 0.12);
+                }
+
+            .navbar-toggler {
+                border: none;
+                padding: 0.5rem;
+            }
+
+                .navbar-toggler:focus {
+                    box-shadow: none;
+                    outline: none;
+                }
+
+            .nav-link {
+                color: #334155 !important;
+                font-weight: 650;
+                padding: 0.62rem 0.9rem !important;
+                margin: 0 0.15rem;
+                border-radius: 999px;
+                transition: all 0.22s ease;
+                position: relative;
+            }
+
+                .nav-link i {
+                    margin-right: 0.5rem;
+                    font-size: 1rem;
+                }
+
+                .nav-link:hover {
+                    background-color: #eef6ff;
+                    color: var(--primary-color) !important;
+                    transform: translateY(-1px);
+                }
+
+                .nav-link.active {
+                    color: var(--primary-color) !important;
+                    font-weight: 600;
+                }
+
+                    .nav-link.active::after {
+                        display: none;
+                    }
+
+            .navbar .btn {
+                border-radius: 999px;
+                font-weight: 750;
+                padding: 0.62rem 1rem;
+                transition: all 0.22s ease;
+            }
+
+            .navbar .btn-outline-primary {
+                color: #2563eb;
+                border-color: #bfdcff;
+                background: rgba(255, 255, 255, 0.68);
+            }
+
+            .navbar .btn-outline-primary:hover {
+                color: #1d4ed8;
+                background: #eef6ff;
+                border-color: #93c5fd;
+                transform: translateY(-1px);
+            }
+
+            .navbar .btn-primary {
+                background: linear-gradient(135deg, #2563eb, #1d4ed8);
+                border: 0;
+                box-shadow: 0 12px 26px rgba(37, 99, 235, 0.22);
+            }
+
+            .navbar .btn-primary:hover {
+                transform: translateY(-1px);
+                box-shadow: 0 16px 32px rgba(37, 99, 235, 0.28);
+            }
+
+            .btn-employer {
+                color: #142033;
+                border: 1px solid #e3ebf6;
+                background: #eef6ff;
+            }
+
+            .btn-employer:hover {
+                color: #2563eb;
+                border-color: #bfdbfe;
+                background: #ffffff;
+            }
+
+            /* Icon buttons */
+            .icon-btn {
+                width: 38px;
+                height: 38px;
+                border-radius: 50%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                background: transparent;
+                border: none;
+                color: var(--dark-color);
+                font-size: 1.1rem;
+                cursor: pointer;
+                transition: all 0.3s;
+                position: relative;
+                margin: 0 0.2rem;
+            }
+
+                .icon-btn:hover {
+                    background-color: rgba(37, 99, 235, 0.1);
+                    color: var(--primary-color);
+                    transform: translateY(-2px);
+                }
+
+                .icon-btn .badge {
+                    position: absolute;
+                    top: -5px;
+                    right: -5px;
+                    font-size: 0.65rem;
+                    padding: 0.2rem 0.4rem;
+                    min-width: 18px;
+                    height: 18px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                }
+
+            /* Dark mode toggle */
+            .dark-mode-toggle {
+                width: 38px;
+                height: 38px;
+                border-radius: 50%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                background: transparent;
+                border: none;
+                color: var(--dark-color);
+                font-size: 1.1rem;
+                cursor: pointer;
+                transition: all 0.3s;
+            }
+
+                .dark-mode-toggle:hover {
+                    background-color: rgba(37, 99, 235, 0.1);
+                    color: var(--primary-color);
+                    transform: rotate(30deg);
+                }
+
+            /* Avatar */
+            .user-avatar {
+                width: 38px;
+                height: 38px;
+                border-radius: 50%;
+                object-fit: cover;
+                border: 2px solid var(--primary-color);
+                transition: all 0.3s;
+            }
+
+                .user-avatar:hover {
+                    transform: scale(1.1);
+                    border-color: var(--primary-dark);
+                }
+
+            /* Notification & Chat dropdown - Responsive */
+            .notification-dropdown,
+            .chat-dropdown {
+                width: 320px;
+                max-height: 400px;
+                overflow-y: auto;
+                padding: 0;
+                border: none;
+                box-shadow: var(--shadow-lg);
+            }
+
+            @@media (max-width: 480px) {
+                .notification-dropdown,
+                .chat-dropdown {
+                    width: calc(100vw - 2rem);
+                    max-width: 320px;
+                    position: fixed;
+                    left: 50% !important;
+                    transform: translateX(-50%) !important;
+                    top: 60px !important;
+                }
+            }
+
+            .notification-header {
+                padding: 0.875rem 1rem;
+                border-bottom: 1px solid #eef2f6;
+                font-weight: 600;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+            }
+
+            .notification-item {
+                padding: 0.875rem 1rem;
+                border-bottom: 1px solid #eef2f6;
+                transition: all 0.3s;
+                cursor: pointer;
+            }
+
+                .notification-item:hover {
+                    background-color: #f8fafc;
+                }
+
+                .notification-item.unread {
+                    background-color: #eef2ff;
+                }
+
+            .notification-icon {
+                width: 36px;
+                height: 36px;
+                border-radius: 50%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 1rem;
+            }
+
+            .notification-content {
+                flex: 1;
+            }
+
+            .notification-title {
+                font-weight: 600;
+                font-size: 0.875rem;
+                margin-bottom: 0.25rem;
+            }
+
+            .notification-text {
+                font-size: 0.8rem;
+                color: var(--gray-color);
+                margin-bottom: 0.25rem;
+            }
+
+            .notification-time {
+                font-size: 0.7rem;
+                color: var(--gray-color);
+            }
+
+            .notification-footer {
+                padding: 0.75rem 1rem;
+                text-align: center;
+                border-top: 1px solid #eef2f6;
+            }
+
+            /* Chat items */
+            .chat-item {
+                padding: 0.875rem 1rem;
+                border-bottom: 1px solid #eef2f6;
+                transition: all 0.3s;
+                cursor: pointer;
+            }
+
+                .chat-item:hover {
+                    background-color: #f8fafc;
+                }
+
+            .chat-avatar {
+                width: 40px;
+                height: 40px;
+                border-radius: 50%;
+                object-fit: cover;
+                margin-right: 0.75rem;
+            }
+
+            .chat-info {
+                flex: 1;
+            }
+
+            .chat-name {
+                font-weight: 600;
+                font-size: 0.875rem;
+                margin-bottom: 0.25rem;
+            }
+
+            .chat-last-message {
+                font-size: 0.8rem;
+                color: var(--gray-color);
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                max-width: 160px;
+            }
+
+            .chat-time {
+                font-size: 0.7rem;
+                color: var(--gray-color);
+                margin-left: 0.5rem;
+            }
+
+            .chat-badge {
+                background-color: var(--primary-color);
+                color: white;
+                font-size: 0.65rem;
+                padding: 0.2rem 0.45rem;
+                border-radius: 10px;
+                min-width: 18px;
+                height: 18px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+
+            /* Admin Badge */
+            .admin-badge {
+                background-color: var(--primary-color);
+                color: white;
+                padding: 0.2rem 0.5rem;
+                border-radius: 20px;
+                font-size: 0.65rem;
+                margin-left: 0.5rem;
+            }
+
+            /* Main content */
+            main {
+                min-height: calc(100vh - 200px);
+            }
+
+            /* Footer */
+            footer {
+                background: linear-gradient(180deg, #ffffff 0%, #eef6ff 100%);
+                border-top: 1px solid #e3ebf6;
+                padding: 3rem 0 1.25rem;
+                color: #142033;
+            }
+
+                footer h5, footer h6 {
+                    font-weight: 800;
+                    margin-bottom: 1rem;
+                }
+
+                footer ul li {
+                    margin-bottom: 0.5rem;
+                }
+
+                footer a {
+                    transition: all 0.22s ease;
+                }
+
+                    footer a:hover {
+                        color: var(--primary-color) !important;
+                    }
+
+            .footer-brand {
+                display: inline-flex;
+                align-items: center;
+                gap: 0.6rem;
+                color: #2563eb;
+                font-weight: 850;
+                font-size: 1.35rem;
+                margin-bottom: 0.8rem;
+            }
+
+            .social-link {
+                width: 42px;
+                height: 42px;
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                border-radius: 14px;
+                background: #ffffff;
+                border: 1px solid #e3ebf6;
+                color: #2563eb !important;
+                box-shadow: 0 10px 24px rgba(37, 99, 235, 0.08);
+            }
+
+            .social-link:hover {
+                background: #2563eb;
+                color: #ffffff !important;
+                transform: translateY(-2px);
+            }
+
+            /* Alert messages */
+            .alert {
+                border-radius: var(--border-radius);
+                margin-bottom: 1rem;
+            }
+
+            /* ==================== RESPONSIVE STYLES ==================== */
+
+            /* Tablet (768px - 1024px) */
+            @@media (max-width: 1024px) {
+                .navbar-brand {
+                    font-size: 1.3rem;
+                }
+            
+                    .navbar-brand i {
+                        font-size: 1.2rem;
+                    }
+            
+                .nav-link {
+                    padding: 0.5rem 0.6rem !important;
+                    font-size: 0.9rem;
+                }
+            
+                    .nav-link i {
+                        margin-right: 0.4rem;
+                    }
+            }
+
+            /* Mobile Landscape (576px - 768px) */
+            @@media (max-width: 768px) {
+                .navbar {
+                    padding: 0.5rem 0;
+                }
+            
+                .navbar-brand {
+                    font-size: 1.2rem;
+                }
+            
+                    .navbar-brand i {
+                        font-size: 1.1rem;
+                    }
+                /* Hiển thị icon và text trên mobile khi menu mở */
+                .navbar-collapse {
+                    background: rgba(255, 255, 255, 0.98);
+                    backdrop-filter: blur(10px);
+                    border-radius: var(--border-radius);
+                    padding: 1rem;
+                    margin-top: 0.5rem;
+                    max-height: calc(100vh - 70px);
+                    overflow-y: auto;
+                }
+            
+                body.dark-mode .navbar-collapse {
+                    background: rgba(45, 45, 45, 0.98);
+                }
+            
+                .nav-link {
+                    padding: 0.75rem 1rem !important;
+                    margin: 0.25rem 0;
+                    text-align: center;
+                }
+            
+                    .nav-link i {
+                        margin-right: 0.75rem;
+                        font-size: 1.1rem;
+                    }
+            
+                    .nav-link span {
+                        display: inline-block !important;
+                    }
+            
+                    .nav-link.active::after {
+                        display: none;
+                    }
+                /* User menu trên mobile */
+                .navbar-nav.align-items-center {
+                    flex-direction: row;
+                    justify-content: center;
+                    flex-wrap: wrap;
+                    margin-top: 0.5rem;
+                    padding-top: 0.5rem;
+                    border-top: 1px solid rgba(0,0,0,0.1);
+                }
+            
+                body.dark-mode .navbar-nav.align-items-center {
+                    border-top-color: rgba(255,255,255,0.1);
+                }
+            
+                .icon-btn, .dark-mode-toggle {
+                    width: 44px;
+                    height: 44px;
+                    font-size: 1.2rem;
+                }
+            
+                .user-avatar {
+                    width: 44px;
+                    height: 44px;
+                }
+                /* Footer responsive */
+                footer .row > div {
+                    text-align: center;
+                    margin-bottom: 1.5rem;
+                }
+            
+                footer .d-flex {
+                    justify-content: center;
+                }
+                /* Alert */
+                .alert {
+                    font-size: 0.875rem;
+                }
+            }
+
+            /* Mobile Portrait (dưới 576px) */
+            @@media (max-width: 576px) {
+                .navbar-brand {
+                    font-size: 1.1rem;
+                }
+            
+                    .navbar-brand i {
+                        font-size: 1rem;
+                    }
+            
+                .navbar-toggler {
+                    padding: 0.4rem;
+                }
+            
+                .navbar-toggler-icon {
+                    width: 1.2rem;
+                    height: 1.2rem;
+                }
+            
+                .icon-btn, .dark-mode-toggle {
+                    width: 40px;
+                    height: 40px;
+                    font-size: 1rem;
+                }
+            
+                .user-avatar {
+                    width: 40px;
+                    height: 40px;
+                }
+            
+                .notification-dropdown .notification-header,
+                .chat-dropdown .notification-header {
+                    font-size: 0.875rem;
+                }
+            
+                .notification-item, .chat-item {
+                    padding: 0.75rem;
+                }
+            
+                .notification-title, .chat-name {
+                    font-size: 0.8rem;
+                }
+            
+                .notification-text, .chat-last-message {
+                    font-size: 0.75rem;
+                }
+            
+                .btn-outline-primary, .btn-primary {
+                    padding: 0.4rem 0.75rem;
+                    font-size: 0.8rem;
+                }
+            
+                footer {
+                    padding: 1.5rem 0 1rem;
+                }
+            
+                    footer h5, footer h6 {
+                        font-size: 1rem;
+                        margin-bottom: 0.75rem;
+                    }
+            
+                    footer ul li a {
+                        font-size: 0.8rem;
+                    }
+            
+                    footer .small {
+                        font-size: 0.7rem;
+                    }
+            
+                main {
+                    padding: 1rem 0;
+                }
+            }
+
+            /* Very small devices (dưới 375px) */
+            @@media (max-width: 375px) {
+                .icon-btn, .dark-mode-toggle {
+                    width: 36px;
+                    height: 36px;
+                    font-size: 0.9rem;
+                }
+            
+                .user-avatar {
+                    width: 36px;
+                    height: 36px;
+                }
+            
+                .btn-outline-primary, .btn-primary {
+                    padding: 0.35rem 0.6rem;
+                    font-size: 0.75rem;
+                }
+            
+                    .btn-outline-primary i, .btn-primary i {
+                        font-size: 0.75rem;
+                    }
+            }
+
+            /* Touch-friendly improvements */
+            @@media (hover: none) and (pointer: coarse) {
+                .nav-link:hover,
+                .icon-btn:hover,
+                .dark-mode-toggle:hover,
+                .action-btn-modern:hover {
+                    transform: none;
+                }
+            
+                button, a, .nav-link, .icon-btn {
+                    cursor: pointer;
+                    -webkit-tap-highlight-color: transparent;
+                }
+            }
+    </style>
+
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/custom.css" asp-append-version="true" />
+
+    @await RenderSectionAsync("Styles", required: false)
+</head>
+<body class="@(isSecurityDarkPage ? "security-dark-page dark-mode" : "")">
+    @await Html.PartialAsync("_PageLoader")
+    <script>
+        (function () {
+            try {
+                if (document.documentElement.classList.contains('dark-mode-preload')) {
+                    document.body.classList.add('dark-mode');
+                }
+            } catch (e) { }
+        })();
+    </script>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-light sticky-top">
+        <div class="container">
+            <a class="navbar-brand" href="@Url.Action("Index", "Home")">
+                <span class="brand-icon">
+                    <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <rect width="20" height="14" x="2" y="7" rx="2"></rect>
+                        <path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"></path>
+                        <path d="M2 13h20"></path>
+                    </svg>
+                </span>
+                JobPortal
+            </a>
+            
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-label="Toggle menu">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav mx-auto">
+                    <li class="nav-item">
+                        <a class="nav-link nav-hover-line @(ViewContext.RouteData.Values["controller"]?.ToString() == "Jobs" ? "active" : "")"
+                               href="@Url.Action("Index", "Jobs")">
+                            <span>Việc làm</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link nav-hover-line @(ViewContext.RouteData.Values["controller"]?.ToString() == "Companies" ? "active" : "")"
+                               href="@Url.Action("Index", "Companies")">
+                            <span>Công ty</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link nav-hover-line @(ViewContext.RouteData.Values["controller"]?.ToString() == "CV" ? "active" : "")"
+                           href="@Url.Action("Upload", "CV")">
+                            <span>Tạo CV</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link nav-hover-line" href="@Url.Action("Index", "Home")#tin-noi-bat">
+                            <span>Tin nổi bật</span>
+                        </a>
+                    </li>
+                </ul>
+
+                <ul class="navbar-nav align-items-center">
+                    <li class="nav-item">
+                        <button class="dark-mode-toggle" id="darkModeToggle" aria-label="Chế độ sáng tối" title="Chế độ sáng tối">
+                            <svg class="theme-icon theme-icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                <path d="M20.5 14.5A8.5 8.5 0 0 1 9.5 3.5 7 7 0 1 0 20.5 14.5Z"></path>
+                            </svg>
+                            <svg class="theme-icon theme-icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                <circle cx="12" cy="12" r="4"></circle>
+                                <path d="M12 2v2"></path>
+                                <path d="M12 20v2"></path>
+                                <path d="m4.93 4.93 1.41 1.41"></path>
+                                <path d="m17.66 17.66 1.41 1.41"></path>
+                                <path d="M2 12h2"></path>
+                                <path d="M20 12h2"></path>
+                                <path d="m6.34 17.66-1.41 1.41"></path>
+                                <path d="m19.07 4.93-1.41 1.41"></path>
+                            </svg>
+                        </button>
+                    </li>
+
+                    @if (Context.Session.GetString("UserId") != null)
+                    {
+                        <!-- Notification -->
+                        <li class="nav-item dropdown">
+                            <button class="icon-btn position-relative" id="notificationDropdown" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Thông báo">
+                                <i class="fas fa-bell"></i>
+                                <span class="badge bg-danger" id="notificationBadge" style="display: none;">0</span>
+                            </button>
+                            <div class="dropdown-menu dropdown-menu-end notification-dropdown" aria-labelledby="notificationDropdown">
+                                <div class="notification-header">
+                                    <span>Thông báo</span>
+                                    <small><a href="#" id="markAllRead" style="color: #2563eb; text-decoration: none;">Đánh dấu đã đọc</a></small>
+                                </div>
+                                <div id="notificationList" style="max-height: 300px; overflow-y: auto;">
+                                    <div class="text-center p-3">Đang tải...</div>
+                                </div>
+                                <div class="notification-footer">
+                                    <a href="@Url.Action("Index", "Notification")">Xem tất cả thông báo</a>
+                                </div>
+                            </div>
+                        </li>
+
+                        <!-- Chat -->
+                        <li class="nav-item dropdown">
+                            <button class="icon-btn position-relative" id="chatDropdown" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Tin nhắn">
+                                <i class="fas fa-comment"></i>
+                                <span class="badge bg-danger" id="chatBadge" style="display: none;">0</span>
+                            </button>
+                            <div class="dropdown-menu dropdown-menu-end chat-dropdown" aria-labelledby="chatDropdown">
+                                <div class="notification-header">
+                                    <span>Tin nhắn</span>
+                                    <small><a href="@Url.Action("Index", "Chat")" style="color: #2563eb; text-decoration: none;">Xem tất cả</a></small>
+                                </div>
+                                <div id="chatList" style="max-height: 350px; overflow-y: auto;">
+                                    <div class="text-center p-3">Đang tải...</div>
+                                </div>
+                            </div>
+                        </li>
+
+                        <!-- User Dropdown -->
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle p-0" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                <img src="@(string.IsNullOrWhiteSpace(Context.Session.GetString("UserAvatar")) ? "/images/default-avatar.svg" : Context.Session.GetString("UserAvatar"))"
+                                     alt="Avatar" class="user-avatar">
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+                                <!-- Menu dành cho Admin -->
+                                @if (Context.Session.GetString("UserRole") == "Admin")
+                                {
+                                    <li><h6 class="dropdown-header bg-primary text-white py-2 px-3">Quản trị hệ thống</h6></li>
+                                    <li>
+                                        <a class="dropdown-item" href="@Url.Action("Dashboard", "Admin")">
+                                            <i class="fas fa-tachometer-alt me-2 text-primary"></i>Dashboard
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item" href="@Url.Action("ManageUsers", "Admin")">
+                                            <i class="fas fa-users me-2 text-primary"></i>Quản lý người dùng
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item" href="@Url.Action("ManageApplications", "Jobs")">
+                                            <i class="fas fa-file-signature me-2 text-primary"></i>Duyệt hồ sơ CV
+                                            <span class="badge bg-warning text-dark ms-2" id="pendingApplicationsCount">0</span>
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item" href="@Url.Action("ManageJobs", "Admin")">
+                                            <i class="fas fa-briefcase me-2 text-primary"></i>Quản lý tin tuyển dụng
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item" href="@Url.Action("CreateJob", "Admin")">
+                                            <i class="fas fa-plus-circle me-2 text-primary"></i>Đăng tin mới
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item" href="@Url.Action("ManageAnnouncements", "Admin")">
+                                            <i class="fas fa-bullhorn me-2 text-primary"></i>Quản lý thông báo
+                                        </a>
+                                    </li>
+                                    <li><hr class="dropdown-divider"></li>
+                                }
+
+                                <!-- Menu dành cho Employer -->
+                                @if (Context.Session.GetString("UserRole") == "Employer")
+                                {
+                                    <li><h6 class="dropdown-header bg-success text-white py-2 px-3">Nhà tuyển dụng</h6></li>
+                                    <li>
+                                        <a class="dropdown-item" href="@Url.Action("ManageApplications", "Jobs")">
+                                            <i class="fas fa-file-signature me-2 text-success"></i>Xem hồ sơ ứng tuyển
+                                        </a>
+                                    </li>
+                                    <li><hr class="dropdown-divider"></li>
+                                }
+
+                                <!-- Menu dành cho Candidate -->
+                                @if (Context.Session.GetString("UserRole") == "Candidate")
+                                {
+                                    <li><h6 class="dropdown-header bg-info text-white py-2 px-3">Ứng viên</h6></li>
+                                    <li>
+                                        <a class="dropdown-item" href="@Url.Action("MyApplications", "Account")">
+                                            <i class="fas fa-file-alt me-2 text-info"></i>Việc đã ứng tuyển
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item" href="@Url.Action("SavedJobs", "Jobs")">
+                                            <i class="fas fa-bookmark me-2 text-info"></i>Việc đã lưu
+                                        </a>
+                                    </li>
+                                    <li><hr class="dropdown-divider"></li>
+                                }
+
+                                <!-- Menu chung cho tất cả user -->
+                                <li>
+                                    <a class="dropdown-item" href="@Url.Action("Profile", "Account")">
+                                        <i class="fas fa-user me-2"></i>Hồ sơ cá nhân
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item" href="@Url.Action("ChangePassword", "Account")">
+                                        <i class="fas fa-key me-2"></i>Đổi mật khẩu
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item" href="@Url.Action("Profile", "Account", new { tab = "security" })">
+                                        <i class="fas fa-shield-alt me-2"></i>Bảo mật 2FA
+                                    </a>
+                                </li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li>
+                                    <form asp-action="Logout" asp-controller="Account" method="post" id="logoutForm">
+                                        @Html.AntiForgeryToken()
+                                        <button type="submit" class="dropdown-item text-danger">
+                                            <i class="fas fa-sign-out-alt me-2"></i>Đăng xuất
+                                        </button>
+                                    </form>
+                                </li>
+                            </ul>
+                        </li>
+                    }
+                    else
+                    {
+                        <li class="nav-item">
+                            <a class="btn btn-outline-primary me-2" href="@Url.Action("Login", "Account")">
+                                Đăng nhập
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="btn btn-primary" href="@Url.Action("Register", "Account")">
+                                Đăng ký
+                            </a>
+                        </li>
+                        <li class="nav-item ms-lg-2 mt-2 mt-lg-0">
+                            <a class="btn btn-employer" href="@Url.Action("Login", "Account", new { role = "employer", returnUrl = Url.Action("ManageApplications", "Jobs") })">
+                                Nhà tuyển dụng
+                            </a>
+                        </li>
+                    }
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Alert Messages -->
+    @if (TempData["SuccessMessage"] != null || TempData["ErrorMessage"] != null || TempData["WarningMessage"] != null)
+    {
+        <div class="app-toast-container" aria-live="polite" aria-atomic="true">
+            @if (TempData["SuccessMessage"] != null)
+            {
+                <div class="alert alert-success alert-dismissible fade show app-toast" role="alert">
+                    <i class="fas fa-check-circle me-2"></i>@TempData["SuccessMessage"]
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            }
+
+            @if (TempData["ErrorMessage"] != null)
+            {
+                <div class="alert alert-danger alert-dismissible fade show app-toast" role="alert">
+                    <i class="fas fa-exclamation-circle me-2"></i>@TempData["ErrorMessage"]
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            }
+
+            @if (TempData["WarningMessage"] != null)
+            {
+                <div class="alert alert-warning alert-dismissible fade show app-toast" role="alert">
+                    <i class="fas fa-exclamation-triangle me-2"></i>@TempData["WarningMessage"]
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            }
+        </div>
+    }
+
+    <!-- Main Content -->
+    <main class="py-4">
+        @RenderBody()
+    </main>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="row g-4">
+                <div class="col-lg-4 col-md-6 text-center text-md-start">
+                    <div class="footer-brand">
+                        <span class="brand-icon">
+                            <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                <rect width="20" height="14" x="2" y="7" rx="2"></rect>
+                                <path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"></path>
+                                <path d="M2 13h20"></path>
+                            </svg>
+                        </span>
+                        JobPortal
+                    </div>
+                    <p class="text-muted small mb-0">Nền tảng tuyển dụng hiện đại giúp ứng viên tìm việc phù hợp và doanh nghiệp tiếp cận nhân sự chất lượng.</p>
+                </div>
+                <div class="col-6 col-lg-2 col-md-3 text-center text-md-start">
+                    <h6>Nền tảng</h6>
+                    <ul class="list-unstyled small">
+                        <li><a href="@Url.Action("Index", "Jobs")" class="text-decoration-none text-muted">Việc làm</a></li>
+                        <li><a href="@Url.Action("Index", "Companies")" class="text-decoration-none text-muted">Công ty</a></li>
+                        <li><a href="@Url.Action("Upload", "CV")" class="text-decoration-none text-muted">CV</a></li>
+                    </ul>
+                </div>
+                <div class="col-6 col-lg-2 col-md-3 text-center text-md-start">
+                    <h6>Thông tin</h6>
+                    <ul class="list-unstyled small">
+                        <li><a href="@Url.Action("Index", "Home")#tin-noi-bat" class="text-decoration-none text-muted">Tin nổi bật</a></li>
+                        <li><a href="@Url.Action("Login", "Account", new { role = "employer", returnUrl = Url.Action("ManageApplications", "Jobs") })" class="text-decoration-none text-muted">Nhà tuyển dụng</a></li>
+                        <li><a href="#" class="text-decoration-none text-muted">Liên hệ</a></li>
+                    </ul>
+                </div>
+                <div class="col-lg-4 col-md-12 text-center text-md-start">
+                    <h6>Kết nối với JobPortal</h6>
+                    <div class="d-flex gap-3 justify-content-center justify-content-md-start">
+                        <a href="#" class="social-link" aria-label="Facebook">
+                            <svg width="19" height="19" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M13.5 22v-8h2.7l.4-3.1h-3.1V8.9c0-.9.3-1.5 1.6-1.5h1.7V4.6c-.8-.1-1.7-.2-2.5-.2-2.5 0-4.2 1.5-4.2 4.3v2.2H7.3V14h2.8v8h3.4Z"/></svg>
+                        </a>
+                        <a href="#" class="social-link" aria-label="Zalo">
+                            <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5.5A3.5 3.5 0 0 1 7.5 2h9A3.5 3.5 0 0 1 20 5.5v8.2a3.5 3.5 0 0 1-3.5 3.5H12l-4.5 4v-4A3.5 3.5 0 0 1 4 13.7V5.5Z"></path><path d="M8 8h5l-5 5h5"></path><path d="M16 13V8"></path></svg>
+                        </a>
+                        <a href="#" class="social-link" aria-label="Telegram">
+                            <svg width="19" height="19" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M21.7 4.3c.3-1.2-.8-1.7-1.8-1.3L2.8 9.6c-1.2.5-1.2 1.2-.2 1.5l4.4 1.4 10.2-6.4c.5-.3.9-.1.5.2l-8.3 7.5-.3 4.5c.5 0 .7-.2 1-.5l2.4-2.4 4.9 3.6c.9.5 1.5.2 1.7-.8l2.6-14.4Z"/></svg>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <hr class="my-3">
+            <div class="text-center text-muted small">
+                &copy; @DateTime.Now.Year JobPortal. All rights reserved.
+            </div>
+        </div>
+    </footer>
+
+    <!-- Toast Container -->
+    <div id="toastContainer" class="toast-container" aria-live="polite"></div>
+
+    <!-- Back to Top -->
+    <button id="backToTop" class="back-to-top" aria-label="Lên đầu trang" title="Lên đầu trang">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="m18 15-6-6-6 6"/>
+        </svg>
+    </button>
+
+    <!-- Scripts -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/custom.js" asp-append-version="true"></script>
+    
+    <script>
+        $(document).ready(function() {
+        // Dark Mode Toggle
+        function initDarkMode() {
+        if ($('body').hasClass('security-dark-page')) {
+        $('body').addClass('dark-mode');
+        document.documentElement.classList.add('dark-mode-preload');
+        document.documentElement.style.colorScheme = 'dark';
+        return;
+        }
+        var darkMode = localStorage.getItem('darkMode');
+        var enabled = darkMode === 'enabled';
+        $('body').toggleClass('dark-mode', enabled);
+        document.documentElement.classList.toggle('dark-mode-preload', enabled);
+        document.documentElement.style.colorScheme = enabled ? 'dark' : 'light';
+        window.setTimeout(function() {
+        document.documentElement.classList.remove('theme-no-transition');
+        }, 80);
+        }
+
+        $('#darkModeToggle').click(function() {
+        if ($('body').hasClass('security-dark-page')) {
+        $('body').addClass('dark-mode');
+        document.documentElement.classList.add('dark-mode-preload');
+        document.documentElement.style.colorScheme = 'dark';
+        return;
+        }
+        var isDark = !$('body').hasClass('dark-mode');
+        $('body').toggleClass('dark-mode', isDark);
+        document.documentElement.classList.toggle('dark-mode-preload', isDark);
+        document.documentElement.style.colorScheme = isDark ? 'dark' : 'light';
+        localStorage.setItem('darkMode', isDark ? 'enabled' : 'disabled');
+        });
+
+        initDarkMode();
+
+        // Load notifications
+        function loadNotifications() {
+        $.get('@Url.Action("GetNotifications", "Notification")', function(data) {
+        var list = $('#notificationList');
+        list.empty();
+                    
+        if (data.length === 0) {
+        list.append('<div class="text-center p-4"><i class="fas fa-bell-slash fa-2x text-muted mb-2"></i><p class="text-muted">Không có thông báo</p></div>');
+        return;
+        }
+                    
+        data.forEach(function(notif) {
+        var unreadClass = notif.isRead ? '' : 'unread';
+        list.append(`
+        <div class="notification-item ${unreadClass}" data-id="${notif.id}" onclick="markAsRead(${notif.id}, '${notif.linkUrl || '#'}')">
+        <div class="d-flex">
+        <div class="notification-icon ${notif.iconClass.split(' ')[1]} me-3">
+        <i class="fas ${notif.iconClass.split(' ')[0]}"></i>
+        </div>
+        <div class="notification-content">
+        <div class="notification-title">${notif.title}</div>
+        <div class="notification-text">${notif.content}</div>
+        <div class="notification-time">${notif.timeAgo}</div>
+        </div>
+        ${!notif.isRead ? '<span class="badge bg-primary ms-2" style="width: 8px; height: 8px; padding: 0;"></span>' : ''}
+        </div>
+        </div>
+        `);
+        });
+                    
+        // Update badge
+        updateNotificationBadge();
+        });
+        }
+
+        function updateNotificationBadge() {
+        $.get('@Url.Action("GetUnreadCount", "Notification")', function(count) {
+        var badge = $('#notificationBadge');
+        if (count > 0) {
+        badge.text(count).show();
+        } else {
+        badge.hide();
+        }
+        });
+        }
+
+        window.markAsRead = function(id, url) {
+        $.post('@Url.Action("MarkAsRead", "Notification")',
+        { id: id, __RequestVerificationToken: $('input[name="__RequestVerificationToken"]').val() },
+        function() {
+        if (url && url !== '#') {
+        window.location.href = url;
+        } else {
+        loadNotifications();
+        }
+        }
+        );
+        };
+
+        $('#markAllRead').click(function(e) {
+        e.preventDefault();
+        $.post('@Url.Action("MarkAllAsRead", "Notification")',
+        { __RequestVerificationToken: $('input[name="__RequestVerificationToken"]').val() },
+        function() {
+        loadNotifications();
+        }
+        );
+        });
+
+        // Load chat conversations
+        function loadChats() {
+        $.get('@Url.Action("GetConversations", "Chat")', function(data) {
+        var list = $('#chatList');
+        list.empty();
+                    
+        if (data.length === 0) {
+        list.append('<div class="text-center p-4"><i class="fas fa-comments fa-2x text-muted mb-2"></i><p class="text-muted">Chưa có tin nhắn</p></div>');
+        return;
+        }
+                    
+        data.forEach(function(chat) {
+        list.append(`
+        <div class="chat-item" onclick="window.location.href='@Url.Action("Index", "Chat")?conversation=${chat.conversationId}'">
+        <div class="d-flex align-items-center">
+        <img src="${chat.otherUserAvatar}" class="chat-avatar">
+        <div class="chat-info">
+        <div class="d-flex justify-content-between align-items-center">
+        <span class="chat-name">${chat.otherUserName}</span>
+        <span class="chat-time">${chat.timeAgo}</span>
+        </div>
+        <div class="d-flex justify-content-between align-items-center">
+        <span class="chat-last-message">${chat.lastMessage || 'Chưa có tin nhắn'}</span>
+        ${chat.unreadCount > 0 ? `<span class="chat-badge ms-2">${chat.unreadCount}</span>` : ''}
+        </div>
+        </div>
+        </div>
+        </div>
+        `);
+        });
+                    
+        // Update chat badge
+        updateChatBadge();
+        });
+        }
+
+        function updateChatBadge() {
+        $.get('@Url.Action("GetUnreadMessageCount", "Chat")', function(count) {
+        var badge = $('#chatBadge');
+        if (count > 0) {
+        badge.text(count).show();
+        } else {
+        badge.hide();
+        }
+        });
+        }
+
+        // Load data
+        if ('@Context.Session.GetString("UserId")' !== '') {
+        loadNotifications();
+        loadChats();
+                
+        // Auto refresh every 30 seconds
+        setInterval(function() {
+        updateNotificationBadge();
+        updateChatBadge();
+        }, 30000);
+                
+        // Refresh when dropdown opens
+        $('#notificationDropdown').parent().on('show.bs.dropdown', function() {
+        loadNotifications();
+        });
+                
+        $('#chatDropdown').parent().on('show.bs.dropdown', function() {
+        loadChats();
+        });
+        }
+
+        // Auto hide alerts
+        setTimeout(function() {
+        $('.alert').fadeOut(500, function() {
+        $(this).remove();
+        });
+        }, 5000);
+
+        // Update pending applications count for Admin
+        @if (Context.Session.GetString("UserRole") == "Admin")
+        {
+            <text>
+                $.get('@Url.Action("GetPendingCount", "Admin")', function(count) {
+                $('#pendingApplicationsCount').text(count);
+                });
+            </text>
+        }
+        });
+    </script>
+
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

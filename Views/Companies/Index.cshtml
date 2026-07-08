@@ -1,0 +1,286 @@
+﻿@model IEnumerable<BTL_2.Models.Company>
+
+@{
+    ViewData["Title"] = "Công ty";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+    .companies-page {
+        background: #f6f8fb;
+        min-height: calc(100vh - 80px);
+        padding: 36px 0 56px;
+    }
+
+    body.dark-mode .companies-page {
+        background:
+            radial-gradient(circle at 12% 0%, rgba(37, 99, 235, 0.12), transparent 28%),
+            linear-gradient(180deg, #0f172a 0%, #111827 100%) !important;
+    }
+
+    html.dark-mode-preload .companies-page {
+        background:
+            radial-gradient(circle at 12% 0%, rgba(37, 99, 235, 0.12), transparent 28%),
+            linear-gradient(180deg, #0f172a 0%, #111827 100%) !important;
+    }
+
+    html.dark-mode-preload .company-card,
+    html.dark-mode-preload .empty-state {
+        background: rgba(15, 23, 42, 0.82) !important;
+        border-color: rgba(148, 163, 184, 0.24) !important;
+        color: #e5e7eb !important;
+    }
+
+    html.dark-mode-preload .companies-title,
+    html.dark-mode-preload .company-name,
+    html.dark-mode-preload .empty-state h4 {
+        color: #f8fafc !important;
+    }
+
+    html.dark-mode-preload .companies-subtitle,
+    html.dark-mode-preload .company-address,
+    html.dark-mode-preload .company-description {
+        color: #b6c2d2 !important;
+    }
+
+    .companies-shell {
+        max-width: 1180px;
+        margin: 0 auto;
+        padding: 0 18px;
+    }
+
+    .companies-head {
+        display: flex;
+        align-items: end;
+        justify-content: space-between;
+        gap: 16px;
+        margin-bottom: 22px;
+    }
+
+    .companies-title {
+        margin: 0;
+        color: #172033;
+        font-size: 32px;
+        font-weight: 800;
+        letter-spacing: 0;
+    }
+
+    body.dark-mode .companies-title,
+    body.dark-mode .company-name,
+    body.dark-mode .empty-state h4 {
+        color: #f8fafc !important;
+    }
+
+    body.dark-mode .companies-subtitle,
+    body.dark-mode .company-address,
+    body.dark-mode .company-description,
+    body.dark-mode .empty-state {
+        color: #b6c2d2 !important;
+    }
+
+    .companies-subtitle {
+        margin: 8px 0 0;
+        color: #64748b;
+    }
+
+    .companies-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: 18px;
+    }
+
+    .company-card {
+        background: #fff;
+        border: 1px solid #e5eaf2;
+        border-radius: 8px;
+        padding: 20px;
+        box-shadow: 0 10px 28px rgba(15, 23, 42, 0.06);
+        transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease;
+        min-height: 210px;
+        display: flex;
+        flex-direction: column;
+    }
+
+    body.dark-mode .company-card,
+    body.dark-mode .empty-state {
+        background: rgba(15, 23, 42, 0.82) !important;
+        border-color: rgba(148, 163, 184, 0.24) !important;
+        box-shadow: 0 18px 45px rgba(0, 0, 0, 0.18);
+    }
+
+    body.dark-mode .company-card:hover {
+        background: rgba(30, 41, 59, 0.86) !important;
+        border-color: rgba(96, 165, 250, 0.38) !important;
+    }
+
+    .company-card:hover {
+        transform: translateY(-3px);
+        border-color: #c7d2fe;
+        box-shadow: 0 16px 36px rgba(15, 23, 42, 0.10);
+    }
+
+    .company-top {
+        display: flex;
+        gap: 14px;
+        align-items: center;
+        margin-bottom: 16px;
+    }
+
+    .company-logo {
+        width: 58px;
+        height: 58px;
+        border-radius: 8px;
+        border: 1px solid #e5eaf2;
+        background: #fff;
+        object-fit: contain;
+        padding: 6px;
+        flex: 0 0 auto;
+    }
+
+    body.dark-mode .company-logo {
+        background: #101a2c !important;
+        border-color: rgba(148, 163, 184, 0.26) !important;
+    }
+
+    .company-name {
+        color: #111827;
+        font-weight: 800;
+        font-size: 18px;
+        line-height: 1.25;
+        margin: 0;
+    }
+
+    .company-address {
+        color: #64748b;
+        margin: 6px 0 0;
+        font-size: 14px;
+    }
+
+    .company-description {
+        color: #475569;
+        font-size: 14px;
+        line-height: 1.6;
+        margin-bottom: 18px;
+        display: -webkit-box;
+        -webkit-line-clamp: 3;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+
+    .company-actions {
+        margin-top: auto;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+    }
+
+    .company-jobs {
+        color: #2563eb;
+        background: #eff6ff;
+        border-radius: 999px;
+        padding: 7px 11px;
+        font-weight: 700;
+        font-size: 13px;
+        white-space: nowrap;
+    }
+
+    body.dark-mode .company-jobs {
+        background: rgba(96, 165, 250, 0.14) !important;
+        color: #bfdbfe !important;
+    }
+
+    .company-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        color: #fff;
+        background: #2563eb;
+        border: 1px solid #2563eb;
+        border-radius: 8px;
+        padding: 9px 13px;
+        font-weight: 700;
+        text-decoration: none;
+        transition: background .18s ease, transform .18s ease;
+    }
+
+    .company-link:hover {
+        color: #fff;
+        background: #1d4ed8;
+        transform: translateY(-1px);
+    }
+
+    .empty-state {
+        background: #fff;
+        border: 1px dashed #cbd5e1;
+        border-radius: 8px;
+        padding: 46px 20px;
+        text-align: center;
+        color: #64748b;
+    }
+
+    @@media (max-width: 640px) {
+        .companies-head {
+            display: block;
+        }
+
+        .companies-title {
+            font-size: 26px;
+        }
+    }
+</style>
+
+<section class="companies-page">
+    <div class="companies-shell">
+        <div class="companies-head">
+            <div>
+                <h1 class="companies-title"><i class="fas fa-building me-2"></i>Công ty tuyển dụng</h1>
+                <p class="companies-subtitle">Khám phá nhà tuyển dụng và các vị trí đang mở.</p>
+            </div>
+            <a asp-controller="Jobs" asp-action="Index" class="btn btn-outline-primary">
+                <i class="fas fa-briefcase me-2"></i>Xem việc làm
+            </a>
+        </div>
+
+        @if (Model == null || !Model.Any())
+        {
+            <div class="empty-state">
+                <i class="fas fa-building fa-3x mb-3"></i>
+                <h4>Chưa có công ty</h4>
+                <p class="mb-0">Dữ liệu công ty sẽ hiển thị tại đây sau khi được tạo.</p>
+            </div>
+        }
+        else
+        {
+            <div class="companies-grid">
+                @foreach (var company in Model)
+                {
+                    <article class="company-card">
+                        <div class="company-top">
+                            <img class="company-logo"
+                                 src="@(string.IsNullOrWhiteSpace(company.Logo) ? Url.Content("~/images/default-avatar.png") : company.Logo)"
+                                 alt="@company.CompanyName" />
+                            <div>
+                                <h2 class="company-name">@company.CompanyName</h2>
+                                <p class="company-address">
+                                    <i class="fas fa-location-dot me-1"></i>@(string.IsNullOrWhiteSpace(company.Address) ? "Chưa cập nhật" : company.Address)
+                                </p>
+                            </div>
+                        </div>
+
+                        <p class="company-description">
+                            @(string.IsNullOrWhiteSpace(company.Description) ? "Công ty chưa cập nhật mô tả." : company.Description)
+                        </p>
+
+                        <div class="company-actions">
+                            <span class="company-jobs">@company.JobCount việc đang tuyển</span>
+                            <a asp-action="Details" asp-route-id="@company.CompanyId" class="company-link">
+                                Chi tiết <i class="fas fa-arrow-right"></i>
+                            </a>
+                        </div>
+                    </article>
+                }
+            </div>
+        }
+    </div>
+</section>

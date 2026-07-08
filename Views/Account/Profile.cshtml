@@ -1,0 +1,954 @@
+@model BTL_2.Models.ViewModels.ProfileViewModel
+
+@{
+    ViewData["Title"] = "Hồ sơ cá nhân";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+    var user = Model?.User ?? new BTL_2.Models.User();
+    var applications = Model?.Applications ?? new List<BTL_2.Models.Application>();
+    var allJobs = Model?.AllJobs ?? new List<BTL_2.Models.Job>();
+    var followedCompanies = Model?.FollowedCompanies ?? new List<BTL_2.Models.Company>();
+    var activeTab = Model?.ActiveTab ?? "info";
+    var completion = 72;
+    var twoFactorSetupKey = ViewBag.TwoFactorSetupKey as string ?? "";
+    var twoFactorOtpAuthUri = ViewBag.TwoFactorOtpAuthUri as string ?? "";
+    DateTime? twoFactorLastVerifiedAt = ViewBag.TwoFactorLastVerifiedAt as DateTime?;
+
+    string ValueOrEmpty(string? value) => string.IsNullOrWhiteSpace(value) ? "Chưa cập nhật" : value;
+    string Active(string tab) => activeTab == tab ? "active" : "";
+    string StatusText(string? status) => status switch
+    {
+        "Approved" => "Đã duyệt",
+        "Rejected" => "Từ chối",
+        _ => "Đang chờ"
+    };
+    string StatusClass(string? status) => status switch
+    {
+        "Approved" => "approved",
+        "Rejected" => "rejected",
+        _ => "pending"
+    };
+}
+
+<style>
+    main.py-4 {
+        padding-top: 0 !important;
+        padding-bottom: 0 !important;
+    }
+
+    .profile-page {
+        min-height: calc(100vh - 80px);
+        padding: 52px 0 72px;
+        background:
+            radial-gradient(circle at 90% 8%, rgba(125, 211, 252, 0.28), transparent 30%),
+            linear-gradient(135deg, rgba(239, 246, 255, 0.92), rgba(255, 255, 255, 0.96));
+        position: relative;
+        overflow: hidden;
+    }
+
+    .profile-page::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background-image: repeating-linear-gradient(135deg, rgba(37, 99, 235, 0.035) 0 1px, transparent 1px 22px);
+        pointer-events: none;
+    }
+
+    .profile-shell {
+        position: relative;
+        z-index: 1;
+        max-width: 1180px;
+        margin: 0 auto;
+        background: rgba(255, 255, 255, 0.94);
+        border: 1px solid #dbe7f7;
+        border-radius: 24px;
+        box-shadow: 0 26px 80px rgba(37, 99, 235, 0.11);
+        overflow: hidden;
+        animation: profileIn 420ms ease both;
+    }
+
+    .profile-hero {
+        padding: 34px 38px 30px;
+        color: #ffffff;
+        background:
+            radial-gradient(circle at 76% 20%, rgba(255, 255, 255, 0.18), transparent 28%),
+            linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
+
+    .profile-top {
+        display: grid;
+        grid-template-columns: 1fr auto;
+        gap: 28px;
+        align-items: end;
+    }
+
+    .identity {
+        display: flex;
+        align-items: center;
+        gap: 24px;
+        min-width: 0;
+    }
+
+    .profile-avatar-large {
+        width: 122px;
+        height: 122px;
+        border-radius: 50%;
+        display: grid;
+        place-items: center;
+        color: #6b7280;
+        background: #f8fafc;
+        border: 5px solid rgba(255, 255, 255, 0.92);
+        box-shadow: 0 18px 42px rgba(15, 23, 42, 0.22);
+        flex: 0 0 auto;
+    }
+
+    .profile-avatar-large i {
+        font-size: 4rem;
+    }
+
+    .identity h1 {
+        margin: 0 0 12px;
+        color: #ffffff;
+        font-size: clamp(2rem, 4vw, 3rem);
+        font-weight: 900;
+        letter-spacing: 0;
+    }
+
+    .profile-meta {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px 22px;
+        margin: 0;
+        padding: 0;
+        list-style: none;
+        color: rgba(255, 255, 255, 0.9);
+        font-weight: 700;
+    }
+
+    .profile-meta li {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .profile-progress {
+        width: 230px;
+        padding: 18px;
+        border: 1px solid rgba(255, 255, 255, 0.22);
+        border-radius: 18px;
+        background: rgba(255, 255, 255, 0.13);
+        backdrop-filter: blur(12px);
+    }
+
+    .profile-progress span {
+        display: block;
+        margin-bottom: 10px;
+        color: rgba(255, 255, 255, 0.82);
+        font-size: 0.9rem;
+        font-weight: 750;
+    }
+
+    .profile-progress strong {
+        display: block;
+        margin-bottom: 12px;
+        color: #ffffff;
+        font-size: 1.85rem;
+        line-height: 1;
+    }
+
+    .progress-track {
+        height: 9px;
+        overflow: hidden;
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.22);
+    }
+
+    .progress-track i {
+        display: block;
+        width: @(completion)%;
+        height: 100%;
+        border-radius: inherit;
+        background: #ffffff;
+    }
+
+    .profile-stats {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 14px;
+        margin-top: 28px;
+    }
+
+    .profile-stat {
+        padding: 16px;
+        border: 1px solid rgba(255, 255, 255, 0.18);
+        border-radius: 18px;
+        background: rgba(255, 255, 255, 0.12);
+    }
+
+    .profile-stat span {
+        display: block;
+        color: rgba(255, 255, 255, 0.78);
+        font-weight: 750;
+        font-size: 0.88rem;
+    }
+
+    .profile-stat strong {
+        display: block;
+        margin-top: 8px;
+        color: #ffffff;
+        font-size: 1.55rem;
+        line-height: 1;
+    }
+
+    .profile-tabs {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        padding: 0 28px;
+        border-bottom: 1px solid #e6eef8;
+        background: #ffffff;
+    }
+
+    .profile-tab {
+        border: 0;
+        border-bottom: 3px solid transparent;
+        background: transparent;
+        color: #475569;
+        padding: 18px 10px 16px;
+        margin-right: 18px;
+        font-weight: 800;
+        transition: color 180ms ease, border-color 180ms ease;
+    }
+
+    .profile-tab:hover,
+    .profile-tab.active {
+        color: #2563eb;
+        border-bottom-color: #6d7df1;
+    }
+
+    .profile-content {
+        padding: 28px;
+        background: #ffffff;
+    }
+
+    .profile-panel {
+        padding: 26px;
+        border: 1px solid #e6eef8;
+        border-radius: 18px;
+        background: #f8fbff;
+    }
+
+    .panel-title {
+        margin: 0 0 22px;
+        padding-bottom: 14px;
+        border-bottom: 1px solid #e6eef8;
+        color: #142033;
+        font-size: 1.1rem;
+        font-weight: 900;
+    }
+
+    .info-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 24px 64px;
+    }
+
+    .info-item span {
+        display: block;
+        margin-bottom: 7px;
+        color: #64748b;
+        font-size: 0.88rem;
+        font-weight: 650;
+    }
+
+    .info-item strong {
+        display: block;
+        color: #1f2937;
+        font-size: 1.08rem;
+        font-weight: 800;
+        word-break: break-word;
+    }
+
+    .keyword-wrap {
+        margin-top: 28px;
+    }
+
+    .keyword-tags {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+
+    .keyword-tag {
+        padding: 9px 16px;
+        border: 1px solid #e1eaf7;
+        border-radius: 999px;
+        background: #ffffff;
+        color: #475569;
+        font-weight: 650;
+        cursor: pointer;
+        transition: all 190ms ease;
+    }
+
+    .keyword-tag:hover {
+        color: #2563eb;
+        border-color: #9bc0ff;
+        transform: translateY(-2px);
+        box-shadow: 0 12px 24px rgba(37, 99, 235, 0.10);
+    }
+
+    .profile-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 18px;
+    }
+
+    .profile-card {
+        padding: 20px;
+        border: 1px solid #dbe7f7;
+        border-radius: 18px;
+        background: #ffffff;
+        box-shadow: 0 12px 32px rgba(37, 99, 235, 0.06);
+    }
+
+    .profile-card-head {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        margin-bottom: 14px;
+    }
+
+    .logo-box {
+        width: 54px;
+        height: 54px;
+        border-radius: 16px;
+        object-fit: cover;
+        display: grid;
+        place-items: center;
+        flex: 0 0 auto;
+        color: #2563eb;
+        background: #eef6ff;
+        border: 1px solid #dbe7f7;
+        font-weight: 900;
+    }
+
+    .profile-card h3 {
+        margin: 0;
+        color: #142033;
+        font-size: 1.05rem;
+        font-weight: 900;
+    }
+
+    .profile-card p {
+        margin: 5px 0 0;
+        color: #64748b;
+        line-height: 1.55;
+    }
+
+    .card-meta {
+        display: grid;
+        gap: 9px;
+        margin: 14px 0;
+        color: #53657e;
+        font-weight: 700;
+    }
+
+    .card-meta span {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .status-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        padding: 8px 12px;
+        border-radius: 999px;
+        font-size: 0.82rem;
+        font-weight: 900;
+    }
+
+    .status-pill.approved {
+        color: #047857;
+        background: #dcfce7;
+        border: 1px solid #bbf7d0;
+    }
+
+    .status-pill.pending {
+        color: #b45309;
+        background: #fef3c7;
+        border: 1px solid #fde68a;
+    }
+
+    .status-pill.rejected {
+        color: #b91c1c;
+        background: #fee2e2;
+        border: 1px solid #fecaca;
+    }
+
+    .card-actions {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 12px;
+        padding-top: 14px;
+        border-top: 1px solid #e6eef8;
+    }
+
+    .empty-state {
+        padding: 54px 24px;
+        text-align: center;
+        border: 1px dashed #cfe0f6;
+        border-radius: 18px;
+        background: #ffffff;
+        color: #64748b;
+    }
+
+    .empty-state i {
+        color: #93b4e8;
+        font-size: 3rem;
+        margin-bottom: 14px;
+    }
+
+    .empty-state h3 {
+        color: #142033;
+        font-weight: 900;
+        margin-bottom: 8px;
+    }
+
+    .btn-unfollow {
+        width: 100%;
+        border: 0;
+        border-radius: 12px;
+        padding: 11px 14px;
+        background: #fee2e2;
+        color: #b91c1c;
+        font-weight: 900;
+        transition: all 190ms ease;
+    }
+
+    .btn-unfollow:hover {
+        background: #ef4444;
+        color: #ffffff;
+        transform: translateY(-1px);
+    }
+
+    .security-layout {
+        display: grid;
+        grid-template-columns: minmax(0, 1.15fr) minmax(280px, 0.85fr);
+        gap: 20px;
+        align-items: start;
+    }
+
+    .security-card {
+        padding: 20px;
+        border: 1px solid #dbe7f7;
+        border-radius: 18px;
+        background: #ffffff;
+        box-shadow: 0 12px 32px rgba(37, 99, 235, 0.06);
+    }
+
+    .security-state {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px 12px;
+        border-radius: 999px;
+        font-weight: 900;
+        margin-bottom: 14px;
+    }
+
+    .security-state.on {
+        color: #047857;
+        background: #dcfce7;
+        border: 1px solid #bbf7d0;
+    }
+
+    .security-state.off {
+        color: #b45309;
+        background: #fef3c7;
+        border: 1px solid #fde68a;
+    }
+
+    .setup-key,
+    .setup-uri {
+        width: 100%;
+        border: 1px solid #dbe7f7;
+        border-radius: 12px;
+        background: #f8fbff;
+        color: #142033;
+        padding: 12px 14px;
+        font-family: Consolas, monospace;
+        font-weight: 800;
+        word-break: break-all;
+    }
+
+    .setup-uri {
+        min-height: 92px;
+        resize: vertical;
+        font-size: 0.82rem;
+        font-weight: 650;
+    }
+
+    .security-steps {
+        margin: 0;
+        padding-left: 20px;
+        color: #53657e;
+        font-weight: 650;
+        line-height: 1.8;
+    }
+
+    .security-form {
+        display: grid;
+        gap: 12px;
+        margin-top: 18px;
+    }
+
+    .security-form input {
+        width: 100%;
+        border: 2px solid #e2e8f0;
+        border-radius: 12px;
+        padding: 12px 14px;
+        font-size: 1rem;
+        font-weight: 800;
+        letter-spacing: 4px;
+        text-align: center;
+    }
+
+    .security-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+
+    .security-actions .btn {
+        border-radius: 12px;
+        font-weight: 800;
+    }
+
+    body.dark-mode .profile-page {
+        background: linear-gradient(135deg, #101827, #0f172a);
+    }
+
+    body.dark-mode .profile-shell,
+    body.dark-mode .profile-tabs,
+    body.dark-mode .profile-content,
+    body.dark-mode .profile-card {
+        background: rgba(15, 23, 42, 0.92);
+        border-color: rgba(148, 163, 184, 0.22);
+    }
+
+    body.dark-mode .profile-panel,
+    body.dark-mode .empty-state,
+    body.dark-mode .security-card {
+        background: rgba(17, 24, 39, 0.82);
+        border-color: rgba(148, 163, 184, 0.22);
+    }
+
+    body.dark-mode .panel-title,
+    body.dark-mode .info-item strong,
+    body.dark-mode .profile-card h3,
+    body.dark-mode .empty-state h3 {
+        color: #f8fafc;
+    }
+
+    body.dark-mode .setup-key,
+    body.dark-mode .setup-uri,
+    body.dark-mode .security-form input {
+        background: rgba(15, 23, 42, 0.95);
+        border-color: rgba(148, 163, 184, 0.28);
+        color: #f8fafc;
+    }
+
+    @@keyframes profileIn {
+        from { opacity: 0; transform: translateY(14px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    @@media (max-width: 991px) {
+        .profile-top,
+        .profile-stats,
+        .info-grid,
+        .profile-grid,
+        .security-layout {
+            grid-template-columns: 1fr;
+        }
+
+        .profile-progress {
+            width: 100%;
+        }
+    }
+
+    @@media (max-width: 640px) {
+        .profile-page {
+            padding: 22px 0 44px;
+        }
+
+        .profile-hero,
+        .profile-content {
+            padding: 22px;
+        }
+
+        .identity {
+            align-items: flex-start;
+            flex-direction: column;
+        }
+
+        .profile-avatar-large {
+            width: 104px;
+            height: 104px;
+        }
+    }
+</style>
+
+<div class="profile-page">
+    <div class="container">
+        <div class="profile-shell">
+            @Html.AntiForgeryToken()
+            <section class="profile-hero">
+                <div class="profile-top">
+                    <div class="identity">
+                        <div class="profile-avatar-large" aria-hidden="true">
+                            <i class="fas fa-user-circle"></i>
+                        </div>
+                        <div>
+                            <h1>@ValueOrEmpty(user.FullName)</h1>
+                            <ul class="profile-meta">
+                                <li><i class="fas fa-envelope"></i>@ValueOrEmpty(user.Email)</li>
+                                <li><i class="fas fa-phone"></i>@ValueOrEmpty(user.Phone)</li>
+                                <li><i class="fas fa-map-marker-alt"></i>@ValueOrEmpty(user.Address)</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="profile-progress">
+                        <span>Mức độ hoàn thiện hồ sơ</span>
+                        <strong>@completion%</strong>
+                        <div class="progress-track"><i></i></div>
+                    </div>
+                </div>
+
+                <div class="profile-stats">
+                    <div class="profile-stat"><span>Ứng tuyển</span><strong>@applications.Count</strong></div>
+                    <div class="profile-stat"><span>Đã duyệt</span><strong>@applications.Count(a => a.Status == "Approved")</strong></div>
+                    <div class="profile-stat"><span>Đang theo dõi</span><strong>@followedCompanies.Count</strong></div>
+                    <div class="profile-stat"><span>Việc gợi ý</span><strong>@allJobs.Count</strong></div>
+                </div>
+            </section>
+
+            <nav class="profile-tabs" aria-label="Profile tabs">
+                <button class="profile-tab @Active("info")" type="button" onclick="changeTab('info')"><i class="fas fa-info-circle me-2"></i>Thông tin</button>
+                <button class="profile-tab @Active("security")" type="button" onclick="changeTab('security')"><i class="fas fa-shield-alt me-2"></i>Bảo mật</button>
+                <button class="profile-tab @Active("applications")" type="button" onclick="changeTab('applications')"><i class="fas fa-briefcase me-2"></i>Ứng tuyển</button>
+                <button class="profile-tab @Active("jobs")" type="button" onclick="changeTab('jobs')"><i class="fas fa-building me-2"></i>Việc làm</button>
+                <button class="profile-tab @Active("follows")" type="button" onclick="changeTab('follows')"><i class="fas fa-eye me-2"></i>Theo dõi</button>
+            </nav>
+
+            <div class="profile-content">
+                @if (activeTab == "info")
+                {
+                    <section class="profile-panel">
+                        <h2 class="panel-title">Thông tin cá nhân</h2>
+                        <div class="info-grid">
+                            <div class="info-item"><span>Họ và tên</span><strong>@ValueOrEmpty(user.FullName)</strong></div>
+                            <div class="info-item"><span>Email</span><strong>@ValueOrEmpty(user.Email)</strong></div>
+                            <div class="info-item"><span>Điện thoại</span><strong>@ValueOrEmpty(user.Phone)</strong></div>
+                            <div class="info-item"><span>Địa chỉ</span><strong>@ValueOrEmpty(user.Address)</strong></div>
+                            <div class="info-item"><span>Ngày sinh</span><strong>08/02/2000</strong></div>
+                            <div class="info-item"><span>Giới tính</span><strong>Nữ</strong></div>
+                        </div>
+
+                        <div class="keyword-wrap">
+                            <h2 class="panel-title">Gợi ý từ khóa</h2>
+                            <div class="keyword-tags">
+                                @foreach (var keyword in new[] { "Nhân sự", "Phát triển", "Quản lý", "Kế toán", "Kỹ thuật", "Thiết kế", "Marketing", "Bán hàng", "Hỗ trợ", "Tư vấn", "Y tế", "Luật", "Sản xuất", "Dịch vụ", "Xây dựng", "Giáo dục" })
+                                {
+                                    <button class="keyword-tag" type="button">@keyword</button>
+                                }
+                            </div>
+                        </div>
+                    </section>
+                }
+                else if (activeTab == "security")
+                {
+                    <section class="profile-panel">
+                        <h2 class="panel-title">Xác thực hai lớp</h2>
+
+                        @if (TempData["SuccessMessage"] != null)
+                        {
+                            <div class="alert alert-success">@TempData["SuccessMessage"]</div>
+                        }
+                        @if (TempData["ErrorMessage"] != null)
+                        {
+                            <div class="alert alert-danger">@TempData["ErrorMessage"]</div>
+                        }
+
+                        <div class="security-layout">
+                            <div class="security-card">
+                                @if (user.TwoFactorEnabled)
+                                {
+                                    <span class="security-state on"><i class="fas fa-check-circle"></i> Đang bật</span>
+                                    <h3 class="mb-2">Tài khoản đang được bảo vệ bằng mã 2FA</h3>
+                                    <p class="text-muted mb-3">
+                                        Sau khi nhập đúng email và mật khẩu, hệ thống sẽ yêu cầu thêm mã 6 số từ Google Authenticator.
+                                        @(twoFactorLastVerifiedAt.HasValue ? $"Xác thực gần nhất: {twoFactorLastVerifiedAt.Value.ToLocalTime():dd/MM/yyyy HH:mm}" : "")
+                                    </p>
+
+                                    <form asp-action="DisableTwoFactor" method="post" class="security-form">
+                                        @Html.AntiForgeryToken()
+                                        <label class="form-label fw-bold" for="disable2faCode">Mã 2FA hiện tại</label>
+                                        <input id="disable2faCode" name="code" inputmode="numeric" maxlength="6" pattern="[0-9]{6}" autocomplete="one-time-code" placeholder="000000" required />
+                                        <div class="security-actions">
+                                            <button type="submit" class="btn btn-danger">
+                                                <i class="fas fa-lock-open me-2"></i>Tắt 2FA
+                                            </button>
+                                        </div>
+                                    </form>
+                                }
+                                else
+                                {
+                                    <span class="security-state off"><i class="fas fa-triangle-exclamation"></i> Chưa bật</span>
+                                    <h3 class="mb-2">Bật 2FA bằng Google Authenticator</h3>
+                                    <ol class="security-steps">
+                                        <li>Mở Google Authenticator và chọn thêm tài khoản.</li>
+                                        <li>Chọn nhập khóa thiết lập, rồi nhập tên tài khoản và setup key bên dưới.</li>
+                                        <li>Nhập mã 6 số đang hiển thị để hoàn tất bật 2FA.</li>
+                                    </ol>
+
+                                    <form asp-action="EnableTwoFactor" method="post" class="security-form">
+                                        @Html.AntiForgeryToken()
+                                        <label class="form-label fw-bold" for="enable2faCode">Mã 2FA đầu tiên</label>
+                                        <input id="enable2faCode" name="code" inputmode="numeric" maxlength="6" pattern="[0-9]{6}" autocomplete="one-time-code" placeholder="000000" required />
+                                        <div class="security-actions">
+                                            <button type="submit" class="btn btn-primary">
+                                                <i class="fas fa-shield-alt me-2"></i>Bật 2FA
+                                            </button>
+                                        </div>
+                                    </form>
+                                }
+                            </div>
+
+                            @if (!user.TwoFactorEnabled)
+                            {
+                                <div class="security-card">
+                                    <h3 class="mb-3">Thông tin thiết lập</h3>
+                                    <label class="form-label fw-bold" for="setupKey">Setup key</label>
+                                    <input id="setupKey" class="setup-key mb-3" value="@twoFactorSetupKey" readonly />
+                                    <div class="security-actions mb-3">
+                                        <button type="button" class="btn btn-outline-primary btn-sm" onclick="copyTwoFactorValue('setupKey')">
+                                            <i class="fas fa-copy me-1"></i>Sao chép key
+                                        </button>
+                                    </div>
+
+                                    <label class="form-label fw-bold" for="otpAuthUri">otpauth URI</label>
+                                    <textarea id="otpAuthUri" class="setup-uri" readonly>@twoFactorOtpAuthUri</textarea>
+                                    <div class="security-actions mt-3">
+                                        <button type="button" class="btn btn-outline-secondary btn-sm" onclick="copyTwoFactorValue('otpAuthUri')">
+                                            <i class="fas fa-link me-1"></i>Sao chép URI
+                                        </button>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    </section>
+                }
+                else if (activeTab == "applications")
+                {
+                    <section class="profile-panel">
+                        <h2 class="panel-title">Hồ sơ đã ứng tuyển</h2>
+                        @if (applications.Any())
+                        {
+                            <div class="profile-grid">
+                                @foreach (var app in applications)
+                                {
+                                    <article class="profile-card">
+                                        <div class="profile-card-head">
+                                            @if (!string.IsNullOrWhiteSpace(app.Job?.Company?.Logo))
+                                            {
+                                                <img class="logo-box" src="@app.Job.Company.Logo" alt="@app.Job.Company.CompanyName" />
+                                            }
+                                            else
+                                            {
+                                                <span class="logo-box"><i class="fas fa-building"></i></span>
+                                            }
+                                            <div>
+                                                <h3>@(app.Job?.Title ?? "Đang cập nhật")</h3>
+                                                <p>@(app.Job?.Company?.CompanyName ?? "Đang cập nhật")</p>
+                                            </div>
+                                        </div>
+                                        <div class="card-meta">
+                                            <span><i class="fas fa-map-marker-alt text-primary"></i>@(app.Job?.Location ?? "Linh hoạt")</span>
+                                            <span><i class="far fa-calendar-alt text-primary"></i>@(app.ApplyDate?.ToString("dd/MM/yyyy") ?? "Chưa cập nhật")</span>
+                                        </div>
+                                        <div class="card-actions">
+                                            <span class="status-pill @StatusClass(app.Status)"><i class="fas fa-check"></i>@StatusText(app.Status)</span>
+                                            @if (!string.IsNullOrEmpty(app.CVFile))
+                                            {
+                                                <a class="btn btn-outline-primary btn-sm" href="@app.CVFile" target="_blank"><i class="fas fa-eye me-1"></i>Xem CV</a>
+                                            }
+                                        </div>
+                                    </article>
+                                }
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="empty-state">
+                                <i class="fas fa-file-alt"></i>
+                                <h3>Chưa có hồ sơ ứng tuyển</h3>
+                                <p>Bạn có thể tìm công việc phù hợp và ứng tuyển ngay trên JobPortal.</p>
+                                <a class="btn btn-primary mt-2" href="@Url.Action("Index", "Jobs")"><i class="fas fa-search me-2"></i>Tìm việc ngay</a>
+                            </div>
+                        }
+                    </section>
+                }
+                else if (activeTab == "jobs")
+                {
+                    <section class="profile-panel">
+                        <h2 class="panel-title">Việc làm gợi ý</h2>
+                        @if (allJobs.Any())
+                        {
+                            <div class="profile-grid">
+                                @foreach (var job in allJobs.Take(6))
+                                {
+                                    <article class="profile-card">
+                                        <div class="profile-card-head">
+                                            @if (!string.IsNullOrWhiteSpace(job.Company?.Logo))
+                                            {
+                                                <img class="logo-box" src="@job.Company.Logo" alt="@job.Company.CompanyName" />
+                                            }
+                                            else
+                                            {
+                                                <span class="logo-box"><i class="fas fa-building"></i></span>
+                                            }
+                                            <div>
+                                                <h3>@job.Title</h3>
+                                                <p>@(job.Company?.CompanyName ?? "Đang cập nhật")</p>
+                                            </div>
+                                        </div>
+                                        <div class="card-meta">
+                                            <span><i class="fas fa-map-marker-alt text-primary"></i>@(string.IsNullOrWhiteSpace(job.Location) ? "Linh hoạt" : job.Location)</span>
+                                            <span><i class="fas fa-wallet text-primary"></i>@(job.SalaryMin.HasValue ? $"{job.SalaryMin:N0} - {job.SalaryMax:N0}" : "Lương thỏa thuận")</span>
+                                        </div>
+                                        <div class="card-actions">
+                                            <span class="status-pill approved"><i class="fas fa-check"></i>Đang tuyển</span>
+                                            <a class="btn btn-outline-primary btn-sm" href="@Url.Action("Details", "Jobs", new { id = job.JobId })">Chi tiết</a>
+                                        </div>
+                                    </article>
+                                }
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="empty-state"><i class="fas fa-briefcase"></i><h3>Chưa có việc làm gợi ý</h3><p>Hệ thống sẽ hiển thị các vị trí phù hợp khi có dữ liệu.</p></div>
+                        }
+                    </section>
+                }
+                else if (activeTab == "follows")
+                {
+                    <section class="profile-panel">
+                        <h2 class="panel-title">Công ty đang theo dõi</h2>
+                        @if (followedCompanies.Any())
+                        {
+                            <div class="profile-grid">
+                                @foreach (var company in followedCompanies)
+                                {
+                                    <article class="profile-card">
+                                        <div class="profile-card-head">
+                                            @if (!string.IsNullOrWhiteSpace(company.Logo))
+                                            {
+                                                <img class="logo-box" src="@company.Logo" alt="@company.CompanyName" />
+                                            }
+                                            else
+                                            {
+                                                <span class="logo-box"><i class="fas fa-building"></i></span>
+                                            }
+                                            <div>
+                                                <h3>@company.CompanyName</h3>
+                                                <p>@ValueOrEmpty(company.Address)</p>
+                                            </div>
+                                        </div>
+                                        <button class="btn-unfollow" type="button" onclick="toggleFollow(@company.CompanyId, this)">
+                                            <i class="fas fa-times me-2"></i>Bỏ theo dõi
+                                        </button>
+                                    </article>
+                                }
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="empty-state">
+                                <i class="fas fa-building"></i>
+                                <h3>Chưa theo dõi công ty nào</h3>
+                                <p>Theo dõi công ty để nhận thông tin tuyển dụng mới nhanh hơn.</p>
+                                <a class="btn btn-primary mt-2" href="@Url.Action("Index", "Companies")"><i class="fas fa-search me-2"></i>Khám phá công ty</a>
+                            </div>
+                        }
+                    </section>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function changeTab(tabName) {
+            window.location.href = '@Url.Action("Profile", "Account")?tab=' + encodeURIComponent(tabName);
+        }
+
+        function toggleFollow(companyId) {
+            $.ajax({
+                url: '@Url.Action("FollowCompany", "Account")',
+                type: 'POST',
+                data: {
+                    companyId: companyId,
+                    __RequestVerificationToken: $('input[name="__RequestVerificationToken"]').val()
+                },
+                success: function(response) {
+                    showProfileToast(response.message || 'Đã cập nhật theo dõi', response.success ? 'success' : 'danger');
+                    if (response.success) {
+                        setTimeout(function() { location.reload(); }, 900);
+                    }
+                },
+                error: function() {
+                    showProfileToast('Có lỗi xảy ra, vui lòng thử lại.', 'danger');
+                }
+            });
+        }
+
+        function copyTwoFactorValue(elementId) {
+            var element = document.getElementById(elementId);
+            if (!element) return;
+
+            var value = element.value || element.textContent || '';
+            navigator.clipboard.writeText(value).then(function() {
+                showProfileToast('Đã sao chép thông tin 2FA', 'success');
+            }).catch(function() {
+                element.select();
+                document.execCommand('copy');
+                showProfileToast('Đã sao chép thông tin 2FA', 'success');
+            });
+        }
+
+        function showProfileToast(message, type) {
+            var toast = $('<div class="alert alert-' + type + ' alert-dismissible fade show app-toast" role="alert">' +
+                '<i class="fas ' + (type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle') + ' me-2"></i>' +
+                message +
+                '<button type="button" class="btn-close" data-bs-dismiss="alert"></button>' +
+                '</div>');
+            var holder = $('.app-toast-container');
+            if (!holder.length) {
+                holder = $('<div class="app-toast-container" aria-live="polite" aria-atomic="true"></div>').appendTo('body');
+            }
+            holder.append(toast);
+            setTimeout(function() { toast.fadeOut(300, function() { $(this).remove(); }); }, 2600);
+        }
+
+        $(function() {
+            $('.keyword-tag').on('click', function() {
+                window.location.href = '@Url.Action("Index", "Jobs")?keyword=' + encodeURIComponent($(this).text().trim());
+            });
+        });
+    </script>
+}

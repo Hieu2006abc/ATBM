@@ -1,0 +1,632 @@
+﻿@{
+    ViewData["Title"] = "Admin Dashboard";
+    Layout = "~/Views/Shared/_Layout_Admin.cshtml";
+    var recentActivities = ViewBag.RecentActivities as List<BTL_2.Models.ActivityLog> ?? new List<BTL_2.Models.ActivityLog>();
+}
+
+<style>
+    :root {
+        --primary: #8b5cf6;
+        --primary-dark: #6366f1;
+        --primary-light: #c4b5fd;
+        --success: #22c55e;
+        --warning: #f59e0b;
+        --danger: #ef4444;
+        --background: #0f172a;
+        --card-bg: rgba(255, 255, 255, 0.06);
+        --card-bg-strong: rgba(255, 255, 255, 0.09);
+        --text-primary: #f8fafc;
+        --text-secondary: #cbd5e1;
+        --text-light: #94a3b8;
+        --border-color: rgba(255, 255, 255, 0.11);
+        --shadow-sm: 0 14px 35px rgba(2, 6, 23, 0.25);
+        --shadow-md: 0 18px 45px rgba(2, 6, 23, 0.32);
+        --shadow-lg: 0 24px 60px rgba(2, 6, 23, 0.42);
+        --shadow-xl: 0 32px 70px rgba(2, 6, 23, 0.48);
+        --transition: all 0.3s ease;
+    }
+
+    body {
+        background:
+            radial-gradient(circle at 8% 0%, rgba(168, 85, 247, 0.28), transparent 26%),
+            radial-gradient(circle at 88% 12%, rgba(99, 102, 241, 0.22), transparent 30%),
+            linear-gradient(180deg, #0f172a 0%, #171132 48%, #111827 100%);
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        color: var(--text-primary);
+    }
+
+    .container-fluid.py-4 {
+        min-height: calc(100vh - 2rem);
+        padding: 2rem !important;
+    }
+
+    /* Dashboard Header */
+    .dashboard-header {
+        margin-bottom: 2rem;
+    }
+
+        .dashboard-header h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .dashboard-header p {
+            color: var(--text-secondary);
+            font-size: 1rem;
+        }
+
+    /* Stats Cards */
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+
+    .stat-card {
+        background: var(--card-bg);
+        backdrop-filter: blur(18px);
+        border-radius: 16px;
+        padding: 1.5rem;
+        box-shadow: var(--shadow-sm);
+        border: 1px solid var(--border-color);
+        transition: var(--transition);
+        position: relative;
+        overflow: hidden;
+    }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            background: var(--card-bg-strong);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+        }
+
+        .stat-card.blue::before {
+            background: linear-gradient(135deg, var(--primary), #1d4ed8);
+        }
+
+        .stat-card.green::before {
+            background: linear-gradient(135deg, var(--success), #16a34a);
+        }
+
+        .stat-card.yellow::before {
+            background: linear-gradient(135deg, var(--warning), #d97706);
+        }
+
+        .stat-card.red::before {
+            background: linear-gradient(135deg, var(--danger), #dc2626);
+        }
+
+    .stat-card-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 1rem;
+    }
+
+    .stat-card-title {
+        font-size: 0.9rem;
+        font-weight: 500;
+        color: var(--text-secondary);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .stat-card-icon {
+        width: 48px;
+        height: 48px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+    }
+
+    .stat-card.blue .stat-card-icon {
+        background: rgba(139, 92, 246, 0.18);
+        color: #c4b5fd;
+    }
+
+    .stat-card.green .stat-card-icon {
+        background: rgba(34, 197, 94, 0.16);
+        color: #86efac;
+    }
+
+    .stat-card.yellow .stat-card-icon {
+        background: rgba(245, 158, 11, 0.16);
+        color: #fbbf24;
+    }
+
+    .stat-card.red .stat-card-icon {
+        background: rgba(239, 68, 68, 0.16);
+        color: #fca5a5;
+    }
+
+    .stat-card-value {
+        font-size: 2rem;
+        font-weight: 700;
+        color: var(--text-primary);
+        margin-bottom: 0.25rem;
+    }
+
+    .stat-card-change {
+        font-size: 0.85rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+        .stat-card-change.positive {
+            color: var(--success);
+        }
+
+        .stat-card-change.negative {
+            color: var(--danger);
+        }
+
+    /* Menu Cards */
+    .menu-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 1.5rem;
+        margin-top: 2rem;
+    }
+
+    .menu-card {
+        background: var(--card-bg);
+        backdrop-filter: blur(18px);
+        border-radius: 16px;
+        padding: 1.5rem;
+        box-shadow: var(--shadow-sm);
+        border: 1px solid var(--border-color);
+        transition: var(--transition);
+        cursor: pointer;
+        text-decoration: none;
+        display: block;
+        color: inherit;
+    }
+
+        .menu-card:hover {
+            transform: translateY(-5px);
+            background: var(--card-bg-strong);
+            box-shadow: var(--shadow-lg);
+        }
+
+    .menu-card-header {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        margin-bottom: 1rem;
+    }
+
+    .menu-card-icon {
+        width: 50px;
+        height: 50px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+    }
+
+        .menu-card-icon.blue {
+            background: rgba(139, 92, 246, 0.18);
+            color: #c4b5fd;
+        }
+
+        .menu-card-icon.green {
+            background: rgba(34, 197, 94, 0.16);
+            color: #86efac;
+        }
+
+        .menu-card-icon.orange {
+            background: rgba(245, 158, 11, 0.16);
+            color: #fbbf24;
+        }
+
+        .menu-card-icon.purple {
+            background: rgba(168, 85, 247, 0.2);
+            color: #d8b4fe;
+        }
+
+        .menu-card-icon.warning {
+            background: rgba(245, 158, 11, 0.16);
+            color: #fbbf24;
+        }
+
+    .menu-card-title {
+        font-size: 1.2rem;
+        font-weight: 600;
+        color: var(--text-primary);
+        margin-bottom: 0.25rem;
+    }
+
+    .menu-card-description {
+        color: var(--text-secondary);
+        font-size: 0.9rem;
+        line-height: 1.5;
+    }
+
+    .menu-card-footer {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-top: 1rem;
+        padding-top: 1rem;
+        border-top: 1px solid var(--border-color);
+    }
+
+    .menu-card-badge {
+        background: rgba(255, 255, 255, 0.08);
+        color: var(--text-secondary);
+        padding: 0.25rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 500;
+    }
+
+    .menu-card-link {
+        color: #a5b4fc;
+        font-size: 0.9rem;
+        font-weight: 500;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    /* Quick Actions */
+    .quick-actions {
+        background: var(--card-bg);
+        backdrop-filter: blur(18px);
+        border-radius: 16px;
+        padding: 1.5rem;
+        box-shadow: var(--shadow-sm);
+        border: 1px solid var(--border-color);
+        margin-top: 2rem;
+    }
+
+        .quick-actions h3 {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid var(--border-color);
+        }
+
+    .actions-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+    }
+
+    .action-btn {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 1rem;
+        border-radius: 12px;
+        background: rgba(255, 255, 255, 0.07);
+        border: 1px solid var(--border-color);
+        transition: var(--transition);
+        cursor: pointer;
+        text-decoration: none;
+        color: var(--text-primary);
+    }
+
+        .action-btn:hover {
+            background: linear-gradient(135deg, #6366f1, #a855f7);
+            border-color: var(--primary);
+            color: white;
+            transform: translateY(-2px);
+        }
+
+            .action-btn:hover i {
+                color: white;
+            }
+
+        .action-btn i {
+            font-size: 1.2rem;
+            color: #c4b5fd;
+            transition: var(--transition);
+        }
+
+    .table {
+        color: var(--text-secondary);
+    }
+
+    .table thead th {
+        color: var(--text-primary);
+        border-color: var(--border-color);
+    }
+
+    .table td {
+        border-color: var(--border-color);
+    }
+
+    /* Responsive */
+    @@media (max-width: 768px) {
+        .stats-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .menu-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .actions-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .dashboard-header h1 {
+            font-size: 1.5rem;
+        }
+    }
+</style>
+
+<div class="container-fluid py-4">
+    <!-- Dashboard Header -->
+    <div class="dashboard-header">
+        <h1><i class="fas fa-tachometer-alt me-2 text-primary"></i>Dashboard</h1>
+        <p>Quản lý tổng quan hệ thống tuyển dụng JobPortal</p>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="stats-grid">
+        <div class="stat-card blue">
+            <div class="stat-card-header">
+                <span class="stat-card-title">Tổng người dùng</span>
+                <div class="stat-card-icon">
+                    <i class="fas fa-users"></i>
+                </div>
+            </div>
+            <div class="stat-card-value">@ViewBag.TotalUsers</div>
+            <div class="stat-card-change positive">
+                <i class="fas fa-arrow-up"></i>
+                <span>+12% so với tháng trước</span>
+            </div>
+        </div>
+
+        <div class="stat-card green">
+            <div class="stat-card-header">
+                <span class="stat-card-title">Nhà tuyển dụng</span>
+                <div class="stat-card-icon">
+                    <i class="fas fa-building"></i>
+                </div>
+            </div>
+            <div class="stat-card-value">@ViewBag.TotalEmployers</div>
+            <div class="stat-card-change positive">
+                <i class="fas fa-arrow-up"></i>
+                <span>+8% so với tháng trước</span>
+            </div>
+        </div>
+
+        <div class="stat-card yellow">
+            <div class="stat-card-header">
+                <span class="stat-card-title">Ứng viên</span>
+                <div class="stat-card-icon">
+                    <i class="fas fa-user-graduate"></i>
+                </div>
+            </div>
+            <div class="stat-card-value">@ViewBag.TotalCandidates</div>
+            <div class="stat-card-change positive">
+                <i class="fas fa-arrow-up"></i>
+                <span>+15% so với tháng trước</span>
+            </div>
+        </div>
+
+        <div class="stat-card red">
+            <div class="stat-card-header">
+                <span class="stat-card-title">Đơn ứng tuyển</span>
+                <div class="stat-card-icon">
+                    <i class="fas fa-file-signature"></i>
+                </div>
+            </div>
+            <div class="stat-card-value">@ViewBag.TotalApplications</div>
+            <div class="stat-card-change positive">
+                <i class="fas fa-arrow-up"></i>
+                <span>+23% so với tháng trước</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Menu Cards -->
+    <div class="menu-grid">
+        <!-- Quản lý người dùng -->
+        <a href="@Url.Action("ManageUsers")" class="menu-card">
+            <div class="menu-card-header">
+                <div class="menu-card-icon blue">
+                    <i class="fas fa-users"></i>
+                </div>
+                <div class="menu-card-title">Quản lý người dùng</div>
+            </div>
+            <div class="menu-card-description">
+                Quản lý tất cả tài khoản người dùng trong hệ thống bao gồm Admin, Nhà tuyển dụng và Ứng viên.
+            </div>
+            <div class="menu-card-footer">
+                <span class="menu-card-badge">@ViewBag.TotalUsers tài khoản</span>
+                <span class="menu-card-link">
+                    Xem chi tiết <i class="fas fa-arrow-right ms-1"></i>
+                </span>
+            </div>
+        </a>
+
+        <!-- Duyệt hồ sơ CV -->
+        <a href="@Url.Action("ManageApplications")" class="menu-card">
+            <div class="menu-card-header">
+                <div class="menu-card-icon orange">
+                    <i class="fas fa-file-signature"></i>
+                </div>
+                <div class="menu-card-title">Duyệt hồ sơ CV</div>
+            </div>
+            <div class="menu-card-description">
+                Xét duyệt các đơn ứng tuyển từ ứng viên, cập nhật trạng thái và phản hồi.
+            </div>
+            <div class="menu-card-footer">
+                <span class="menu-card-badge">@ViewBag.PendingApplications đơn chờ duyệt</span>
+                <span class="menu-card-link">
+                    Xem chi tiết <i class="fas fa-arrow-right ms-1"></i>
+                </span>
+            </div>
+        </a>
+
+        <!-- Quản lý tin tuyển dụng -->
+        <a href="@Url.Action("ManageJobs")" class="menu-card">
+            <div class="menu-card-header">
+                <div class="menu-card-icon green">
+                    <i class="fas fa-briefcase"></i>
+                </div>
+                <div class="menu-card-title">Quản lý tin tuyển dụng</div>
+            </div>
+            <div class="menu-card-description">
+                Quản lý tất cả tin tuyển dụng, theo dõi lượt xem và số lượng ứng viên.
+            </div>
+            <div class="menu-card-footer">
+                <span class="menu-card-badge">@ViewBag.ActiveJobs tin đang tuyển</span>
+                <span class="menu-card-link">
+                    Xem chi tiết <i class="fas fa-arrow-right ms-1"></i>
+                </span>
+            </div>
+        </a>
+
+        <!-- Đăng tin mới -->
+        <a href="@Url.Action("CreateJob")" class="menu-card">
+            <div class="menu-card-header">
+                <div class="menu-card-icon purple">
+                    <i class="fas fa-plus-circle"></i>
+                </div>
+                <div class="menu-card-title">Đăng tin mới</div>
+            </div>
+            <div class="menu-card-description">
+                Tạo và đăng tin tuyển dụng mới lên hệ thống, tiếp cận hàng ngàn ứng viên.
+            </div>
+            <div class="menu-card-footer">
+                <span class="menu-card-link">
+                    Đăng ngay <i class="fas fa-arrow-right ms-1"></i>
+                </span>
+            </div>
+        </a>
+
+        <!-- Thêm nhà tuyển dụng -->
+        <a href="@Url.Action("CreateEmployer")" class="menu-card">
+            <div class="menu-card-header">
+                <div class="menu-card-icon green">
+                    <i class="fas fa-building"></i>
+                </div>
+                <div class="menu-card-title">Thêm nhà tuyển dụng</div>
+            </div>
+            <div class="menu-card-description">
+                Tạo tài khoản nhà tuyển dụng mới để họ có thể đăng tin và quản lý tuyển dụng.
+            </div>
+            <div class="menu-card-footer">
+                <span class="menu-card-link">
+                    Thêm ngay <i class="fas fa-arrow-right ms-1"></i>
+                </span>
+            </div>
+        </a>
+
+        <!-- Quản lý thông báo -->
+        <a href="@Url.Action("ManageAnnouncements")" class="menu-card">
+            <div class="menu-card-header">
+                <div class="menu-card-icon warning">
+                    <i class="fas fa-bullhorn"></i>
+                </div>
+                <div class="menu-card-title">Quản lý thông báo</div>
+            </div>
+            <div class="menu-card-description">
+                Tạo và quản lý các thông báo hiển thị trên trang chủ cho người dùng.
+            </div>
+            <div class="menu-card-footer">
+                <span class="menu-card-badge">Quản lý thông báo</span>
+                <span class="menu-card-link">
+                    Xem chi tiết <i class="fas fa-arrow-right ms-1"></i>
+                </span>
+            </div>
+        </a>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="quick-actions">
+        <h3><i class="fas fa-bolt me-2 text-primary"></i>Thao tác nhanh</h3>
+        <div class="actions-grid">
+            <a href="@Url.Action("CreateUser")" class="action-btn">
+                <i class="fas fa-user-plus"></i>
+                <span>Thêm người dùng</span>
+            </a>
+            <a href="@Url.Action("CreateEmployer")" class="action-btn">
+                <i class="fas fa-building"></i>
+                <span>Thêm nhà tuyển dụng</span>
+            </a>
+            <a href="@Url.Action("CreateJob")" class="action-btn">
+                <i class="fas fa-briefcase"></i>
+                <span>Đăng tin tuyển dụng</span>
+            </a>
+            <a href="@Url.Action("ManageApplications")" class="action-btn">
+                <i class="fas fa-file-signature"></i>
+                <span>Duyệt hồ sơ CV</span>
+            </a>
+            <a href="@Url.Action("ManageAnnouncements")" class="action-btn">
+                <i class="fas fa-bullhorn"></i>
+                <span>Thêm thông báo</span>
+            </a>
+            <a href="@Url.Action("CVAccessLogs")" class="action-btn">
+                <i class="fas fa-shield-halved"></i>
+                <span>Log truy cập CV</span>
+            </a>
+        </div>
+    </div>
+
+    <!-- Recent Activities (Optional) -->
+    <div class="quick-actions mt-4">
+        <h3><i class="fas fa-history me-2 text-primary"></i>Hoạt động gần đây</h3>
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>Thời gian</th>
+                        <th>Người dùng</th>
+                        <th>Hành động</th>
+                        <th>Chi tiết</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (recentActivities.Any())
+                    {
+                        foreach (var item in recentActivities)
+                        {
+                            var badgeClass = item.Action?.Contains("CV") == true ? "bg-success"
+                                : item.Action?.Contains("Tạo") == true ? "bg-primary"
+                                : item.Action?.Contains("Đăng") == true ? "bg-warning text-dark"
+                                : item.Action?.Contains("Xóa") == true || item.Action?.Contains("Ẩn") == true ? "bg-danger"
+                                : "bg-info";
+                            <tr>
+                                <td>@item.CreatedAt.ToString("HH:mm dd/MM/yyyy")</td>
+                                <td>@item.Username</td>
+                                <td><span class="badge @badgeClass">@item.Action</span></td>
+                                <td>@item.Details</td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="4" class="text-muted py-4 text-center">Chưa có hoạt động admin nào được ghi lại.</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

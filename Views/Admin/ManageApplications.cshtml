@@ -1,0 +1,919 @@
+﻿@model List<BTL_2.Models.Application>
+
+@{
+    ViewData["Title"] = "Duyệt hồ sơ CV";
+    Layout = "~/Views/Shared/_Layout_Admin.cshtml";
+}
+
+<style>
+    /* ==================== MODERN DESIGN SYSTEM ==================== */
+    :root {
+        --primary: #6366f1;
+        --primary-dark: #4f46e5;
+        --success: #22c55e;
+        --warning: #f59e0b;
+        --danger: #ef4444;
+        --gray-400: #94a3b8;
+        --gray-500: #64748b;
+        --gray-600: #475569;
+        --gray-700: #334155;
+        --gray-800: #1e293b;
+        --radius-sm: 0.5rem;
+        --radius-md: 0.75rem;
+        --radius-lg: 1rem;
+        --radius-xl: 1.5rem;
+        --transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
+    body {
+        background: linear-gradient(145deg, #1e293b 0%, #0f172a 100%);
+        font-family: 'Inter', sans-serif;
+    }
+
+    .page-wrapper {
+        padding: 1.5rem;
+        max-width: 1400px;
+        margin: 0 auto;
+    }
+
+    /* Header */
+    .page-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+
+    .page-header h1 {
+        font-size: 1.75rem;
+        font-weight: 700;
+        background: linear-gradient(135deg, #a855f7, #6366f1);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        margin-bottom: 0.25rem;
+    }
+
+    .page-header p {
+        color: #cbd5e1 !important;
+        font-size: 0.875rem;
+    }
+
+    /* Stats Grid */
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+
+    .stat-card {
+        background: rgba(255, 255, 255, 0.03);
+        backdrop-filter: blur(20px);
+        border-radius: var(--radius-xl);
+        padding: 1.25rem;
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        transition: var(--transition);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .stat-card:hover {
+        transform: translateY(-4px);
+        background: rgba(255, 255, 255, 0.05);
+        border-color: rgba(99, 102, 241, 0.3);
+    }
+
+    .stat-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 3px;
+    }
+
+    .stat-card.warning::before { background: linear-gradient(90deg, #f59e0b, #d97706); }
+    .stat-card.success::before { background: linear-gradient(90deg, #22c55e, #16a34a); }
+    .stat-card.danger::before { background: linear-gradient(90deg, #ef4444, #dc2626); }
+    .stat-card.primary::before { background: linear-gradient(90deg, #6366f1, #a855f7); }
+
+    .stat-icon {
+        width: 48px;
+        height: 48px;
+        background: rgba(99, 102, 241, 0.1);
+        border-radius: var(--radius-md);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 1rem;
+    }
+
+    .stat-icon i { font-size: 1.5rem; }
+    .stat-icon.warning i { color: #fbbf24; }
+    .stat-icon.success i { color: #86efac; }
+    .stat-icon.danger i { color: #f87171; }
+    .stat-icon.primary i { color: #818cf8; }
+
+    .stat-value {
+        font-size: 2rem;
+        font-weight: 800;
+        color: white;
+        margin-bottom: 0.25rem;
+    }
+
+    .stat-label {
+        color: var(--gray-400);
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        font-weight: 500;
+    }
+
+    /* Filter Tabs */
+    .filter-tabs {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        margin-bottom: 2rem;
+        flex-wrap: wrap;
+    }
+
+    .filter-tab {
+        padding: 0.75rem 1.5rem;
+        border-radius: 40px;
+        font-weight: 500;
+        transition: var(--transition);
+        background: rgba(255, 255, 255, 0.03);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        color: #cbd5e1;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        text-decoration: none;
+    }
+
+    .filter-tab:hover {
+        border-color: var(--primary);
+        color: white;
+        background: rgba(99, 102, 241, 0.1);
+    }
+
+    .filter-tab.active {
+        background: linear-gradient(135deg, #6366f1, #4f46e5);
+        border-color: transparent;
+        color: white;
+    }
+
+    .filter-tab i { font-size: 1rem; }
+    .filter-tab .badge {
+        background: rgba(255, 255, 255, 0.2);
+        padding: 0.2rem 0.5rem;
+        border-radius: 20px;
+        font-size: 0.7rem;
+    }
+
+    .security-actions {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        flex-wrap: wrap;
+    }
+
+    .security-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.75rem 1rem;
+        border-radius: var(--radius-md);
+        font-weight: 700;
+        font-size: 0.85rem;
+        text-decoration: none;
+        transition: var(--transition);
+        border: 1px solid rgba(255, 255, 255, 0.12);
+    }
+
+    .security-btn.test {
+        background: linear-gradient(135deg, #6366f1, #a855f7);
+        color: white;
+        box-shadow: 0 14px 30px rgba(99, 102, 241, 0.25);
+    }
+
+    .security-btn.log {
+        background: rgba(255, 255, 255, 0.06);
+        color: #cbd5e1;
+    }
+
+    .security-btn:hover {
+        transform: translateY(-2px);
+        color: white;
+        border-color: rgba(168, 85, 247, 0.45);
+    }
+
+    .security-panel {
+        background: rgba(99, 102, 241, 0.08);
+        border: 1px solid rgba(168, 85, 247, 0.2);
+        border-radius: var(--radius-xl);
+        padding: 1rem 1.25rem;
+        margin-bottom: 1.5rem;
+        color: #cbd5e1;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 1rem;
+        flex-wrap: wrap;
+    }
+
+    .security-panel strong {
+        color: white;
+    }
+
+    .security-list {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        margin-top: 0.75rem;
+    }
+
+    .security-chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        padding: 0.35rem 0.65rem;
+        border-radius: 999px;
+        background: rgba(15, 23, 42, 0.45);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        color: #dbeafe;
+        font-size: 0.75rem;
+        font-weight: 600;
+    }
+
+    /* Application Cards */
+    .applications-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+        gap: 1.5rem;
+    }
+
+    .application-card {
+        background: rgba(255, 255, 255, 0.03);
+        backdrop-filter: blur(20px);
+        border-radius: var(--radius-xl);
+        padding: 1.5rem;
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        transition: var(--transition);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .application-card:hover {
+        transform: translateY(-4px);
+        background: rgba(255, 255, 255, 0.05);
+        border-color: rgba(99, 102, 241, 0.3);
+    }
+
+    .application-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 3px;
+        background: linear-gradient(90deg, #6366f1, #a855f7);
+    }
+
+    .card-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 1rem;
+    }
+
+    .company-info {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .company-logo {
+        width: 50px;
+        height: 50px;
+        border-radius: var(--radius-md);
+        object-fit: cover;
+        border: 2px solid rgba(99, 102, 241, 0.3);
+        background: rgba(0, 0, 0, 0.3);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .company-name {
+        font-weight: 600;
+        color: white;
+        margin-bottom: 0.25rem;
+    }
+
+    .job-title {
+        font-size: 0.8rem;
+        color: #94a3b8;
+    }
+
+    /* Status Badge */
+    .status-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.25rem;
+        padding: 0.35rem 1rem;
+        border-radius: 30px;
+        font-size: 0.75rem;
+        font-weight: 500;
+    }
+
+    .status-badge.pending {
+        background: rgba(245, 158, 11, 0.2);
+        color: #fed7aa;
+        border: 1px solid rgba(245, 158, 11, 0.3);
+    }
+
+    .status-badge.approved {
+        background: rgba(34, 197, 94, 0.2);
+        color: #86efac;
+        border: 1px solid rgba(34, 197, 94, 0.3);
+    }
+
+    .status-badge.rejected {
+        background: rgba(239, 68, 68, 0.2);
+        color: #fecaca;
+        border: 1px solid rgba(239, 68, 68, 0.3);
+    }
+
+    /* Candidate Info */
+    .candidate-info {
+        background: rgba(0, 0, 0, 0.2);
+        border-radius: var(--radius-md);
+        padding: 1rem;
+        margin: 1rem 0;
+    }
+
+    .candidate-name {
+        font-weight: 600;
+        color: white;
+        margin-bottom: 0.25rem;
+    }
+
+    .candidate-email {
+        font-size: 0.8rem;
+        color: #94a3b8;
+        margin-bottom: 0.5rem;
+    }
+
+    .apply-date {
+        font-size: 0.75rem;
+        color: #64748b;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    /* Cover Letter */
+    .cover-letter {
+        background: rgba(0, 0, 0, 0.2);
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        border-radius: var(--radius-md);
+        padding: 0.75rem;
+        margin: 1rem 0;
+        font-size: 0.85rem;
+        color: #cbd5e1;
+        line-height: 1.5;
+        max-height: 100px;
+        overflow-y: auto;
+    }
+
+    .cover-letter i { color: #818cf8; }
+
+    .cv-security {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.75rem;
+        padding: 0.75rem;
+        border-radius: var(--radius-md);
+        margin: 1rem 0;
+        background: rgba(15, 23, 42, 0.42);
+        border: 1px solid rgba(255, 255, 255, 0.06);
+        color: #cbd5e1;
+        font-size: 0.8rem;
+    }
+
+    .cv-security.secure {
+        border-color: rgba(34, 197, 94, 0.28);
+        background: rgba(34, 197, 94, 0.08);
+    }
+
+    .cv-security.warning {
+        border-color: rgba(245, 158, 11, 0.32);
+        background: rgba(245, 158, 11, 0.08);
+    }
+
+    .cv-security.danger {
+        border-color: rgba(239, 68, 68, 0.32);
+        background: rgba(239, 68, 68, 0.08);
+    }
+
+    .cv-security-title {
+        font-weight: 800;
+        color: white;
+    }
+
+    .cv-security small {
+        color: #94a3b8;
+    }
+
+    /* Action Buttons */
+    .action-buttons {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        margin-top: 1rem;
+    }
+
+    .btn-action {
+        flex: 1;
+        padding: 0.6rem;
+        border: none;
+        border-radius: var(--radius-md);
+        font-weight: 500;
+        font-size: 0.8rem;
+        cursor: pointer;
+        transition: var(--transition);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+    }
+
+    .btn-approve {
+        background: linear-gradient(135deg, #22c55e, #16a34a);
+        color: white;
+    }
+
+    .btn-approve:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(34, 197, 94, 0.3);
+    }
+
+    .btn-reject {
+        background: linear-gradient(135deg, #ef4444, #dc2626);
+        color: white;
+    }
+
+    .btn-reject:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+    }
+
+    .btn-view-cv {
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        color: #cbd5e1;
+        padding: 0.6rem;
+        border-radius: var(--radius-md);
+        font-weight: 500;
+        font-size: 0.8rem;
+        cursor: pointer;
+        transition: var(--transition);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        text-decoration: none;
+    }
+
+    .btn-view-cv:hover {
+        background: var(--primary);
+        border-color: var(--primary);
+        color: white;
+        transform: translateY(-2px);
+    }
+
+    .btn-view-cv.disabled-link,
+    .btn-view-cv.disabled-link:hover {
+        background: rgba(71, 85, 105, 0.45);
+        border-color: rgba(148, 163, 184, 0.18);
+        color: #94a3b8;
+        cursor: not-allowed;
+        transform: none;
+    }
+
+    /* Empty State */
+    .empty-state {
+        text-align: center;
+        padding: 4rem;
+        background: rgba(255, 255, 255, 0.03);
+        border-radius: var(--radius-xl);
+        border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .empty-state i {
+        font-size: 4rem;
+        color: var(--gray-500);
+        margin-bottom: 1rem;
+    }
+
+    .empty-state h3 {
+        color: white;
+        font-size: 1.3rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .empty-state p {
+        color: var(--gray-400);
+        margin-bottom: 1.5rem;
+    }
+
+    /* Notification */
+    .notification {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        z-index: 9999;
+        min-width: 300px;
+        padding: 12px 20px;
+        border-radius: var(--radius-md);
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        animation: slideIn 0.3s ease;
+    }
+
+    .notification-success {
+        background: #22c55e;
+        color: white;
+    }
+
+    .notification-danger {
+        background: #ef4444;
+        color: white;
+    }
+
+    .notification i { font-size: 1.1rem; }
+    .notification .close-btn {
+        background: none;
+        border: none;
+        color: white;
+        cursor: pointer;
+        margin-left: auto;
+        font-size: 1.2rem;
+    }
+
+    @@keyframes slideIn {
+        from { opacity: 0; transform: translateX(100px); }
+        to { opacity: 1; transform: translateX(0); }
+    }
+
+    /* Responsive */
+    @@media (max-width: 1024px) {
+        .stats-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+
+    @@media (max-width: 768px) {
+        .page-wrapper { padding: 1rem; }
+        .stats-grid { grid-template-columns: 1fr; }
+        .applications-grid { grid-template-columns: 1fr; }
+        .filter-tabs { justify-content: center; }
+        .filter-tab { width: 100%; text-align: center; }
+        .action-buttons { flex-direction: column; }
+        .btn-action, .btn-view-cv { width: 100%; }
+        .security-actions,
+        .security-panel {
+            width: 100%;
+        }
+        .security-btn {
+            flex: 1;
+            justify-content: center;
+        }
+    }
+</style>
+
+<div class="page-wrapper">
+    <div class="page-header">
+        <div>
+            <h1><i class="fas fa-file-signature me-2"></i>Duyệt hồ sơ CV</h1>
+            <p>Xét duyệt đơn ứng tuyển và kiểm tra bảo mật CV</p>
+        </div>
+        <div class="security-actions">
+            <a class="security-btn test" href="@Url.Action("Index", "TestSecurity")">
+                <i class="fas fa-shield-halved"></i> Kiểm thử bảo mật
+            </a>
+            <a class="security-btn log" href="@Url.Action("CVAccessLogs", "Admin")">
+                <i class="fas fa-clipboard-list"></i> Log truy cập CV
+            </a>
+        </div>
+    </div>
+
+    <div class="security-panel">
+        <div>
+            <strong>Secure System Upgrade Challenge</strong>
+            <div class="security-list">
+                <span class="security-chip"><i class="fas fa-key"></i> Token phiên</span>
+                <span class="security-chip"><i class="fas fa-fingerprint"></i> Metadata + nonce</span>
+                <span class="security-chip"><i class="fas fa-file-shield"></i> Phát hiện sửa CV</span>
+                <span class="security-chip"><i class="fas fa-clock"></i> Từ chối CV hết hạn</span>
+                <span class="security-chip"><i class="fas fa-user-lock"></i> Chặn sai quyền</span>
+            </div>
+        </div>
+        <div class="text-end small">
+            <div>CV có metadata: <strong>@Model.Count(a => a.CVMetadataId.HasValue)</strong></div>
+            <div>CV chưa metadata: <strong>@Model.Count(a => !a.CVMetadataId.HasValue)</strong></div>
+        </div>
+    </div>
+
+    @if (TempData["DownloadUrl"] != null)
+    {
+        <div class="security-panel" style="border-color: rgba(34, 197, 94, 0.35); background: rgba(22, 163, 74, 0.12);">
+            <div>
+                <strong><i class="fas fa-key me-2"></i>Token tải CV đã sẵn sàng</strong>
+                <div class="security-list">
+                    <span class="security-chip"><i class="fas fa-clock"></i> Hết hạn sau vài phút</span>
+                    <span class="security-chip"><i class="fas fa-user-lock"></i> Chỉ dùng trong phiên hiện tại</span>
+                    <span class="security-chip"><i class="fas fa-ban"></i> Dùng một lần</span>
+                </div>
+                <code class="d-block mt-2" style="word-break: break-all;">@TempData["DownloadToken"]</code>
+            </div>
+            <div class="text-end">
+                <a class="security-btn test" href="@TempData["DownloadUrl"]">
+                    <i class="fas fa-download"></i> Tải CV đã giải mã
+                </a>
+            </div>
+        </div>
+    }
+
+    <!-- Stats Cards -->
+    <div class="stats-grid">
+        <div class="stat-card warning">
+            <div class="stat-icon warning"><i class="fas fa-clock"></i></div>
+            <div class="stat-value">@Model.Count(a => a.Status == "Pending")</div>
+            <div class="stat-label">Đang chờ duyệt</div>
+        </div>
+        <div class="stat-card success">
+            <div class="stat-icon success"><i class="fas fa-check-circle"></i></div>
+            <div class="stat-value">@Model.Count(a => a.Status == "Approved")</div>
+            <div class="stat-label">Đã duyệt</div>
+        </div>
+        <div class="stat-card danger">
+            <div class="stat-icon danger"><i class="fas fa-times-circle"></i></div>
+            <div class="stat-value">@Model.Count(a => a.Status == "Rejected")</div>
+            <div class="stat-label">Từ chối</div>
+        </div>
+        <div class="stat-card primary">
+            <div class="stat-icon primary"><i class="fas fa-file-alt"></i></div>
+            <div class="stat-value">@Model.Count</div>
+            <div class="stat-label">Tổng đơn</div>
+        </div>
+    </div>
+
+    <!-- Filter Tabs -->
+    <div class="filter-tabs">
+        <a href="@Url.Action("ManageApplications", new { status = "Pending" })" class="filter-tab @(ViewBag.CurrentStatus == "Pending" ? "active" : "")">
+            <i class="fas fa-clock"></i><span>Đang chờ</span><span class="badge">@Model.Count(a => a.Status == "Pending")</span>
+        </a>
+        <a href="@Url.Action("ManageApplications", new { status = "Approved" })" class="filter-tab @(ViewBag.CurrentStatus == "Approved" ? "active" : "")">
+            <i class="fas fa-check-circle"></i><span>Đã duyệt</span><span class="badge">@Model.Count(a => a.Status == "Approved")</span>
+        </a>
+        <a href="@Url.Action("ManageApplications", new { status = "Rejected" })" class="filter-tab @(ViewBag.CurrentStatus == "Rejected" ? "active" : "")">
+            <i class="fas fa-times-circle"></i><span>Từ chối</span><span class="badge">@Model.Count(a => a.Status == "Rejected")</span>
+        </a>
+        <a href="@Url.Action("ManageApplications", new { status = "All" })" class="filter-tab @(ViewBag.CurrentStatus == "All" ? "active" : "")">
+            <i class="fas fa-list"></i><span>Tất cả</span><span class="badge">@Model.Count</span>
+        </a>
+    </div>
+
+    <!-- Applications Grid -->
+    @if (!Model.Any())
+    {
+        <div class="empty-state">
+            <i class="fas fa-file-alt"></i>
+            <h3>Không có đơn ứng tuyển</h3>
+            <p>Hiện tại chưa có đơn ứng tuyển nào trong hệ thống</p>
+        </div>
+    }
+    else
+    {
+        <div class="applications-grid">
+            @foreach (var app in Model)
+            {
+                <div class="application-card" data-id="@app.ApplicationId">
+                    <div class="card-header">
+                        <div class="company-info">
+                            @if (!string.IsNullOrEmpty(app.Job?.Company?.Logo))
+                            {
+                                <img src="@app.Job.Company.Logo" class="company-logo">
+                            }
+                            else
+                            {
+                                <div class="company-logo d-flex align-items-center justify-content-center">
+                                    <i class="fas fa-building text-secondary"></i>
+                                </div>
+                            }
+                            <div>
+                                <div class="company-name">@(app.Job?.Company?.CompanyName ?? "N/A")</div>
+                                <div class="job-title">@(app.Job?.Title ?? "N/A")</div>
+                            </div>
+                        </div>
+                        <span class="status-badge @(app.Status?.ToLower() ?? "pending")">
+                            @if (app.Status == "Pending")
+                            {
+                                <i class="fas fa-clock me-1"></i><span>Đang chờ</span>
+                            }
+                            else if (app.Status == "Approved")
+                            {
+                                <i class="fas fa-check-circle me-1"></i><span>Đã duyệt</span>
+                            }
+                            else
+                            {
+                                <i class="fas fa-times-circle me-1"></i><span>Từ chối</span>
+                            }
+                        </span>
+                    </div>
+
+                    <div class="candidate-info">
+                        <div class="candidate-name">@(app.User?.FullName ?? "N/A")</div>
+                        <div class="candidate-email">@(app.User?.Email ?? "N/A")</div>
+                        <div class="apply-date">
+                            <i class="far fa-calendar-alt"></i>
+                            @(app.ApplyDate?.ToString("dd/MM/yyyy HH:mm") ?? "N/A")
+                        </div>
+                    </div>
+
+                    @if (!string.IsNullOrEmpty(app.CoverLetter))
+                    {
+                        <div class="cover-letter">
+                            <i class="fas fa-quote-left me-2"></i>
+                            @app.CoverLetter
+                        </div>
+                    }
+
+                    @if (app.CVMetadataId.HasValue)
+                    {
+                        var cvStatus = string.IsNullOrWhiteSpace(app.CVIntegrityStatus)
+                            ? "Chưa quét"
+                            : app.CVIntegrityStatus;
+                        <div class="cv-security @(app.CanDownloadSecureCV ? "secure" : "danger")">
+                            <div>
+                                <div class="cv-security-title">
+                                    <i class="fas @(app.CanDownloadSecureCV ? "fa-circle-check" : "fa-triangle-exclamation") me-1"></i> @cvStatus
+                                </div>
+                                <small title="@app.CVIntegrityDetail">
+                                    Metadata #@app.CVMetadataId. Chỉ trạng thái Valid mới tạo link tải.
+                                </small>
+                            </div>
+                            <span class="badge @(app.CanDownloadSecureCV ? "bg-success" : "bg-danger")">
+                                @(app.CanDownloadSecureCV ? "Valid" : "Không tải")
+                            </span>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="cv-security warning">
+                            <div>
+                                <div class="cv-security-title"><i class="fas fa-triangle-exclamation me-1"></i> CV cũ</div>
+                                <small>Chưa có metadata bảo mật, nên ứng tuyển lại để tạo CV secure.</small>
+                            </div>
+                            <span class="badge bg-warning text-dark">Chưa secure</span>
+                        </div>
+                    }
+
+                    <div class="action-buttons">
+                        @if (app.CVMetadataId.HasValue && app.CanDownloadSecureCV)
+                        {
+                            <form asp-action="DownloadDecryptedCV" asp-controller="Jobs" method="post" class="d-inline">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="applicationId" value="@app.ApplicationId" />
+                                <button type="submit" class="btn-view-cv border-0">
+                                    <i class="fas fa-key"></i> Tạo token & tải
+                                </button>
+                            </form>
+                        }
+                        else if (app.CVMetadataId.HasValue)
+                        {
+                            <span class="btn-view-cv disabled-link" title="@app.CVIntegrityDetail">
+                                <i class="fas fa-ban"></i> Không tải
+                            </span>
+                        }
+                        else if (!string.IsNullOrEmpty(app.CVFile))
+                        {
+                            <span class="text-muted">
+                                <i class="fas fa-lock me-1"></i> CV cũ chưa có metadata bảo mật
+                            </span>
+                        }
+
+                        @if (app.Status == "Pending")
+                        {
+                            <button class="btn-action btn-approve" onclick="updateStatus(@app.ApplicationId, 'Approved')">
+                                <i class="fas fa-check"></i> Duyệt
+                            </button>
+                            <button class="btn-action btn-reject" onclick="updateStatus(@app.ApplicationId, 'Rejected')">
+                                <i class="fas fa-times"></i> Từ chối
+                            </button>
+                        }
+                        else if (app.Status == "Approved")
+                        {
+                            <button class="btn-action btn-reject" onclick="updateStatus(@app.ApplicationId, 'Rejected')">
+                                <i class="fas fa-times"></i> Hủy duyệt
+                            </button>
+                        }
+                        else if (app.Status == "Rejected")
+                        {
+                            <button class="btn-action btn-approve" onclick="updateStatus(@app.ApplicationId, 'Approved')">
+                                <i class="fas fa-check"></i> Duyệt lại
+                            </button>
+                        }
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</div>
+
+<!-- Anti-forgery token for AJAX -->
+<form id="__AjaxAntiForgeryForm" style="display:none">
+    @Html.AntiForgeryToken()
+</form>
+
+@section Scripts {
+    <script>
+        function getToken() {
+            var token = $('#__AjaxAntiForgeryForm input[name="__RequestVerificationToken"]').val();
+            console.log("Token:", token ? "Có token" : "Không có token");
+            return token;
+        }
+
+        function updateStatus(id, status) {
+            if (!confirm(`Bạn có chắc muốn ${status === 'Approved' ? 'duyệt' : 'từ chối'} hồ sơ này?`)) return;
+
+            var token = getToken();
+            
+            $.ajax({
+                url: '/Admin/UpdateApplicationStatus',
+                type: 'POST',
+                data: {
+                    id: id,
+                    status: status,
+                    __RequestVerificationToken: token
+                },
+                beforeSend: function() {
+                    console.log("Đang gửi request...");
+                },
+                success: function(response) {
+                    console.log("Response:", response);
+                    if (response.success) {
+                        showNotification('✅ Cập nhật trạng thái thành công!', 'success');
+                        setTimeout(() => location.reload(), 1500);
+                    } else {
+                        showNotification('❌ ' + (response.message || 'Có lỗi xảy ra'), 'danger');
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.error("Error:", xhr.status, xhr.responseText);
+                    var errorMsg = xhr.responseText || 'Lỗi kết nối server';
+                    showNotification('❌ Lỗi: ' + errorMsg, 'danger');
+                }
+            });
+        }
+
+        function showNotification(message, type) {
+            var bgColor = type === 'success' ? '#22c55e' : '#ef4444';
+            var icon = type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle';
+            
+            var notification = $(`
+                <div class="notification notification-${type}" style="background: ${bgColor}">
+                    <i class="fas ${icon}"></i>
+                    <span>${message}</span>
+                    <button class="close-btn" onclick="$(this).parent().remove()">&times;</button>
+                </div>
+            `);
+            
+            $('body').append(notification);
+            setTimeout(function() {
+                notification.fadeOut(500, function() { $(this).remove(); });
+            }, 3000);
+        }
+        
+        // Kiểm tra token khi load trang
+        $(document).ready(function() {
+            var token = getToken();
+            if (!token) {
+                console.warn("⚠️ Không tìm thấy AntiForgeryToken!");
+            } else {
+                console.log("✅ AntiForgeryToken đã sẵn sàng");
+            }
+        });
+    </script>
+}

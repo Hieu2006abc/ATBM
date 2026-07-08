@@ -1,0 +1,252 @@
+﻿@model List<BTL_2.Models.ViewModels.CVAccessLogViewModel>
+@using Microsoft.AspNetCore.Http
+
+@{
+    ViewData["Title"] = "Log truy cập CV";
+    var currentRole = Context.Session.GetString("UserRole");
+    var isEmployer = currentRole == "Employer";
+    Layout = isEmployer ? "~/Views/Shared/_Layout.cshtml" : "~/Views/Shared/_Layout_Admin.cshtml";
+    var backUrl = isEmployer ? Url.Action("ManageApplications", "Jobs") : Url.Action("Dashboard", "Admin");
+    var backText = isEmployer ? "Quản lý ứng viên" : "Dashboard";
+}
+
+<style>
+    body {
+        background: linear-gradient(180deg, #0f172a 0%, #111827 100%);
+        font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        color: #e5e7eb;
+    }
+
+    .logs-shell {
+        max-width: 1320px;
+        margin: 0 auto;
+        padding: 28px 18px;
+    }
+
+    .logs-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 14px;
+        margin-bottom: 18px;
+    }
+
+    .logs-header h1 {
+        font-size: 28px;
+        font-weight: 800;
+        margin: 0;
+        color: #f8fafc;
+    }
+
+    .logs-header p {
+        color: #b6c2d2;
+        margin: 6px 0 0;
+    }
+
+    .logs-card {
+        background: rgba(15, 23, 42, 0.78);
+        border: 1px solid rgba(148, 163, 184, 0.24);
+        border-radius: 8px;
+        box-shadow: 0 16px 40px rgba(0, 0, 0, .18);
+        overflow: hidden;
+    }
+
+    .logs-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    .logs-table th {
+        background: rgba(2, 6, 23, 0.88);
+        color: #e2e8f0;
+        font-size: 13px;
+        text-transform: uppercase;
+        padding: 14px;
+        white-space: nowrap;
+    }
+
+    .logs-table td {
+        padding: 14px;
+        border-bottom: 1px solid rgba(148, 163, 184, 0.18);
+        color: #dbeafe !important;
+        background: rgba(15, 23, 42, 0.68) !important;
+        vertical-align: top;
+    }
+
+    .logs-table tbody tr:nth-child(even) td {
+        background: rgba(30, 41, 59, 0.62) !important;
+    }
+
+    .logs-table tbody tr:hover td {
+        background: rgba(51, 65, 85, 0.72) !important;
+    }
+
+    .status {
+        display: inline-flex;
+        padding: 5px 9px;
+        border-radius: 999px;
+        font-size: 12px;
+        font-weight: 800;
+        background: #e2e8f0;
+        color: #334155;
+    }
+
+    .status.ok {
+        background: #dcfce7;
+        color: #15803d;
+    }
+
+    .status.fail {
+        background: #fee2e2;
+        color: #b91c1c;
+    }
+
+    .muted {
+        color: #9fb0c7 !important;
+        font-size: 13px;
+    }
+
+    .btn-back {
+        min-height: 42px;
+        border-radius: 8px;
+        padding: 9px 14px;
+        border: 1px solid rgba(148, 163, 184, 0.28);
+        color: #e2e8f0;
+        background: rgba(15, 23, 42, 0.72);
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        font-weight: 700;
+    }
+
+    .logs-help {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 10px;
+        margin-bottom: 16px;
+    }
+
+    .logs-help-item {
+        background: rgba(255, 255, 255, 0.06);
+        border: 1px solid rgba(148, 163, 184, 0.22);
+        border-radius: 8px;
+        padding: 12px;
+        color: #dbeafe;
+    }
+
+    .logs-help-item strong {
+        display: block;
+        color: #ffffff;
+        margin-bottom: 4px;
+        font-size: 14px;
+    }
+
+    .logs-help-item span {
+        color: #b6c2d2;
+        font-size: 13px;
+        line-height: 1.35;
+    }
+
+    @@media (max-width: 1100px) {
+        .logs-help {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+    }
+
+    @@media (max-width: 720px) {
+        .logs-header {
+            align-items: flex-start;
+            flex-direction: column;
+        }
+
+        .logs-help {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+
+<div class="logs-shell">
+    <div class="logs-header">
+        <div>
+            <h1><i class="fas fa-shield-halved text-primary me-2"></i>Log truy cập CV</h1>
+            <p>Theo dõi lịch sử nhà tuyển dụng tạo token, tải CV, lỗi token, hết hạn và lỗi toàn vẹn file.</p>
+        </div>
+        <a href="@backUrl" class="btn-back"><i class="fas fa-arrow-left"></i> @backText</a>
+    </div>
+
+    <div class="logs-help">
+        <div class="logs-help-item">
+            <strong>Token_Created</strong>
+            <span>Nhà tuyển dụng tạo link tải CV bảo mật.</span>
+        </div>
+        <div class="logs-help-item">
+            <strong>Success</strong>
+            <span>Token hợp lệ, đúng quyền và file qua kiểm tra toàn vẹn.</span>
+        </div>
+        <div class="logs-help-item">
+            <strong>Failed_InvalidToken</strong>
+            <span>Token sai, đã dùng, hết hạn hoặc không đúng phiên.</span>
+        </div>
+        <div class="logs-help-item">
+            <strong>Failed_*</strong>
+            <span>Ghi nhận lỗi quyền, hết hạn CV, thiếu file hoặc hash không khớp.</span>
+        </div>
+    </div>
+
+    <div class="logs-card table-responsive">
+        <table class="logs-table">
+            <thead>
+                <tr>
+                    <th>Thời gian</th>
+                    <th>Nhà tuyển dụng</th>
+                    <th>CV</th>
+                    <th>Việc làm</th>
+                    <th>Trạng thái</th>
+                    <th>IP / Thiết bị</th>
+                    <th>Chi tiết lỗi</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model.Any())
+                {
+                    foreach (var item in Model)
+                    {
+                        var ok = string.Equals(item.Status, "Success", StringComparison.OrdinalIgnoreCase);
+                        <tr>
+                            <td>
+                                <strong>@item.AccessTime.ToString("HH:mm dd/MM/yyyy")</strong>
+                            </td>
+                            <td>
+                                <strong>@item.RecruiterName</strong>
+                                <div class="muted">@item.RecruiterEmail</div>
+                            </td>
+                            <td>
+                                <strong>#@item.CVMetadataId</strong> @item.OriginalFileName
+                                <div class="muted">Candidate: @item.CandidateId</div>
+                            </td>
+                            <td>
+                                <strong>#@item.JobId</strong> @item.JobTitle
+                            </td>
+                            <td>
+                                <span class="status @(ok ? "ok" : "fail")">@item.Status</span>
+                            </td>
+                            <td>
+                                <div>@item.IPAddress</div>
+                                <div class="muted">@(item.UserAgent?.Length > 90 ? item.UserAgent.Substring(0, 90) + "..." : item.UserAgent)</div>
+                            </td>
+                            <td>@(string.IsNullOrWhiteSpace(item.ErrorMessage) ? "-" : item.ErrorMessage)</td>
+                        </tr>
+                    }
+                }
+                else
+                {
+                    <tr>
+                        <td colspan="7" class="text-center muted py-4">Chưa có log truy cập CV.</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+

@@ -1,0 +1,994 @@
+﻿@model BTL_2.Models.Company
+@{
+    ViewData["Title"] = Model.CompanyName;
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var jobs = ViewBag.Jobs as List<BTL_2.Models.Job> ?? new List<BTL_2.Models.Job>();
+}
+
+<style>
+    :root {
+        --primary: #2563eb;
+        --primary-dark: #1d4ed8;
+        --primary-light: #60a5fa;
+        --gray-bg: #f5f7fb;
+        --text-primary: #1e293b;
+        --text-secondary: #64748b;
+        --border-color: #e2e8f0;
+        --shadow-sm: 0 1px 3px rgba(0,0,0,0.05);
+        --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.1);
+        --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.1);
+        --transition: all 0.3s ease;
+    }
+
+    body {
+        background-color: var(--gray-bg);
+    }
+
+    body.dark-mode {
+        --gray-bg: #0f172a;
+        --text-primary: #f8fafc;
+        --text-secondary: #b6c2d2;
+        --border-color: rgba(148, 163, 184, 0.22);
+        background:
+            radial-gradient(circle at 12% 0%, rgba(37, 99, 235, 0.12), transparent 28%),
+            linear-gradient(180deg, #0f172a 0%, #111827 100%) !important;
+    }
+
+    html.dark-mode-preload .company-header,
+    html.dark-mode-preload .card-custom,
+    html.dark-mode-preload .empty-state,
+    html.dark-mode-preload .table-custom,
+    html.dark-mode-preload .chat-btn {
+        background: rgba(15, 23, 42, 0.82) !important;
+        color: #e5e7eb !important;
+        border-color: rgba(148, 163, 184, 0.24) !important;
+    }
+
+    html.dark-mode-preload .company-name,
+    html.dark-mode-preload .card-title,
+    html.dark-mode-preload .address-label,
+    html.dark-mode-preload .job-title-link,
+    html.dark-mode-preload .jobs-section h3 {
+        color: #f8fafc !important;
+    }
+
+    html.dark-mode-preload .company-meta,
+    html.dark-mode-preload .about-content,
+    html.dark-mode-preload .address-text,
+    html.dark-mode-preload .back-link {
+        color: #b6c2d2 !important;
+    }
+
+    /* Company Header */
+    .company-header {
+        background: white;
+        border-radius: 20px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        box-shadow: var(--shadow-md);
+        border: 1px solid var(--border-color);
+    }
+
+    body.dark-mode .company-header,
+    body.dark-mode .card-custom,
+    body.dark-mode .empty-state {
+        background: rgba(15, 23, 42, 0.82) !important;
+        border-color: rgba(148, 163, 184, 0.24) !important;
+        box-shadow: 0 18px 45px rgba(0, 0, 0, 0.18);
+    }
+
+    body.dark-mode .company-logo-wrapper {
+        background: #101a2c !important;
+        border-color: rgba(148, 163, 184, 0.26) !important;
+    }
+
+    .company-logo-wrapper {
+        width: 120px;
+        height: 120px;
+        border-radius: 16px;
+        overflow: hidden;
+        border: 3px solid white;
+        box-shadow: var(--shadow-lg);
+        background: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .company-logo {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .company-name {
+        font-size: 2.5rem;
+        font-weight: 700;
+        color: var(--text-primary);
+        margin-bottom: 0.5rem;
+        line-height: 1.2;
+    }
+
+    body.dark-mode .company-name,
+    body.dark-mode .card-title,
+    body.dark-mode .address-label,
+    body.dark-mode .job-title-link,
+    body.dark-mode .jobs-section h3 {
+        color: #f8fafc !important;
+    }
+
+    body.dark-mode .company-meta,
+    body.dark-mode .about-content,
+    body.dark-mode .about-content p,
+    body.dark-mode .address-text,
+    body.dark-mode .empty-state p,
+    body.dark-mode .back-link {
+        color: #b6c2d2 !important;
+    }
+
+    .company-meta {
+        display: flex;
+        align-items: center;
+        gap: 2rem;
+        color: var(--text-secondary);
+        font-size: 1rem;
+        flex-wrap: wrap;
+    }
+
+    .company-meta-item {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+        .company-meta-item i {
+            color: var(--primary);
+            font-size: 1.1rem;
+        }
+
+    .company-website {
+        color: var(--primary);
+        text-decoration: none;
+        font-weight: 500;
+        transition: var(--transition);
+    }
+
+        .company-website:hover {
+            color: var(--primary-dark);
+            text-decoration: underline;
+        }
+
+    .btn-follow {
+        background: var(--primary);
+        color: white;
+        border: none;
+        padding: 0.75rem 2rem;
+        border-radius: 50px;
+        font-weight: 600;
+        font-size: 1rem;
+        transition: var(--transition);
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        box-shadow: 0 4px 10px rgba(37, 99, 235, 0.2);
+    }
+
+        .btn-follow:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(37, 99, 235, 0.3);
+        }
+
+        .btn-follow i {
+            font-size: 1.1rem;
+        }
+
+    /* Cards */
+    .card-custom {
+        background: white;
+        border-radius: 16px;
+        padding: 1.5rem;
+        box-shadow: var(--shadow-sm);
+        border: 1px solid var(--border-color);
+        transition: var(--transition);
+        height: 100%;
+    }
+
+        .card-custom:hover {
+            box-shadow: var(--shadow-md);
+        }
+
+    .card-title {
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: var(--text-primary);
+        margin-bottom: 1.5rem;
+        padding-bottom: 1rem;
+        border-bottom: 2px solid var(--border-color);
+        position: relative;
+    }
+
+        .card-title::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            width: 50px;
+            height: 2px;
+            background: var(--primary);
+        }
+
+    /* About Company */
+    .about-content {
+        color: var(--text-secondary);
+        line-height: 1.8;
+        font-size: 1rem;
+    }
+
+        .about-content p {
+            margin-bottom: 1rem;
+        }
+
+    /* Address Card */
+    .address-item {
+        display: flex;
+        gap: 1rem;
+        margin-bottom: 1rem;
+        padding-bottom: 1rem;
+        border-bottom: 1px dashed var(--border-color);
+    }
+
+        .address-item:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+
+    .address-icon {
+        width: 40px;
+        height: 40px;
+        background: rgba(37, 99, 235, 0.1);
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--primary);
+        font-size: 1.2rem;
+    }
+
+    .address-content {
+        flex: 1;
+    }
+
+    .address-label {
+        font-weight: 600;
+        color: var(--text-primary);
+        margin-bottom: 0.25rem;
+    }
+
+    .address-text {
+        color: var(--text-secondary);
+        font-size: 0.95rem;
+    }
+
+    /* Share Buttons */
+    .share-buttons {
+        display: flex;
+        gap: 0.75rem;
+        margin-top: 1rem;
+    }
+
+    .share-btn {
+        width: 40px;
+        height: 40px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 1.2rem;
+        transition: var(--transition);
+        text-decoration: none;
+    }
+
+        .share-btn.facebook {
+            background: #1877f2;
+        }
+
+        .share-btn.twitter {
+            background: #1da1f2;
+        }
+
+        .share-btn.email {
+            background: #ea4335;
+        }
+
+        .share-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+    /* Keyword Tags */
+    .keyword-tags {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.75rem;
+        margin-top: 1rem;
+    }
+
+    .keyword-tag {
+        background: #f1f5f9;
+        color: var(--text-secondary);
+        padding: 0.5rem 1.25rem;
+        border-radius: 50px;
+        font-size: 0.9rem;
+        font-weight: 500;
+        transition: var(--transition);
+        cursor: pointer;
+        border: 1px solid transparent;
+    }
+
+    body.dark-mode .keyword-tag,
+    body.dark-mode .job-badge {
+        background: rgba(96, 165, 250, 0.14) !important;
+        border-color: rgba(96, 165, 250, 0.24) !important;
+        color: #bfdbfe !important;
+    }
+
+        .keyword-tag:hover {
+            background: var(--primary);
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(37, 99, 235, 0.2);
+        }
+
+    /* Jobs Table */
+    .jobs-section {
+        margin-top: 3rem;
+    }
+
+        .jobs-section h3 {
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+    .table-responsive {
+        border-radius: 16px;
+        overflow: hidden;
+        box-shadow: var(--shadow-sm);
+    }
+
+    .table-custom {
+        background: white;
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    body.dark-mode .table-responsive {
+        box-shadow: 0 18px 45px rgba(0, 0, 0, 0.18);
+    }
+
+    body.dark-mode .table-custom {
+        background: rgba(15, 23, 42, 0.78) !important;
+    }
+
+    body.dark-mode .table-custom thead {
+        background: rgba(2, 6, 23, 0.86) !important;
+    }
+
+    body.dark-mode .table-custom th {
+        color: #e2e8f0 !important;
+        border-color: rgba(148, 163, 184, 0.22) !important;
+    }
+
+    body.dark-mode .table-custom td {
+        color: #dbeafe !important;
+        background: rgba(15, 23, 42, 0.68) !important;
+        border-color: rgba(148, 163, 184, 0.18) !important;
+    }
+
+    body.dark-mode .table-custom tr:hover td {
+        background: rgba(30, 41, 59, 0.86) !important;
+    }
+
+    body.dark-mode .table-custom .text-muted {
+        color: #9fb0c7 !important;
+    }
+
+        .table-custom thead {
+            background: #f8fafc;
+        }
+
+        .table-custom th {
+            padding: 1.25rem 1rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            border-bottom: 2px solid var(--border-color);
+            font-size: 0.95rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            text-align: left;
+        }
+
+        .table-custom td {
+            padding: 1.25rem 1rem;
+            vertical-align: middle;
+            color: var(--text-secondary);
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .table-custom tr:last-child td {
+            border-bottom: none;
+        }
+
+        .table-custom tr:hover td {
+            background: #f8fafc;
+        }
+
+    .job-title-link {
+        color: var(--text-primary);
+        font-weight: 600;
+        text-decoration: none;
+        transition: var(--transition);
+    }
+
+        .job-title-link:hover {
+            color: var(--primary);
+        }
+
+    .job-badge {
+        background: rgba(37, 99, 235, 0.1);
+        color: var(--primary);
+        padding: 0.35rem 1rem;
+        border-radius: 50px;
+        font-size: 0.85rem;
+        font-weight: 500;
+        display: inline-block;
+    }
+
+    .salary-text {
+        color: #10b981;
+        font-weight: 600;
+    }
+
+    .btn-view-job {
+        background: transparent;
+        border: 2px solid var(--primary);
+        color: var(--primary);
+        padding: 0.5rem 1.25rem;
+        border-radius: 8px;
+        font-weight: 500;
+        font-size: 0.9rem;
+        transition: var(--transition);
+        text-decoration: none;
+        display: inline-block;
+        white-space: nowrap;
+    }
+
+        .btn-view-job:hover {
+            background: var(--primary);
+            color: white;
+            transform: translateY(-2px);
+        }
+
+    .back-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        color: var(--text-secondary);
+        text-decoration: none;
+        font-weight: 500;
+        transition: var(--transition);
+        margin-bottom: 1rem;
+    }
+
+        .back-link:hover {
+            color: var(--primary);
+            transform: translateX(-5px);
+        }
+
+    /* Chat Button */
+    .chat-btn {
+        background: white;
+        border: 2px solid var(--primary);
+        color: var(--primary);
+        padding: 0.75rem 2rem;
+        border-radius: 50px;
+        font-weight: 600;
+        font-size: 1rem;
+        transition: var(--transition);
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin-top: 1rem;
+        text-decoration: none;
+        justify-content: center;
+        width: 100%;
+    }
+
+    body.dark-mode .chat-btn,
+    body.dark-mode .btn-outline-primary,
+    body.dark-mode .btn-view-job {
+        background: rgba(16, 26, 44, 0.86) !important;
+        border-color: rgba(96, 165, 250, 0.45) !important;
+        color: #bfdbfe !important;
+    }
+
+    body.dark-mode .chat-btn:hover,
+    body.dark-mode .btn-outline-primary:hover,
+    body.dark-mode .btn-view-job:hover {
+        background: #2563eb !important;
+        color: #ffffff !important;
+    }
+
+        .chat-btn:hover {
+            background: var(--primary);
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(37, 99, 235, 0.2);
+        }
+
+    /* Empty State */
+    .empty-state {
+        text-align: center;
+        padding: 3rem;
+        background: white;
+        border-radius: 16px;
+        box-shadow: var(--shadow-sm);
+    }
+
+        .empty-state i {
+            font-size: 4rem;
+            color: #cbd5e1;
+            margin-bottom: 1rem;
+        }
+
+        .empty-state h5 {
+            color: var(--text-primary);
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .empty-state p {
+            color: var(--text-secondary);
+        }
+
+    /* Responsive */
+    @@media (max-width: 992px) {
+        .company-header {
+            text-align: center;
+        }
+        
+        .company-logo-wrapper {
+            margin: 0 auto 1rem;
+        }
+        
+        .company-meta {
+            justify-content: center;
+        }
+        
+        .btn-follow {
+            width: 100%;
+        }
+    }
+
+    @@media (max-width: 768px) {
+        .company-name {
+            font-size: 2rem;
+        }
+
+        .company-logo-wrapper {
+            width: 100px;
+            height: 100px;
+        }
+
+        .company-meta {
+            gap: 1rem;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .table-responsive {
+            overflow-x: auto;
+        }
+
+        .table-custom {
+            min-width: 800px;
+        }
+
+            .table-custom td,
+            .table-custom th {
+                white-space: nowrap;
+            }
+    }
+
+    @@media (max-width: 480px) {
+        .company-name {
+            font-size: 1.75rem;
+        }
+
+        .card-custom {
+            padding: 1.25rem;
+        }
+
+        .address-item {
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .address-icon {
+            margin-bottom: 0.5rem;
+        }
+        
+        .jobs-section h3 {
+            font-size: 1.5rem;
+        }
+    }
+</style>
+
+<div class="container my-4">
+    <!-- Back Link -->
+    <a href="@Url.Action("Index")" class="back-link">
+        <i class="fas fa-arrow-left"></i> Quay lại danh sách công ty
+    </a>
+
+    <!-- Company Header -->
+    <div class="company-header">
+        <div class="row align-items-center">
+            <div class="col-lg-8">
+                <div class="d-flex align-items-center flex-wrap">
+                    <div class="company-logo-wrapper me-4">
+                        @if (!string.IsNullOrEmpty(Model.Logo))
+                        {
+                            <img src="@Model.Logo" alt="@Model.CompanyName" class="company-logo">
+                        }
+                        else
+                        {
+                            <div class="company-logo d-flex align-items-center justify-content-center bg-light">
+                                <i class="fas fa-building fa-3x text-secondary"></i>
+                            </div>
+                        }
+                    </div>
+                    <div>
+                        <h1 class="company-name">@Model.CompanyName</h1>
+                        <div class="company-meta">
+                            <span class="company-meta-item">
+                                <i class="fas fa-users"></i> 50-100 nhân viên
+                            </span>
+                            <span class="company-meta-item">
+                                <i class="fas fa-user-check"></i> 1.2K người theo dõi
+                            </span>
+                            @if (!string.IsNullOrEmpty(Model.Website))
+                            {
+                                <span class="company-meta-item">
+                                    <i class="fas fa-globe"></i>
+                                    <a href="@Model.Website" target="_blank" class="company-website">
+                                        @(Model.Website.Replace("https://", "").Replace("http://", ""))
+                                    </a>
+                                </span>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4 text-lg-end mt-3 mt-lg-0">
+                <button class="btn-follow" onclick="toggleFollow(@Model.CompanyId)">
+                    <i class="fas fa-plus-circle"></i> Theo dõi công ty
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content - 2 Columns -->
+    <div class="row g-4">
+        <!-- Left Column - About Company -->
+        <div class="col-lg-8">
+            <div class="card-custom">
+                <h3 class="card-title">Về công ty</h3>
+                <div class="about-content">
+                    @if (!string.IsNullOrEmpty(Model.Description))
+                    {
+                        <p>@Model.Description</p>
+                    }
+                    else
+                    {
+                        <p>Chưa có thông tin giới thiệu về công ty.</p>
+                    }
+                    
+                    <p>
+                        <strong>Ngày thành lập:</strong> 2010<br>
+                        <strong>Lĩnh vực:</strong> Công nghệ thông tin, Phần mềm<br>
+                        <strong>Quy mô:</strong> 500+ nhân viên
+                    </p>
+                    
+                    <p>
+                        <strong>Tầm nhìn:</strong> Trở thành công ty công nghệ hàng đầu khu vực,
+                        mang đến những giải pháp sáng tạo cho khách hàng.
+                    </p>
+                    
+                    <p>
+                        <strong>Sứ mệnh:</strong> Tạo ra môi trường làm việc chuyên nghiệp,
+                        năng động, giúp nhân viên phát triển tối đa tiềm năng.
+                    </p>
+                    
+                    <p>
+                        <strong>Giá trị cốt lõi:</strong> Đổi mới - Sáng tạo - Chất lượng -
+                        Khách hàng là trung tâm.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Column - Address & Keywords -->
+        <div class="col-lg-4">
+            <!-- Address Card -->
+            <div class="card-custom mb-4">
+                <h3 class="card-title">Địa chỉ</h3>
+                <div class="address-item">
+                    <div class="address-icon">
+                        <i class="fas fa-map-marker-alt"></i>
+                    </div>
+                    <div class="address-content">
+                        <div class="address-label">Trụ sở chính</div>
+                        <div class="address-text">
+                            @(Model.Address ?? "Chưa cập nhật")
+                        </div>
+                    </div>
+                </div>
+                
+                @if (!string.IsNullOrEmpty(Model.Phone))
+                {
+                    <div class="address-item">
+                        <div class="address-icon">
+                            <i class="fas fa-phone"></i>
+                        </div>
+                        <div class="address-content">
+                            <div class="address-label">Điện thoại</div>
+                            <div class="address-text">
+                                @Model.Phone
+                            </div>
+                        </div>
+                    </div>
+                }
+                
+                @if (!string.IsNullOrEmpty(Model.Email))
+                {
+                    <div class="address-item">
+                        <div class="address-icon">
+                            <i class="fas fa-envelope"></i>
+                        </div>
+                        <div class="address-content">
+                            <div class="address-label">Email</div>
+                            <div class="address-text">
+                                @Model.Email
+                            </div>
+                        </div>
+                    </div>
+                }
+                
+                <div class="mt-3">
+                    <div class="address-label mb-2">Chia sẻ</div>
+                    <div class="share-buttons">
+                        <a href="#" class="share-btn facebook" target="_blank">
+                            <i class="fab fa-facebook-f"></i>
+                        </a>
+                        <a href="#" class="share-btn twitter" target="_blank">
+                            <i class="fab fa-twitter"></i>
+                        </a>
+                        <a href="mailto:@(Model.Email ?? "info@company.com")" class="share-btn email">
+                            <i class="fas fa-envelope"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Keywords Card -->
+            <div class="card-custom">
+                <h3 class="card-title">Gợi ý từ khóa</h3>
+                <div class="keyword-tags">
+                    <span class="keyword-tag">IT</span>
+                    <span class="keyword-tag">Kỹ thuật</span>
+                    <span class="keyword-tag">Marketing</span>
+                    <span class="keyword-tag">Thiết kế</span>
+                    <span class="keyword-tag">Bán hàng</span>
+                    <span class="keyword-tag">Dịch vụ</span>
+                    <span class="keyword-tag">Quản lý</span>
+                    <span class="keyword-tag">Tài chính</span>
+                    <span class="keyword-tag">Nhân sự</span>
+                    <span class="keyword-tag">Kế toán</span>
+                    <span class="keyword-tag">Đầu tư</span>
+                    <span class="keyword-tag">Phát triển</span>
+                </div>
+            </div>
+
+            <!-- Chat Button -->
+            <a href="@Url.Action("Index", "Chat")?companyId=@Model.CompanyId" class="chat-btn">
+                <i class="fas fa-comment"></i> Chat với nhà tuyển dụng
+            </a>
+        </div>
+    </div>
+
+    <!-- Jobs Section -->
+    <div class="jobs-section">
+        <h3>
+            <i class="fas fa-briefcase text-primary"></i>
+            Việc làm đang tuyển dụng
+            @if (jobs.Any())
+            {
+                <span class="badge bg-primary ms-2">@jobs.Count</span>
+            }
+        </h3>
+
+        @if (!jobs.Any())
+        {
+            <div class="empty-state">
+                <i class="fas fa-briefcase"></i>
+                <h5>Hiện tại công ty chưa có tuyển dụng</h5>
+                <p class="text-muted">Vui lòng quay lại sau để xem các cơ hội việc làm mới nhất</p>
+            </div>
+        }
+        else
+        {
+            <div class="table-responsive">
+                <table class="table-custom">
+                    <thead>
+                        <tr>
+                            <th>Vị trí</th>
+                            <th>Địa điểm</th>
+                            <th>Loại công việc</th>
+                            <th>Mức lương</th>
+                            <th>Ngày đăng</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var job in jobs)
+                        {
+                            <tr>
+                                <td>
+                                    <a href="@Url.Action("Details", "Jobs", new { id = job.JobId })" class="job-title-link">
+                                        @job.Title
+                                    </a>
+                                </td>
+                                <td>
+                                    <i class="fas fa-map-marker-alt text-primary me-1"></i>
+                                    @job.Location
+                                </td>
+                                <td>
+                                    <span class="job-badge">@job.JobType</span>
+                                </td>
+                                <td class="salary-text">
+                                    @if (job.SalaryMin.HasValue && job.SalaryMax.HasValue)
+                                    {
+                                        @($"{job.SalaryMin.Value:N0} - {job.SalaryMax.Value:N0} VNĐ")
+                                    }
+                                    else if (job.SalaryMin.HasValue)
+                                    {
+                                        @($"Từ {job.SalaryMin.Value:N0} VNĐ")
+                                    }
+                                    else if (job.SalaryMax.HasValue)
+                                    {
+                                        @($"Đến {job.SalaryMax.Value:N0} VNĐ")
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">Thương lượng</span>
+                                    }
+                                </td>
+                                <td>
+                                    <small class="text-muted">
+                                        <i class="far fa-calendar-alt me-1"></i>
+                                        @(job.CreatedDate.HasValue? job.CreatedDate.Value.ToString("dd/MM/yyyy") : "N/A")
+                                    </small>
+                                </td>
+                                <td>
+                                    <a href="@Url.Action("Details", "Jobs", new { id = job.JobId })" class="btn-view-job">
+                                        <i class="fas fa-eye me-1"></i> Xem
+                                    </a>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+            
+            <div class="text-center mt-4">
+                <a href="@Url.Action("Index", "Jobs")?companyId=@Model.CompanyId" class="btn btn-outline-primary">
+                    Xem tất cả việc làm của công ty
+                </a>
+            </div>
+        }
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function toggleFollow(companyId) {
+            var btn = $('.btn-follow');
+            var originalText = btn.html();
+            
+            // Disable button and show loading
+            btn.prop('disabled', true);
+            btn.html('<i class="fas fa-spinner fa-spin"></i> Đang xử lý...');
+            
+            $.ajax({
+                url: '@Url.Action("FollowCompany", "Account")',
+                type: 'POST',
+                data: {
+                    companyId: companyId,
+                    __RequestVerificationToken: $('input[name="__RequestVerificationToken"]').val()
+                },
+                success: function(response) {
+                    if (response.success) {
+                        if (response.action === 'followed') {
+                            btn.html('<i class="fas fa-check-circle"></i> Đang theo dõi');
+                            btn.css('background', '#10b981');
+                            showNotification('✅ Đã theo dõi công ty', 'success');
+                        } else {
+                            btn.html('<i class="fas fa-plus-circle"></i> Theo dõi công ty');
+                            btn.css('background', '#2563eb');
+                            showNotification('ℹ️ Đã hủy theo dõi', 'info');
+                        }
+                    } else {
+                        btn.html(originalText);
+                        showNotification('❌ ' + response.message, 'danger');
+                    }
+                },
+                error: function() {
+                    btn.html(originalText);
+                    showNotification('❌ Có lỗi xảy ra', 'danger');
+                },
+                complete: function() {
+                    btn.prop('disabled', false);
+                }
+            });
+        }
+
+        function showNotification(message, type) {
+            var notification = $('<div class="alert alert-' + type +
+                ' alert-dismissible fade show" role="alert" style="position: fixed; top: 20px; right: 20px; z-index: 9999; min-width: 300px;">' +
+                message +
+                '<button type="button" class="btn-close" data-bs-dismiss="alert"></button>' +
+                '</div>');
+            $('body').append(notification);
+            setTimeout(function() {
+                notification.fadeOut(500, function() {
+                    $(this).remove();
+                });
+            }, 3000);
+        }
+
+        $(document).ready(function() {
+            $('.keyword-tag').click(function() {
+                var keyword = $(this).text().trim();
+                window.location.href = '@Url.Action("Index", "Jobs")?keyword=' + encodeURIComponent(keyword);
+            });
+            
+            // Animation on scroll
+            $(window).scroll(function() {
+                $('.card-custom').each(function() {
+                    var elementTop = $(this).offset().top;
+                    var viewportBottom = $(window).scrollTop() + $(window).height();
+                    
+                    if (elementTop < viewportBottom - 100) {
+                        $(this).css('opacity', '1');
+                        $(this).css('transform', 'translateY(0)');
+                    }
+                });
+            });
+            
+            // Set initial opacity for animation
+            $('.card-custom').css('opacity', '0');
+            $('.card-custom').css('transform', 'translateY(20px)');
+            $('.card-custom').css('transition', 'all 0.6s ease');
+            
+            // Trigger scroll on load
+            $(window).scroll();
+        });
+    </script>
+}

@@ -1,0 +1,404 @@
+﻿@model BTL_2.Models.User
+
+@{
+    ViewData["Title"] = "Chỉnh sửa người dùng";
+    Layout = "~/Views/Shared/_Layout_Admin.cshtml";
+    var companies = ViewBag.Companies as List<BTL_2.Models.Company> ?? new List<BTL_2.Models.Company>();
+    var selectedCompanyIds = ViewBag.SelectedCompanyIds as HashSet<int> ?? new HashSet<int>();
+}
+
+<style>
+    body {
+        background: #eef3f8;
+        font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        color: #0f172a;
+    }
+
+    .edit-shell {
+        max-width: 1180px;
+        margin: 0 auto;
+        padding: 28px 18px;
+    }
+
+    .edit-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 18px;
+        margin-bottom: 20px;
+    }
+
+    .edit-title {
+        font-size: 30px;
+        font-weight: 800;
+        margin: 0;
+        letter-spacing: 0;
+    }
+
+    .edit-subtitle {
+        color: #64748b;
+        margin-top: 6px;
+        font-size: 15px;
+    }
+
+    .admin-card {
+        background: #ffffff;
+        border: 1px solid #dbe3ec;
+        border-radius: 8px;
+        box-shadow: 0 16px 40px rgba(15, 23, 42, 0.08);
+        overflow: hidden;
+    }
+
+    .card-band {
+        background: #0f172a;
+        color: #fff;
+        padding: 20px 24px;
+        border-bottom: 4px solid #2563eb;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+    }
+
+    .card-band h2 {
+        font-size: 20px;
+        font-weight: 800;
+        margin: 0;
+    }
+
+    .role-pill {
+        border-radius: 999px;
+        background: rgba(37, 99, 235, 0.16);
+        color: #bfdbfe;
+        border: 1px solid rgba(147, 197, 253, 0.28);
+        padding: 8px 12px;
+        font-weight: 700;
+        font-size: 13px;
+    }
+
+    .form-body {
+        padding: 24px;
+    }
+
+    .form-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 18px 22px;
+    }
+
+    .field {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .field label {
+        font-weight: 700;
+        color: #172033;
+        font-size: 14px;
+    }
+
+    .form-control,
+    .form-select {
+        min-height: 46px;
+        border-radius: 8px;
+        border: 1px solid #cbd5e1;
+        background: #fff;
+        color: #0f172a;
+        font-size: 15px;
+        padding: 10px 12px;
+        transition: border-color .18s ease, box-shadow .18s ease;
+    }
+
+    .form-control:focus,
+    .form-select:focus {
+        border-color: #2563eb;
+        box-shadow: 0 0 0 4px rgba(37, 99, 235, .12);
+    }
+
+    .permission-box {
+        margin-top: 24px;
+        border: 1px solid #dbe3ec;
+        background: #f8fafc;
+        border-radius: 8px;
+        padding: 20px;
+    }
+
+    .permission-head {
+        display: flex;
+        align-items: flex-start;
+        gap: 12px;
+        margin-bottom: 16px;
+    }
+
+    .permission-icon {
+        width: 42px;
+        height: 42px;
+        border-radius: 8px;
+        background: #dbeafe;
+        color: #2563eb;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 20px;
+        flex-shrink: 0;
+    }
+
+    .permission-head h3 {
+        font-size: 20px;
+        font-weight: 800;
+        margin: 0 0 4px;
+    }
+
+    .permission-head p {
+        margin: 0;
+        color: #64748b;
+        line-height: 1.5;
+    }
+
+    .company-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 12px;
+    }
+
+    .company-option {
+        position: relative;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 14px;
+        border: 1px solid #d6dee8;
+        background: #fff;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: border-color .18s ease, box-shadow .18s ease, transform .18s ease;
+        min-height: 66px;
+    }
+
+    .company-option:hover {
+        border-color: #2563eb;
+        box-shadow: 0 10px 22px rgba(37, 99, 235, .1);
+        transform: translateY(-1px);
+    }
+
+    .company-option input {
+        width: 18px;
+        height: 18px;
+        accent-color: #2563eb;
+        flex-shrink: 0;
+    }
+
+    .company-name {
+        font-weight: 700;
+        color: #172033;
+    }
+
+    .company-note {
+        display: block;
+        color: #d97706;
+        font-size: 12px;
+        margin-top: 2px;
+    }
+
+    .form-actions {
+        margin-top: 24px;
+        padding-top: 20px;
+        border-top: 1px solid #e2e8f0;
+        display: flex;
+        justify-content: space-between;
+        gap: 12px;
+    }
+
+    .btn-soft,
+    .btn-primary-save {
+        min-height: 46px;
+        border-radius: 8px;
+        padding: 10px 18px;
+        font-weight: 700;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        border: 1px solid transparent;
+    }
+
+    .btn-soft {
+        color: #475569;
+        border-color: #cbd5e1;
+        background: #fff;
+    }
+
+    .btn-primary-save {
+        background: #2563eb;
+        color: #fff;
+        border: none;
+        box-shadow: 0 12px 22px rgba(37, 99, 235, .22);
+    }
+
+    .btn-primary-save:hover {
+        background: #1d4ed8;
+        color: #fff;
+    }
+
+    @@media (max-width: 768px) {
+        .edit-header,
+        .form-actions {
+            flex-direction: column;
+        }
+
+        .form-grid,
+        .company-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+
+<div class="edit-shell">
+    <div class="edit-header">
+        <div>
+            <h1 class="edit-title">Chỉnh sửa người dùng</h1>
+            <div class="edit-subtitle">Cập nhật thông tin tài khoản và quyền công ty cho nhà tuyển dụng.</div>
+        </div>
+        <a asp-action="ManageUsers" class="btn-soft">
+            <i class="fas fa-arrow-left"></i> Quay lại
+        </a>
+    </div>
+
+    <div class="admin-card">
+        <div class="card-band">
+            <h2><i class="fas fa-user-pen me-2"></i>@Model.FullName</h2>
+            <span class="role-pill" id="roleBadge">@Model.Role</span>
+        </div>
+
+        <form asp-action="EditUser" method="post" id="editUserForm">
+            @Html.AntiForgeryToken()
+            <input type="hidden" asp-for="UserId" />
+
+            <div class="form-body">
+                @if (TempData["ErrorMessage"] != null)
+                {
+                    <div class="alert alert-danger">
+                        <i class="fas fa-exclamation-circle me-2"></i>@TempData["ErrorMessage"]
+                    </div>
+                }
+
+                @if (TempData["SuccessMessage"] != null)
+                {
+                    <div class="alert alert-success">
+                        <i class="fas fa-check-circle me-2"></i>@TempData["SuccessMessage"]
+                    </div>
+                }
+
+                <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+                <div class="form-grid">
+                    <div class="field">
+                        <label asp-for="FullName">Họ và tên</label>
+                        <input asp-for="FullName" class="form-control" required />
+                        <span asp-validation-for="FullName" class="text-danger"></span>
+                    </div>
+
+                    <div class="field">
+                        <label asp-for="Email">Email</label>
+                        <input asp-for="Email" class="form-control" type="email" required />
+                        <span asp-validation-for="Email" class="text-danger"></span>
+                    </div>
+
+                    <div class="field">
+                        <label asp-for="Phone">Số điện thoại</label>
+                        <input asp-for="Phone" class="form-control" />
+                    </div>
+
+                    <div class="field">
+                        <label asp-for="Address">Địa chỉ</label>
+                        <input asp-for="Address" class="form-control" />
+                    </div>
+
+                    <div class="field">
+                        <label asp-for="Role">Vai trò</label>
+                        <select asp-for="Role" class="form-select" id="roleSelect">
+                            <option value="Admin">Admin</option>
+                            <option value="Employer">Nhà tuyển dụng</option>
+                            <option value="Candidate">Ứng viên</option>
+                        </select>
+                    </div>
+
+                    <div class="field">
+                        <label asp-for="IsActive">Trạng thái</label>
+                        <select asp-for="IsActive" class="form-select">
+                            <option value="true">Hoạt động</option>
+                            <option value="false">Khóa tài khoản</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div id="companyPermissionBox" class="permission-box">
+                    <div class="permission-head">
+                        <div class="permission-icon"><i class="fas fa-building"></i></div>
+                        <div>
+                            <h3>Công ty được phép quản lý</h3>
+                            <p>Nhà tuyển dụng chỉ được đăng tin, duyệt hồ sơ, xem CV và tải CV của các công ty được chọn.</p>
+                        </div>
+                    </div>
+
+                    @if (companies.Any())
+                    {
+                        <div class="company-grid">
+                            @foreach (var company in companies)
+                            {
+                                <label class="company-option">
+                                    <input type="checkbox" name="selectedCompanyIds" value="@company.CompanyId" @(selectedCompanyIds.Contains(company.CompanyId) ? "checked" : "") />
+                                    <span>
+                                        <span class="company-name">@company.CompanyName</span>
+                                        @if (company.EmployerId.HasValue && company.EmployerId != Model.UserId)
+                                        {
+                                            <span class="company-note">Đang gán cho nhà tuyển dụng khác</span>
+                                        }
+                                    </span>
+                                </label>
+                            }
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="alert alert-warning mb-0">Chưa có công ty nào trong hệ thống.</div>
+                    }
+                </div>
+
+                <div class="form-actions">
+                    <a asp-action="ManageUsers" class="btn-soft">
+                        <i class="fas fa-arrow-left"></i> Quay lại danh sách
+                    </a>
+                    <button type="submit" class="btn-primary-save" id="saveBtn">
+                        <i class="fas fa-floppy-disk"></i> Cập nhật
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        const roleSelect = document.getElementById('roleSelect');
+        const roleBadge = document.getElementById('roleBadge');
+        const permissionBox = document.getElementById('companyPermissionBox');
+
+        function toggleCompanyPermissions() {
+            const role = roleSelect.value;
+            permissionBox.style.display = role === 'Employer' ? 'block' : 'none';
+            roleBadge.textContent = role === 'Employer' ? 'Nhà tuyển dụng' : role;
+        }
+
+        roleSelect.addEventListener('change', toggleCompanyPermissions);
+        toggleCompanyPermissions();
+
+        document.getElementById('editUserForm').addEventListener('submit', function () {
+            const btn = document.getElementById('saveBtn');
+            btn.disabled = true;
+            btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Đang lưu...';
+        });
+    </script>
+}

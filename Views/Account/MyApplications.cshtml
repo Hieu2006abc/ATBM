@@ -1,0 +1,605 @@
+@model IEnumerable<BTL_2.Models.Application>
+
+@{
+    ViewData["Title"] = "Hồ sơ đã ứng tuyển";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+    var applications = (Model ?? Enumerable.Empty<BTL_2.Models.Application>()).ToList();
+    var total = applications.Count;
+    var approved = applications.Count(a => a.Status == "Approved" || a.Status == "Accepted");
+    var pending = applications.Count(a => a.Status == "Pending");
+    var securePercent = total == 0 ? 0 : 100;
+
+    string StatusText(string status)
+    {
+        return status switch
+        {
+            "Pending" => "Đang chờ",
+            "Approved" or "Accepted" => "Đã duyệt",
+            "Rejected" => "Từ chối",
+            "Withdrawn" => "Đã rút",
+            _ => string.IsNullOrWhiteSpace(status) ? "Không rõ" : status
+        };
+    }
+
+    string StatusClass(string status)
+    {
+        return status switch
+        {
+            "Pending" => "is-pending",
+            "Approved" or "Accepted" => "is-approved",
+            "Rejected" => "is-rejected",
+            "Withdrawn" => "is-withdrawn",
+            _ => "is-muted"
+        };
+    }
+}
+
+@section Styles {
+    <style>
+        main.py-4 {
+            padding-top: 0 !important;
+        }
+
+        .applications-page {
+            min-height: calc(100vh - 92px);
+            background:
+                linear-gradient(90deg, rgba(37, 99, 235, 0.05) 1px, transparent 1px),
+                linear-gradient(180deg, rgba(37, 99, 235, 0.05) 1px, transparent 1px),
+                radial-gradient(circle at 90% 6%, rgba(96, 165, 250, 0.26), transparent 28%),
+                linear-gradient(180deg, #eef7ff 0%, #f7fbff 34%, #ffffff 100%);
+            background-size: 72px 72px, 72px 72px, auto, auto;
+        }
+
+        .applications-hero {
+            padding: 34px 0 28px;
+            border-bottom: 1px solid #dbe7f7;
+        }
+
+        .breadcrumb-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 9px;
+            padding: 9px 15px;
+            border-radius: 999px;
+            color: #2563eb;
+            background: rgba(255, 255, 255, 0.88);
+            border: 1px solid #d7e7ff;
+            font-weight: 800;
+            text-decoration: none;
+            box-shadow: 0 10px 24px rgba(37, 99, 235, 0.08);
+        }
+
+        .app-hero-title {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-top: 18px;
+        }
+
+        .app-hero-icon {
+            width: 54px;
+            height: 54px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 16px;
+            color: #2563eb;
+            background: #ffffff;
+            box-shadow: 0 18px 38px rgba(37, 99, 235, 0.14);
+        }
+
+        .app-hero-title h1 {
+            margin: 0;
+            color: #172033;
+            font-size: clamp(2.1rem, 4vw, 3.2rem);
+            font-weight: 900;
+        }
+
+        .app-hero-copy {
+            max-width: 680px;
+            color: #64748b;
+            font-size: 1.05rem;
+            line-height: 1.75;
+            margin: 14px 0 0;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 16px;
+            margin-top: 12px;
+        }
+
+        .stat-card {
+            padding: 20px 22px;
+            border-radius: 18px;
+            background: rgba(255, 255, 255, 0.92);
+            border: 1px solid #dbe7f7;
+            box-shadow: 0 18px 44px rgba(37, 99, 235, 0.08);
+            animation: appRise 420ms ease both;
+        }
+
+        .stat-card span {
+            display: block;
+            color: #64748b;
+            font-weight: 800;
+            margin-bottom: 12px;
+        }
+
+        .stat-card strong {
+            color: #172033;
+            font-size: 1.7rem;
+            font-weight: 900;
+        }
+
+        .stat-card strong.ok {
+            color: #16a34a;
+        }
+
+        .stat-card strong.wait {
+            color: #f59e0b;
+        }
+
+        .stat-card strong.secure {
+            color: #2563eb;
+        }
+
+        .applications-content {
+            padding: 34px 0 58px;
+        }
+
+        .section-head {
+            display: flex;
+            align-items: end;
+            justify-content: space-between;
+            gap: 18px;
+            margin-bottom: 22px;
+        }
+
+        .section-head h2 {
+            margin: 0 0 8px;
+            font-size: 1.45rem;
+            font-weight: 900;
+        }
+
+        .section-head p {
+            margin: 0;
+            color: #64748b;
+        }
+
+        .filter-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .filter-select,
+        .filter-button {
+            min-height: 44px;
+            border-radius: 14px !important;
+            border: 1px solid #cfe0f6 !important;
+            background: rgba(255, 255, 255, 0.92) !important;
+            color: #172033;
+            font-weight: 800;
+        }
+
+        .application-grid {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) minmax(280px, 330px);
+            gap: 22px;
+            align-items: start;
+        }
+
+        .application-list {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 18px;
+        }
+
+        .application-card {
+            position: relative;
+            padding: 24px;
+            border-radius: 20px !important;
+            border-left: 3px solid #60a5fa !important;
+            overflow: hidden;
+            animation: appRise 460ms ease both;
+        }
+
+        .application-card.is-hidden {
+            display: none;
+        }
+
+        .application-title {
+            color: #0f172a;
+            font-weight: 900;
+            font-size: 1.1rem;
+            text-decoration: none;
+        }
+
+        .application-title:hover {
+            color: #2563eb;
+        }
+
+        .status-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            padding: 8px 12px;
+            border-radius: 999px;
+            font-weight: 900;
+            font-size: 0.8rem;
+        }
+
+        .status-pill.is-approved {
+            color: #047857;
+            background: #dcfce7;
+            border: 1px solid #a7f3d0;
+        }
+
+        .status-pill.is-pending {
+            color: #a16207;
+            background: #fef3c7;
+            border: 1px solid #fde68a;
+        }
+
+        .status-pill.is-rejected {
+            color: #b91c1c;
+            background: #fee2e2;
+            border: 1px solid #fecaca;
+        }
+
+        .status-pill.is-withdrawn,
+        .status-pill.is-muted {
+            color: #475569;
+            background: #f1f5f9;
+            border: 1px solid #e2e8f0;
+        }
+
+        .application-meta {
+            margin: 14px 0 0;
+            color: #536784;
+            font-weight: 750;
+        }
+
+        .application-meta i {
+            width: 18px;
+            color: #2563eb;
+        }
+
+        .cover-letter {
+            margin: 14px 0 16px;
+            padding: 16px;
+            border-radius: 14px;
+            background: #f8fbff;
+            border: 1px solid #dbe7f7;
+        }
+
+        .cover-letter strong {
+            display: block;
+            margin-bottom: 8px;
+            color: #172033;
+        }
+
+        .cover-letter p {
+            margin: 0;
+            color: #0f172a;
+            line-height: 1.55;
+        }
+
+        .secure-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            padding-top: 16px;
+            border-top: 1px solid #dbe7f7;
+        }
+
+        .secure-label {
+            color: #536784;
+            font-weight: 850;
+        }
+
+        .secure-label i {
+            color: #2563eb;
+        }
+
+        .round-action {
+            width: 38px;
+            height: 38px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 12px;
+            border: 1px solid #cfe0f6;
+            color: #536784;
+            background: #ffffff;
+            text-decoration: none;
+        }
+
+        .round-action:hover {
+            color: #2563eb;
+            border-color: #9bc0ff;
+            transform: translateY(-1px);
+        }
+
+        .tips-card {
+            position: sticky;
+            top: 116px;
+            padding: 26px;
+            border-radius: 20px;
+            border: 1px solid #cfe0f6;
+            background: linear-gradient(180deg, #eefcff 0%, #ffffff 100%);
+            box-shadow: 0 18px 42px rgba(37, 99, 235, 0.08);
+            animation: appRise 500ms ease both;
+        }
+
+        .tips-card h3 {
+            font-size: 1.1rem;
+            font-weight: 900;
+            color: #172033;
+            margin-bottom: 16px;
+        }
+
+        .tips-card p,
+        .tips-card li {
+            color: #64748b;
+            line-height: 1.6;
+        }
+
+        .tips-card ul {
+            list-style: none;
+            padding: 0;
+            margin: 20px 0 0;
+        }
+
+        .tips-card li {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 12px;
+            font-weight: 800;
+        }
+
+        .tips-card li i {
+            color: #2563eb;
+            margin-top: 4px;
+        }
+
+        .empty-state {
+            border-radius: 22px;
+            padding: 54px 24px;
+            border: 1px solid #dbe7f7;
+            background: rgba(255, 255, 255, 0.9);
+            box-shadow: 0 18px 44px rgba(37, 99, 235, 0.08);
+        }
+
+        @@keyframes appRise {
+            from {
+                opacity: 0;
+                transform: translateY(14px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @@media (max-width: 992px) {
+            .stats-grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+
+            .application-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .tips-card {
+                position: static;
+            }
+        }
+
+        @@media (max-width: 768px) {
+            .application-list,
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .section-head {
+                align-items: stretch;
+                flex-direction: column;
+            }
+
+            .filter-actions {
+                flex-direction: column;
+            }
+        }
+    </style>
+}
+
+<div class="applications-page">
+    <section class="applications-hero">
+        <div class="container">
+            <a class="breadcrumb-pill" href="@Url.Action("Profile", "Account")">
+                <i class="fas fa-arrow-left"></i>
+                Tài khoản / Hồ sơ đã ứng tuyển
+            </a>
+
+            <div class="row align-items-end g-4 mt-1">
+                <div class="col-lg-8">
+                    <div class="app-hero-title">
+                        <span class="app-hero-icon"><i class="far fa-file-alt fa-lg"></i></span>
+                        <h1>Hồ sơ đã ứng tuyển</h1>
+                    </div>
+                    <p class="app-hero-copy">
+                        Theo dõi các vị trí bạn đã ứng tuyển, kiểm tra phản hồi từ nhà tuyển dụng và quản lý CV một cách rõ ràng, chuyên nghiệp.
+                    </p>
+                </div>
+                <div class="col-lg-4 text-lg-end">
+                    <a href="@Url.Action("Index", "Jobs")" class="btn btn-primary btn-lg px-4">
+                        <i class="fas fa-search me-2"></i>Tìm việc thêm
+                    </a>
+                </div>
+            </div>
+
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <span>Tổng hồ sơ</span>
+                    <strong>@total</strong>
+                </div>
+                <div class="stat-card">
+                    <span>Đã duyệt</span>
+                    <strong class="ok">@approved</strong>
+                </div>
+                <div class="stat-card">
+                    <span>Đang chờ</span>
+                    <strong class="wait">@pending</strong>
+                </div>
+                <div class="stat-card">
+                    <span>CV bảo mật</span>
+                    <strong class="secure">@securePercent%</strong>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="applications-content">
+        <div class="container">
+            <div class="section-head">
+                <div>
+                    <h2>Danh sách ứng tuyển</h2>
+                    <p>Quản lý các vị trí bạn đã gửi hồ sơ và theo dõi kết quả từ nhà tuyển dụng.</p>
+                </div>
+                <div class="filter-actions">
+                    <select class="form-select filter-select" id="statusFilter" aria-label="Lọc trạng thái">
+                        <option value="all">Tất cả trạng thái</option>
+                        <option value="Approved">Đã duyệt</option>
+                        <option value="Pending">Đang chờ</option>
+                        <option value="Rejected">Từ chối</option>
+                        <option value="Withdrawn">Đã rút</option>
+                    </select>
+                    <button type="button" class="btn filter-button" id="resetFilter">
+                        <i class="fas fa-filter me-2"></i>Lọc hồ sơ
+                    </button>
+                </div>
+            </div>
+
+            @if (!applications.Any())
+            {
+                <div class="empty-state text-center">
+                    <i class="far fa-file-alt fa-4x text-primary mb-3"></i>
+                    <h4 class="fw-bold">Chưa có hồ sơ ứng tuyển</h4>
+                    <p class="text-muted">Bạn chưa ứng tuyển công việc nào. Hãy tìm việc phù hợp và gửi hồ sơ ngay.</p>
+                    <a href="@Url.Action("Index", "Jobs")" class="btn btn-primary mt-2">
+                        <i class="fas fa-search me-2"></i>Tìm việc ngay
+                    </a>
+                </div>
+            }
+            else
+            {
+                <div class="application-grid">
+                    <div class="application-list" id="applicationList">
+                        @foreach (var app in applications)
+                        {
+                            var status = app.Status ?? "";
+                            <article class="card application-card" data-status="@status">
+                                <div class="d-flex justify-content-between align-items-start gap-3">
+                                    <a asp-controller="Jobs" asp-action="Details" asp-route-id="@app.JobId" class="application-title">
+                                        @(app.Job?.Title ?? "Tin tuyển dụng")
+                                    </a>
+                                    <span class="status-pill @StatusClass(status)">
+                                        <i class="fas fa-check"></i>@StatusText(status)
+                                    </span>
+                                </div>
+
+                                <div class="application-meta">
+                                    <div class="mb-2"><i class="far fa-building"></i>@(app.Job?.Company?.CompanyName ?? "Nhà tuyển dụng")</div>
+                                    <div><i class="far fa-calendar"></i>@(app.ApplyDate?.ToString("dd/MM/yyyy HH:mm") ?? "N/A")</div>
+                                </div>
+
+                                <div class="cover-letter">
+                                    <strong>Thư xin việc</strong>
+                                    <p>@(string.IsNullOrWhiteSpace(app.CoverLetter) ? "Tôi quan tâm đến vị trí này và mong muốn được trao đổi thêm với nhà tuyển dụng." : app.CoverLetter)</p>
+                                </div>
+
+                                <div class="secure-row">
+                                    <span class="secure-label"><i class="fas fa-lock me-2"></i>CV đã mã hóa</span>
+                                    <div class="d-flex gap-2">
+                                        <a asp-controller="Jobs" asp-action="Details" asp-route-id="@app.JobId" class="round-action" title="Xem tin">
+                                            <i class="far fa-eye"></i>
+                                        </a>
+                                        @if (status == "Pending")
+                                        {
+                                            <button type="button" class="round-action text-danger" title="Rút đơn"
+                                                    onclick="confirmDelete(@app.ApplicationId, '@(app.Job?.Title ?? "tin tuyển dụng")')">
+                                                <i class="fas fa-ban"></i>
+                                            </button>
+                                        }
+                                        else if (status == "Rejected" || status == "Withdrawn")
+                                        {
+                                            <a asp-controller="Jobs" asp-action="Apply" asp-route-id="@app.JobId" class="round-action" title="Nộp lại">
+                                                <i class="fas fa-paper-plane"></i>
+                                            </a>
+                                        }
+                                        else
+                                        {
+                                            <span class="round-action" title="CV bảo mật"><i class="fas fa-download"></i></span>
+                                        }
+                                    </div>
+                                </div>
+                            </article>
+                        }
+                    </div>
+
+                    <aside class="tips-card">
+                        <h3>Tối ưu hồ sơ ứng tuyển</h3>
+                        <p>Hồ sơ rõ ràng và CV được cập nhật thường xuyên giúp nhà tuyển dụng đánh giá bạn nhanh hơn.</p>
+                        <ul>
+                            <li><i class="fas fa-check"></i><span>Kiểm tra lại thông tin liên hệ trong CV</span></li>
+                            <li><i class="fas fa-check"></i><span>Viết thư xin việc ngắn gọn, đúng vị trí</span></li>
+                            <li><i class="fas fa-check"></i><span>Theo dõi trạng thái ứng tuyển mỗi ngày</span></li>
+                        </ul>
+                        <a href="@Url.Action("Profile", "Account")" class="btn btn-primary w-100 mt-2">
+                            Cập nhật hồ sơ
+                        </a>
+                    </aside>
+                </div>
+            }
+        </div>
+    </section>
+</div>
+
+<form id="deleteForm" asp-action="DeleteApplication" method="post" style="display: none;">
+    @Html.AntiForgeryToken()
+    <input type="hidden" name="id" id="deleteApplicationId" />
+</form>
+
+@section Scripts {
+    <script>
+        function confirmDelete(applicationId, jobTitle) {
+            if (confirm(`Bạn có chắc chắn muốn rút đơn ứng tuyển cho công việc "${jobTitle}"?`)) {
+                document.getElementById('deleteApplicationId').value = applicationId;
+                document.getElementById('deleteForm').submit();
+            }
+        }
+
+        (function () {
+            const filter = document.getElementById('statusFilter');
+            const reset = document.getElementById('resetFilter');
+            const cards = Array.from(document.querySelectorAll('.application-card'));
+
+            function applyFilter() {
+                const value = filter.value;
+                cards.forEach(card => {
+                    const visible = value === 'all' || card.dataset.status === value;
+                    card.classList.toggle('is-hidden', !visible);
+                });
+            }
+
+            filter?.addEventListener('change', applyFilter);
+            reset?.addEventListener('click', function () {
+                filter.value = 'all';
+                applyFilter();
+            });
+        })();
+    </script>
+}

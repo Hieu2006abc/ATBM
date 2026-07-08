@@ -1,0 +1,173 @@
+﻿@{
+    ViewData["Title"] = "Thông báo";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+    .notification-page {
+        max-width: 800px;
+        margin: 0 auto;
+    }
+
+    .notification-page-item {
+        background: white;
+        border-radius: 12px;
+        padding: 1.25rem;
+        margin-bottom: 1rem;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        transition: all 0.3s;
+        border-left: 4px solid transparent;
+        cursor: pointer;
+    }
+
+        .notification-page-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        }
+
+        .notification-page-item.unread {
+            background: #eef2ff;
+            border-left-color: #667eea;
+        }
+
+        .notification-page-item.application_approved {
+            border-left-color: #10b981;
+        }
+
+        .notification-page-item.application_rejected {
+            border-left-color: #ef4444;
+        }
+
+        .notification-page-item.message {
+            border-left-color: #3b82f6;
+        }
+
+    .notification-page-icon {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+    }
+
+    .notification-page-content {
+        flex: 1;
+    }
+
+    .notification-page-title {
+        font-weight: 600;
+        font-size: 1.1rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .notification-page-text {
+        color: #64748b;
+        margin-bottom: 0.5rem;
+        line-height: 1.6;
+    }
+
+    .notification-page-time {
+        font-size: 0.85rem;
+        color: #94a3b8;
+    }
+
+    @@media (max-width: 768px) {
+        .notification-page-item {
+            padding: 1rem;
+        }
+        
+        .notification-page-icon {
+            width: 40px;
+            height: 40px;
+            font-size: 1.2rem;
+        }
+    }
+</style>
+
+<div class="container mt-4">
+    <div class="notification-page">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2><i class="fas fa-bell me-2"></i>Thông báo</h2>
+            <button class="btn btn-outline-primary" id="markAllReadBtn">
+                <i class="fas fa-check-double me-2"></i>Đánh dấu tất cả đã đọc
+            </button>
+        </div>
+
+        <div id="notificationPageList">
+            <div class="text-center py-5">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Đang tải...</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function loadAllNotifications() {
+            $.get('@Url.Action("GetNotifications", "Notification")', function(data) {
+                var list = $('#notificationPageList');
+                list.empty();
+                
+                if (data.length === 0) {
+                    list.append(`
+                        <div class="text-center py-5">
+                            <i class="fas fa-bell-slash fa-4x text-muted mb-3"></i>
+                            <h5>Không có thông báo</h5>
+                            <p class="text-muted">Bạn chưa có thông báo nào</p>
+                        </div>
+                    `);
+                    return;
+                }
+                
+                data.forEach(function(notif) {
+                    var unreadClass = notif.isRead ? '' : 'unread';
+                    var iconBg = notif.iconClass.split(' ')[1] || 'text-primary';
+                    
+                    list.append(`
+                        <div class="notification-page-item ${unreadClass} ${notif.type}" data-id="${notif.id}" onclick="markAsRead(${notif.id}, '${notif.linkUrl || '#'}')">
+                            <div class="d-flex">
+                                <div class="notification-page-icon ${iconBg} me-3">
+                                    <i class="fas ${notif.iconClass.split(' ')[0]}"></i>
+                                </div>
+                                <div class="notification-page-content">
+                                    <div class="notification-page-title">${notif.title}</div>
+                                    <div class="notification-page-text">${notif.content}</div>
+                                    <div class="notification-page-time">${notif.timeAgo}</div>
+                                </div>
+                                ${!notif.isRead ? '<span class="badge bg-primary ms-2" style="width: 10px; height: 10px; padding: 0;"></span>' : ''}
+                            </div>
+                        </div>
+                    `);
+                });
+            });
+        }
+
+        function markAsRead(id, url) {
+            $.post('@Url.Action("MarkAsRead", "Notification")',
+                { id: id, __RequestVerificationToken: $('input[name="__RequestVerificationToken"]').val() },
+                function() {
+                    if (url && url !== '#') {
+                        window.location.href = url;
+                    } else {
+                        loadAllNotifications();
+                    }
+                }
+            );
+        }
+
+        $('#markAllReadBtn').click(function() {
+            $.post('@Url.Action("MarkAllAsRead", "Notification")',
+                { __RequestVerificationToken: $('input[name="__RequestVerificationToken"]').val() },
+                function() {
+                    loadAllNotifications();
+                }
+            );
+        });
+
+        loadAllNotifications();
+    </script>
+}

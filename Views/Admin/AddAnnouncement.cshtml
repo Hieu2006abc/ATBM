@@ -1,0 +1,677 @@
+﻿@model BTL_2.Models.ViewModels.AnnouncementViewModel
+
+@{
+    ViewData["Title"] = "Thêm thông báo mới";
+    Layout = "~/Views/Shared/_Layout_Admin.cshtml";
+}
+
+<style>
+    /* ==================== MODERN DESIGN SYSTEM ==================== */
+    :root {
+        --primary: #6366f1;
+        --primary-dark: #4f46e5;
+        --primary-light: #eef2ff;
+        --secondary: #64748b;
+        --success: #22c55e;
+        --success-dark: #16a34a;
+        --danger: #ef4444;
+        --danger-dark: #dc2626;
+        --warning: #f59e0b;
+        --info: #3b82f6;
+        --dark: #0f172a;
+        --light: #f8fafc;
+        --gray-50: #f9fafb;
+        --gray-100: #f1f5f9;
+        --gray-200: #e2e8f0;
+        --gray-300: #cbd5e1;
+        --gray-400: #94a3b8;
+        --gray-500: #64748b;
+        --gray-600: #475569;
+        --gray-700: #334155;
+        --gray-800: #1e293b;
+        --gray-900: #0f172a;
+        --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.05);
+        --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.06);
+        --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        --radius-sm: 0.5rem;
+        --radius-md: 0.75rem;
+        --radius-lg: 1rem;
+        --radius-xl: 1.5rem;
+        --transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
+    body {
+        background: linear-gradient(145deg, #1e293b 0%, #0f172a 100%);
+        min-height: 100vh;
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+    }
+
+    .page-wrapper {
+        min-height: calc(100vh - 200px);
+        padding: 2rem;
+    }
+
+    .form-container {
+        max-width: 900px;
+        margin: 0 auto;
+    }
+
+    /* ==================== CARD ==================== */
+    .form-card {
+        background: rgba(255, 255, 255, 0.03);
+        backdrop-filter: blur(20px);
+        border-radius: var(--radius-xl);
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        overflow: hidden;
+        animation: fadeInUp 0.5s ease;
+    }
+
+    @@keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    /* ==================== HEADER ==================== */
+    .form-header {
+        background: rgba(99, 102, 241, 0.1);
+        padding: 2rem 2rem;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .form-header h1 {
+        font-size: 1.75rem;
+        font-weight: 700;
+        background: linear-gradient(135deg, #a855f7, #6366f1);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin-bottom: 0.5rem;
+        letter-spacing: -0.02em;
+    }
+
+    .form-header p {
+        color: var(--gray-400);
+        font-size: 0.875rem;
+    }
+
+    /* ==================== BODY ==================== */
+    .form-body {
+        padding: 2rem;
+    }
+
+    /* ==================== FORM GROUPS ==================== */
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+
+    .form-label {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-weight: 600;
+        color: var(--gray-300);
+        margin-bottom: 0.5rem;
+        font-size: 0.875rem;
+    }
+
+    .form-label i {
+        color: #818cf8;
+        font-size: 1rem;
+        width: 20px;
+    }
+
+    .form-label .required {
+        color: var(--danger);
+        margin-left: 0.25rem;
+    }
+
+    .form-control, .form-select {
+        width: 100%;
+        padding: 0.75rem 1rem;
+        background: rgba(0, 0, 0, 0.3);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: var(--radius-md);
+        font-size: 0.875rem;
+        color: white;
+        transition: var(--transition);
+    }
+
+    .form-control:focus, .form-select:focus {
+        outline: none;
+        border-color: #6366f1;
+        background: rgba(0, 0, 0, 0.5);
+        box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+    }
+
+    .form-control::placeholder {
+        color: var(--gray-500);
+    }
+
+    textarea.form-control {
+        min-height: 120px;
+        resize: vertical;
+    }
+
+    .form-select {
+        cursor: pointer;
+        appearance: none;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 0.75rem center;
+    }
+
+    .form-select option {
+        background: var(--gray-800);
+        color: white;
+    }
+
+    .text-danger {
+        color: #f87171;
+        font-size: 0.75rem;
+        margin-top: 0.25rem;
+        display: block;
+    }
+
+    .text-muted {
+        color: var(--gray-500);
+        font-size: 0.7rem;
+        margin-top: 0.25rem;
+        display: block;
+    }
+
+    /* ==================== ROW ==================== */
+    .row {
+        display: flex;
+        flex-wrap: wrap;
+        margin: 0 -0.75rem;
+    }
+
+    .col-md-6 {
+        flex: 0 0 50%;
+        max-width: 50%;
+        padding: 0 0.75rem;
+    }
+
+    /* ==================== UPLOAD AREA ==================== */
+    .upload-area {
+        border: 2px dashed rgba(255, 255, 255, 0.2);
+        border-radius: var(--radius-md);
+        padding: 2rem;
+        text-align: center;
+        background: rgba(0, 0, 0, 0.2);
+        cursor: pointer;
+        transition: var(--transition);
+        position: relative;
+    }
+
+    .upload-area:hover {
+        border-color: #6366f1;
+        background: rgba(99, 102, 241, 0.05);
+    }
+
+    .upload-area i {
+        font-size: 3rem;
+        color: var(--gray-500);
+        margin-bottom: 1rem;
+    }
+
+    .upload-area p {
+        color: var(--gray-400);
+        margin-bottom: 0.5rem;
+    }
+
+    .upload-area small {
+        color: var(--gray-500);
+        font-size: 0.75rem;
+    }
+
+    .upload-area input[type="file"] {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        opacity: 0;
+        cursor: pointer;
+    }
+
+    .image-preview {
+        margin-top: 1rem;
+        position: relative;
+        display: inline-block;
+    }
+
+    .image-preview img {
+        max-width: 200px;
+        max-height: 200px;
+        border-radius: var(--radius-md);
+        border: 2px solid rgba(99, 102, 241, 0.5);
+    }
+
+    .remove-image {
+        position: absolute;
+        top: -10px;
+        right: -10px;
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        background: var(--danger);
+        color: white;
+        border: none;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: var(--transition);
+    }
+
+    .remove-image:hover {
+        transform: scale(1.1);
+        background: #dc2626;
+    }
+
+    /* ==================== BUTTONS ==================== */
+    .form-actions {
+        display: flex;
+        gap: 1rem;
+        margin-top: 2rem;
+    }
+
+    .btn-submit, .btn-cancel {
+        flex: 1;
+        padding: 0.75rem 1.5rem;
+        border-radius: var(--radius-md);
+        font-weight: 600;
+        font-size: 0.875rem;
+        transition: var(--transition);
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        border: none;
+        text-decoration: none;
+    }
+
+    .btn-submit {
+        background: linear-gradient(135deg, #6366f1, #4f46e5);
+        color: white;
+        box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+    }
+
+    .btn-submit:hover:not(:disabled) {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(99, 102, 241, 0.4);
+    }
+
+    .btn-cancel {
+        background: rgba(255, 255, 255, 0.05);
+        color: var(--gray-300);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .btn-cancel:hover {
+        background: rgba(255, 255, 255, 0.1);
+        border-color: rgba(255, 255, 255, 0.2);
+        color: white;
+        transform: translateY(-2px);
+    }
+
+    .btn-submit:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+    }
+
+    /* ==================== ALERTS ==================== */
+    .alert-modern {
+        padding: 1rem 1.25rem;
+        border-radius: var(--radius-lg);
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        backdrop-filter: blur(10px);
+        animation: fadeInUp 0.3s ease;
+    }
+
+    .alert-modern i {
+        font-size: 1.25rem;
+    }
+
+    .alert-success-modern {
+        background: rgba(34, 197, 94, 0.15);
+        border-left: 4px solid var(--success);
+        color: #bef264;
+    }
+
+    .alert-danger-modern {
+        background: rgba(239, 68, 68, 0.15);
+        border-left: 4px solid var(--danger);
+        color: #fecaca;
+    }
+
+    .alert ul {
+        margin: 0;
+        padding-left: 1.5rem;
+    }
+
+    .alert li {
+        margin: 0.25rem 0;
+    }
+
+    /* ==================== SPINNER ==================== */
+    .spinner-border {
+        display: inline-block;
+        width: 1rem;
+        height: 1rem;
+        border: 0.15em solid currentColor;
+        border-right-color: transparent;
+        border-radius: 50%;
+        animation: spinner-border .75s linear infinite;
+    }
+
+    @@keyframes spinner-border {
+        to {
+            transform: rotate(360deg);
+        }
+    }
+
+    /* ==================== RESPONSIVE ==================== */
+    @@media (max-width: 768px) {
+        .page-wrapper {
+            padding: 1rem;
+        }
+        
+        .form-body {
+            padding: 1.5rem;
+        }
+        
+        .form-header {
+            padding: 1.5rem;
+        }
+        
+        .form-header h1 {
+            font-size: 1.5rem;
+        }
+        
+        .row {
+            flex-direction: column;
+        }
+        
+        .col-md-6 {
+            flex: 0 0 100%;
+            max-width: 100%;
+            margin-bottom: 0;
+        }
+        
+        .form-actions {
+            flex-direction: column;
+        }
+        
+        .upload-area {
+            padding: 1.5rem;
+        }
+    }
+
+    @@media (max-width: 480px) {
+        .form-header h1 {
+            font-size: 1.3rem;
+        }
+        
+        .form-header p {
+            font-size: 0.8rem;
+        }
+        
+        .form-body {
+            padding: 1rem;
+        }
+        
+        .btn-submit, .btn-cancel {
+            padding: 0.7rem 1rem;
+            font-size: 0.8rem;
+        }
+    }
+</style>
+
+<div class="page-wrapper">
+    <div class="form-container">
+        <div class="form-card">
+            <div class="form-header">
+                <h1><i class="fas fa-bullhorn me-2"></i>Thêm thông báo mới</h1>
+                <p>Tạo thông báo hiển thị trên trang chủ</p>
+            </div>
+
+            <div class="form-body">
+                <!-- HIỂN THỊ THÔNG BÁO -->
+                @if (TempData["SuccessMessage"] != null)
+                {
+                    <div class="alert-modern alert-success-modern">
+                        <i class="fas fa-check-circle"></i>
+                        <span>@TempData["SuccessMessage"]</span>
+                    </div>
+                }
+
+                @if (TempData["ErrorMessage"] != null)
+                {
+                    <div class="alert-modern alert-danger-modern">
+                        <i class="fas fa-exclamation-circle"></i>
+                        <span>@TempData["ErrorMessage"]</span>
+                    </div>
+                }
+
+                <!-- HIỂN THỊ LỖI VALIDATION TỔNG THỂ -->
+                @if (!ViewData.ModelState.IsValid)
+                {
+                    <div class="alert-modern alert-danger-modern">
+                        <i class="fas fa-exclamation-circle"></i>
+                        <ul class="mb-0">
+                            @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+                            {
+                                <li>@error.ErrorMessage</li>
+                            }
+                        </ul>
+                    </div>
+                }
+
+                <form asp-action="AddAnnouncement" method="post" enctype="multipart/form-data" id="announcementForm">
+                    @Html.AntiForgeryToken()
+
+                    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+                    <div class="form-group">
+                        <label asp-for="Title" class="form-label">
+                            <i class="fas fa-heading"></i>Tiêu đề <span class="required">*</span>
+                        </label>
+                        <input asp-for="Title" class="form-control" placeholder="Nhập tiêu đề thông báo" />
+                        <span asp-validation-for="Title" class="text-danger"></span>
+                    </div>
+
+                    <div class="form-group">
+                        <label asp-for="Content" class="form-label">
+                            <i class="fas fa-align-left"></i>Nội dung <span class="required">*</span>
+                        </label>
+                        <textarea asp-for="Content" class="form-control" rows="6" placeholder="Nhập nội dung thông báo..."></textarea>
+                        <span asp-validation-for="Content" class="text-danger"></span>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label asp-for="Type" class="form-label">
+                                    <i class="fas fa-palette"></i>Loại thông báo
+                                </label>
+                                <select asp-for="Type" class="form-select">
+                                    <option value="info">📘 Thông tin</option>
+                                    <option value="success">✅ Thành công</option>
+                                    <option value="warning">⚠️ Cảnh báo</option>
+                                    <option value="danger">❌ Lỗi</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label asp-for="TargetRole" class="form-label">
+                                    <i class="fas fa-users"></i>Đối tượng
+                                </label>
+                                <select asp-for="TargetRole" class="form-select">
+                                    <option value="All">👥 Tất cả</option>
+                                    <option value="Admin">🛡️ Quản trị viên</option>
+                                    <option value="Employer">🏢 Nhà tuyển dụng</option>
+                                    <option value="Candidate">🎓 Ứng viên</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label asp-for="ExpiryDate" class="form-label">
+                                    <i class="fas fa-calendar-times"></i>Ngày hết hạn
+                                </label>
+                                <input asp-for="ExpiryDate" class="form-control" type="text" 
+                                       placeholder="dd/MM/yyyy (VD: 25/12/2024)" 
+                                       value="@(Model.ExpiryDate?.ToString("dd/MM/yyyy"))" />
+                                <span class="text-muted">Nhập theo định dạng ngày/tháng/năm, để trống nếu không có hạn</span>
+                                <span asp-validation-for="ExpiryDate" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label asp-for="LinkUrl" class="form-label">
+                                    <i class="fas fa-link"></i>Link liên kết
+                                </label>
+                                <input asp-for="LinkUrl" class="form-control" placeholder="https://example.com" />
+                                <span asp-validation-for="LinkUrl" class="text-danger"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">
+                            <i class="fas fa-image"></i>Hình ảnh
+                        </label>
+                        <div class="upload-area" id="imageUploadArea">
+                            <i class="fas fa-cloud-upload-alt"></i>
+                            <p>Kéo thả hoặc click để tải lên</p>
+                            <small>Hỗ trợ: JPG, PNG, GIF (Tối đa 5MB)</small>
+                            <input asp-for="ImageFile" type="file" accept="image/*" id="imageInput" />
+                        </div>
+                        <div class="image-preview" id="imagePreview" style="display: none;">
+                            <img src="" alt="Preview" id="previewImg">
+                            <button type="button" class="remove-image" onclick="removeImage()">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="form-actions">
+                        <a asp-action="ManageAnnouncements" class="btn-cancel">
+                            <i class="fas fa-arrow-left"></i>Hủy
+                        </a>
+                        <button type="submit" class="btn-submit" id="submitBtn">
+                            <i class="fas fa-paper-plane"></i>Đăng thông báo
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    
+    <script>
+        // Preview image
+        const imageInput = document.getElementById('imageInput');
+        const imageUploadArea = document.getElementById('imageUploadArea');
+        const imagePreview = document.getElementById('imagePreview');
+        const previewImg = document.getElementById('previewImg');
+
+        if (imageInput) {
+            imageInput.addEventListener('change', function(e) {
+                const file = e.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        previewImg.src = e.target.result;
+                        imagePreview.style.display = 'inline-block';
+                        imageUploadArea.style.display = 'none';
+                    }
+                    reader.readAsDataURL(file);
+                }
+            });
+        }
+
+        function removeImage() {
+            if (imageInput) imageInput.value = '';
+            imagePreview.style.display = 'none';
+            imageUploadArea.style.display = 'block';
+        }
+
+        // Auto-resize textarea
+        const textarea = document.querySelector('textarea');
+        if (textarea) {
+            textarea.addEventListener('input', function() {
+                this.style.height = 'auto';
+                this.style.height = Math.min(this.scrollHeight, 300) + 'px';
+            });
+        }
+
+        // Format date input as user types
+        const expiryDateInput = document.querySelector('input[asp-for="ExpiryDate"]');
+        if (expiryDateInput) {
+            expiryDateInput.addEventListener('input', function(e) {
+                let value = e.target.value.replace(/\D/g, '');
+                if (value.length >= 2 && value.length <= 4) {
+                    value = value.slice(0, 2) + '/' + value.slice(2);
+                } else if (value.length > 4) {
+                    value = value.slice(0, 2) + '/' + value.slice(2, 4) + '/' + value.slice(4, 8);
+                }
+                e.target.value = value;
+            });
+        }
+
+        // XỬ LÝ SUBMIT FORM
+        const form = document.getElementById('announcementForm');
+        const submitBtn = document.getElementById('submitBtn');
+        const originalText = submitBtn?.innerHTML;
+
+        if (form) {
+            form.addEventListener('submit', function() {
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Đang xử lý...';
+                return true;
+            });
+        }
+
+        // Khôi phục nút nếu có lỗi
+        window.addEventListener('load', function() {
+            if (document.querySelector('.alert-danger-modern') || document.querySelector('.text-danger')) {
+                if (submitBtn) {
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = originalText;
+                }
+            }
+        });
+    </script>
+}
